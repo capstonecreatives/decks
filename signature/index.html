@@ -47,6 +47,16 @@
   .mail-meta b{color:var(--ink)}
   .mail-body{font-size:14px;margin-bottom:22px;color:var(--ink)}
   .steps{margin-top:28px}
+  .seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+  .seg button{border:0;background:transparent;color:var(--navy);padding:8px 14px;border-radius:9px;font-size:13px;display:inline-flex;align-items:center;gap:8px}
+  .seg button[aria-pressed="true"]{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .seg.small button{padding:6px 11px;font-size:12px}
+  .sw{width:14px;height:14px;border-radius:4px;display:inline-block}
+  .preview{transition:background .25s,border-color .25s}
+  .preview.dark{background:#1F1F1F;border-color:#1F1F1F}
+  .preview.dark .mail-meta{color:#9AA0A6;border-color:#333}
+  .preview.dark .mail-meta b,.preview.dark .mail-body{color:#E8EAED}
+  .preview.dark .preview-h h2{color:#8CC3CB!important}
   .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
   .tab{background:var(--bg);border:1px solid var(--line);color:var(--navy);padding:8px 14px;font-size:13px}
   .tab[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
@@ -84,6 +94,12 @@
       <label for="f-wa">WhatsApp number</label>
       <div class="prefix"><span>+974</span><input id="f-wa" inputmode="numeric" placeholder="7056 7823"></div>
       <p class="hint">Clicking the number opens a WhatsApp chat with you.</p>
+      <label>Style</label>
+      <div class="seg" id="style-seg" role="group" aria-label="Signature style">
+        <button type="button" data-s="navy" aria-pressed="true"><span class="sw" style="background:#003850"></span>Navy</button>
+        <button type="button" data-s="light" aria-pressed="false"><span class="sw" style="background:#F3F4F6;border:1px solid #D5D8DE"></span>Light</button>
+      </div>
+      <p class="hint">Navy looks right in both light and dark mode Outlook. Light can show a grey box around the logo in dark mode.</p>
       <label for="f-email">Email (optional)</label>
       <input id="f-email" type="email" placeholder="name@capstoneproperty.com">
       <div class="btns">
@@ -96,7 +112,8 @@
     <!-- PREVIEW -->
     <section>
       <div class="preview">
-        <div class="preview-h"><h2 style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)">Preview</h2></div>
+        <div class="preview-h"><h2 style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)">Preview</h2>
+          <div class="seg small" id="inbox-seg" role="group" aria-label="Preview inbox mode"><button type="button" data-m="light" aria-pressed="true">Light inbox</button><button type="button" data-m="dark" aria-pressed="false">Dark inbox</button></div></div>
         <div class="mail-meta"><b>To:</b> client@example.com &nbsp;·&nbsp; <b>Subject:</b> Your viewing at The Pearl</div>
         <div class="mail-body">Kind regards,</div>
         <div id="sig"></div>
@@ -148,6 +165,11 @@
     fb:  'https://www.facebook.com/CapstonePropertyQatar/',
     x:   'https://x.com/CapstoneQa'
   };
+  var THEMES = {
+    navy:  {bg:'#003850', text:'#DCE6EA', strong:'#FFFFFF', accent:'#8CC3CB', line:'#2B5A6E', sfx:'-navy'},
+    light: {bg:'#F3F4F6', text:'#212721', strong:'#003850', accent:'#45828C', line:'#D5D8DE', sfx:''}
+  };
+  var style = 'navy';
   var DEF = {name:'Raniel Ponesto', title:'Marketing Assistant', wa:'70567823', email:''};
   var $ = function(id){return document.getElementById(id)};
   var f = {name:$('f-name'), title:$('f-title'), wa:$('f-wa'), email:$('f-email')};
@@ -155,51 +177,53 @@
   // Pre-fill from ?name=&title=&wa=&email= or defaults
   var q = new URLSearchParams(location.search);
   Object.keys(f).forEach(function(k){ f[k].value = q.has(k) ? q.get(k) : DEF[k]; });
+  if (THEMES[q.get('style')]) style = q.get('style');
 
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function digits(s){return String(s).replace(/\D/g,'').replace(/^974/,'')}
   function fmt(d){return d.length===8 ? d.slice(0,4)+' '+d.slice(4) : d}
 
   function sigHTML(base){
+    var T = THEMES[style] || THEMES.navy;
     var name = esc(f.name.value.trim() || 'Your Name');
     var title = esc(f.title.value.trim() || 'Job Title');
     var d = digits(f.wa.value), email = f.email.value.trim();
     var font = "font-family:'Proxima Nova',Tahoma,Arial,sans-serif;";
     var waBlock = d ? (
-      '<a href="https://wa.me/974'+d+'" target="_blank" style="text-decoration:none;color:#212721;">'+
+      '<a href="https://wa.me/974'+d+'" target="_blank" style="text-decoration:none;color:'+T.text+';">'+
       '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;"><tr>'+
-      '<td valign="top" style="padding:2px 6px 0 0;"><img src="'+base+'chat.png" width="14" height="14" alt="WhatsApp" style="display:block;border:0;"></td>'+
-      '<td style="'+font+'font-size:12px;line-height:19px;color:#212721;white-space:nowrap;">'+
-      '<div style="font-weight:bold;color:#003850;">+974 '+fmt(d)+'</div>'+
-      '<div style="color:#45828C;">Chat on WhatsApp</div></td></tr></table></a>') : '';
-    var mailBlock = email ? '<div style="'+font+'font-size:12px;line-height:19px;padding-top:4px;"><a href="mailto:'+esc(email)+'" style="color:#212721;text-decoration:none;">'+esc(email)+'</a></div>' : '';
+      '<td valign="top" style="padding:2px 6px 0 0;"><img src="'+base+'chat'+T.sfx+'.png" width="14" height="14" alt="WhatsApp" style="display:block;border:0;"></td>'+
+      '<td style="'+font+'font-size:12px;line-height:19px;color:'+T.text+';white-space:nowrap;">'+
+      '<div style="font-weight:bold;color:'+T.strong+';">+974 '+fmt(d)+'</div>'+
+      '<div style="color:'+T.accent+';">Chat on WhatsApp</div></td></tr></table></a>') : '';
+    var mailBlock = email ? '<div style="'+font+'font-size:12px;line-height:19px;padding-top:4px;"><a href="mailto:'+esc(email)+'" style="color:'+T.text+';text-decoration:none;">'+esc(email)+'</a></div>' : '';
     function icon(href,img,alt,last){return '<td style="padding:0 '+(last?0:6)+'px 0 0;"><a href="'+href+'" target="_blank"><img src="'+base+img+'" width="22" height="22" alt="'+alt+'" style="display:block;border:0;"></a></td>'}
     return ''+
-'<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="560" bgcolor="#F3F4F6" style="border-collapse:separate;width:560px;background:#F3F4F6;border-radius:18px;'+font+'color:#212721;">'+
+'<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="560" bgcolor="'+T.bg+'" style="border-collapse:separate;width:560px;background:'+T.bg+';border-radius:18px;'+font+'color:'+T.text+';">'+
  '<tr><td style="padding:22px 28px 0 26px;">'+
   '<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr>'+
-   '<td valign="middle" width="226" style="width:226px;padding:0;"><a href="'+LINKS.web+'" target="_blank" style="text-decoration:none;"><img src="'+base+'capstone-emblem-premium.gif" width="196" height="69" alt="Capstone Property" style="display:block;border:0;width:196px;height:69px;"></a></td>'+
+   '<td valign="middle" width="226" style="width:226px;padding:0;"><a href="'+LINKS.web+'" target="_blank" style="text-decoration:none;"><img src="'+base+'capstone-emblem-premium'+T.sfx+'.gif" width="196" height="69" alt="Capstone Property" style="display:block;border:0;width:196px;height:69px;"></a></td>'+
    '<td valign="middle" style="padding:12px 0 0 0;'+font+'">'+
-    '<div style="font-size:21px;line-height:25px;font-weight:bold;color:#003850;">'+name+'</div>'+
-    '<div style="font-size:13px;line-height:18px;color:#45828C;">'+title+'</div>'+
+    '<div style="font-size:21px;line-height:25px;font-weight:bold;color:'+T.strong+';">'+name+'</div>'+
+    '<div style="font-size:13px;line-height:18px;color:'+T.accent+';">'+title+'</div>'+
    '</td></tr></table>'+
  '</td></tr>'+
- '<tr><td style="padding:14px 28px 0 26px;"><table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr><td style="height:1px;line-height:1px;font-size:0;background:#D5D8DE;">&nbsp;</td></tr></table></td></tr>'+
+ '<tr><td style="padding:14px 28px 0 26px;"><table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr><td style="height:1px;line-height:1px;font-size:0;background:'+T.line+';">&nbsp;</td></tr></table></td></tr>'+
  '<tr><td style="padding:14px 28px 22px 26px;">'+
   '<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr>'+
-   '<td valign="bottom" width="226" style="width:226px;padding:0;'+font+'font-size:12px;line-height:16px;font-weight:bold;"><a href="'+LINKS.web+'" target="_blank" style="color:#003850;text-decoration:none;">capstoneproperty.com</a></td>'+
+   '<td valign="bottom" width="226" style="width:226px;padding:0;'+font+'font-size:12px;line-height:16px;font-weight:bold;"><a href="'+LINKS.web+'" target="_blank" style="color:'+T.strong+';text-decoration:none;">capstoneproperty.com</a></td>'+
    '<td valign="top" style="padding:0 18px 0 0;'+font+'font-size:12px;line-height:19px;">'+
-        '<a href="'+LINKS.map+'" target="_blank" style="text-decoration:none;color:#212721;">'+
+        '<a href="'+LINKS.map+'" target="_blank" style="text-decoration:none;color:'+T.text+';">'+
     '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;"><tr>'+
-     '<td valign="top" style="padding:2px 6px 0 0;"><img src="'+base+'pin.png" width="14" height="14" alt="Map" style="display:block;border:0;"></td>'+
-     '<td style="'+font+'font-size:12px;line-height:19px;color:#212721;">'+
-      '<div style="font-weight:bold;color:#003850;">Marina Way 27</div><div>Porto Arabia</div><div>The Pearl, Qatar</div>'+
+     '<td valign="top" style="padding:2px 6px 0 0;"><img src="'+base+'pin'+T.sfx+'.png" width="14" height="14" alt="Map" style="display:block;border:0;"></td>'+
+     '<td style="'+font+'font-size:12px;line-height:19px;color:'+T.text+';">'+
+      '<div style="font-weight:bold;color:'+T.strong+';">Marina Way 27</div><div>Porto Arabia</div><div>The Pearl, Qatar</div>'+
      '</td></tr></table></a>'+
    '</td>'+
    '<td valign="top" style="padding:0;'+font+'font-size:12px;line-height:19px;white-space:nowrap;">'+
         waBlock + mailBlock +
     '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;margin-top:8px;"><tr>'+
-     icon(LINKS.ig,'instagram.png','Instagram')+icon(LINKS.li,'linkedin.png','LinkedIn')+icon(LINKS.fb,'facebook.png','Facebook')+icon(LINKS.x,'x.png','X',true)+
+     icon(LINKS.ig,'instagram'+T.sfx+'.png','Instagram')+icon(LINKS.li,'linkedin'+T.sfx+'.png','LinkedIn')+icon(LINKS.fb,'facebook'+T.sfx+'.png','Facebook')+icon(LINKS.x,'x'+T.sfx+'.png','X',true)+
     '</tr></table>'+
    '</td></tr></table>'+
  '</td></tr>'+
@@ -209,6 +233,15 @@
   var sig = $('sig');
   function render(){ sig.innerHTML = sigHTML(ABS); }
   Object.keys(f).forEach(function(k){ f[k].addEventListener('input', render); });
+  var segs = document.querySelectorAll('#style-seg button');
+  function syncSeg(){ segs.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.s === style); }); }
+  segs.forEach(function(b){ b.addEventListener('click', function(){ style = b.dataset.s; syncSeg(); render(); }); });
+  syncSeg();
+  var inb = document.querySelectorAll('#inbox-seg button'), pv = document.querySelector('.preview');
+  inb.forEach(function(b){ b.addEventListener('click', function(){
+    inb.forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
+    pv.classList.toggle('dark', b.dataset.m === 'dark');
+  }); });
   render();
 
   var toastEl = $('toast'), tt;
@@ -244,7 +277,7 @@
 
   $('share').addEventListener('click', function(e){
     e.preventDefault();
-    var p = new URLSearchParams();
+    var p = new URLSearchParams(); p.set('style', style);
     Object.keys(f).forEach(function(k){ if (f[k].value.trim()) p.set(k, f[k].value.trim()); });
     var url = location.origin + location.pathname + '?' + p.toString();
     (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function(){ toast('Pre-filled link copied.'); }, function(){ prompt('Copy this link:', url); });
