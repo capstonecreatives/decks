@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Email Signature — Capstone Property</title>
+<style>
+  :root{
+    --navy:#003850; --teal:#45828C; --ink:#212721; --gray:#C0C2CB;
+    --bg:#F7F8FA; --card:#FFFFFF; --line:#E3E6EB; --muted:#6B7480;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Proxima Nova","Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  header{background:#fff;border-bottom:1px solid var(--line)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:72px}
+  .bar img{height:34px;display:block}
+  .bar .label{font-size:13px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+  .back{display:inline-flex;align-items:center;gap:6px;margin:28px 0 8px;font-size:14px;font-weight:600;color:var(--navy);text-decoration:none}
+  .back:hover{text-decoration:underline}
+  h1{font-size:clamp(28px,4vw,40px);line-height:1.1;color:var(--navy);letter-spacing:-.01em}
+  .lead{margin-top:10px;color:var(--muted);max-width:60ch;font-size:16px}
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:28px;margin:32px 0 48px;align-items:start}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .panel h2{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:16px}
+  label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin:14px 0 6px}
+  label:first-of-type{margin-top:0}
+  input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
+  input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(69,130,140,.18)}
+  .prefix{display:flex;align-items:stretch}
+  .prefix span{display:flex;align-items:center;padding:0 12px;border:1px solid var(--line);border-right:0;border-radius:10px 0 0 10px;background:var(--bg);font-size:15px;color:var(--muted)}
+  .prefix input{border-radius:0 10px 10px 0}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  button{font:inherit;font-size:14px;font-weight:700;border-radius:10px;padding:12px 18px;cursor:pointer;border:1px solid var(--navy);transition:transform .15s,background .2s}
+  button:active{transform:scale(.97)}
+  .primary{background:var(--navy);color:#fff}
+  .primary:hover{background:#00293b}
+  .ghost{background:#fff;color:var(--navy)}
+  .ghost:hover{background:var(--bg)}
+  .preview{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;overflow-x:auto}
+  .preview-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+  .preview-h h2{margin:0}
+  .mail-meta{font-size:13px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px}
+  .mail-meta b{color:var(--ink)}
+  .mail-body{font-size:14px;margin-bottom:22px;color:var(--ink)}
+  .steps{margin-top:28px}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tab{background:var(--bg);border:1px solid var(--line);color:var(--navy);padding:8px 14px;font-size:13px}
+  .tab[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+  ol{padding-left:20px;font-size:14px}
+  ol li{margin:6px 0}
+  ol li b{color:var(--navy)}
+  .note{margin-top:14px;font-size:13px;color:var(--muted);border-left:3px solid var(--teal);padding-left:12px}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,16px);background:var(--navy);color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  footer{border-top:1px solid var(--line);padding:24px 0;font-size:13px;color:var(--muted);text-align:center}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a href="https://ranielponesto.github.io/decks/"><img src="images/capstone-logo-navy.png" alt="Capstone Property"></a>
+    <span class="label">Email Signature</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <a class="back" href="https://ranielponesto.github.io/decks/">← Back to decks</a>
+  <h1>Email signature</h1>
+  <p class="lead">Fill in your details, copy the signature, and paste it into Outlook. The logo animation and all links are already set up.</p>
+
+  <div class="grid">
+    <!-- FORM -->
+    <section class="panel" aria-label="Your details">
+      <h2>Your details</h2>
+      <label for="f-name">Full name</label>
+      <input id="f-name" autocomplete="name" placeholder="e.g. Raniel Ponesto">
+      <label for="f-title">Job title</label>
+      <input id="f-title" placeholder="e.g. Marketing Assistant">
+      <label for="f-wa">WhatsApp number</label>
+      <div class="prefix"><span>+974</span><input id="f-wa" inputmode="numeric" placeholder="7056 7823"></div>
+      <p class="hint">Clicking the number opens a WhatsApp chat with you.</p>
+      <label for="f-email">Email (optional)</label>
+      <input id="f-email" type="email" placeholder="name@capstoneproperty.com">
+      <div class="btns">
+        <button class="primary" id="copy">Copy signature</button>
+        <button class="ghost" id="download">Download .htm</button>
+      </div>
+      <p class="hint" style="margin-top:12px">Share a pre-filled link: <a href="#" id="share" style="color:var(--teal);font-weight:600">copy link</a></p>
+    </section>
+
+    <!-- PREVIEW -->
+    <section>
+      <div class="preview">
+        <div class="preview-h"><h2 style="font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)">Preview</h2></div>
+        <div class="mail-meta"><b>To:</b> client@example.com &nbsp;·&nbsp; <b>Subject:</b> Your viewing at The Pearl</div>
+        <div class="mail-body">Kind regards,</div>
+        <div id="sig"></div>
+      </div>
+
+      <div class="panel steps">
+        <h2>Add it to Outlook</h2>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-t="new">New Outlook / Web</button>
+          <button class="tab" role="tab" aria-selected="false" data-t="classic">Classic Outlook (Windows)</button>
+          <button class="tab" role="tab" aria-selected="false" data-t="mac">Outlook for Mac</button>
+        </div>
+        <ol data-p="new">
+          <li>Click <b>Copy signature</b> above.</li>
+          <li>In Outlook, open <b>Settings</b> (gear) → <b>Accounts</b> → <b>Signatures</b>.</li>
+          <li>Click <b>+ New signature</b>, name it "Capstone", and paste (<b>Ctrl+V</b>).</li>
+          <li>Under <b>Select default signatures</b>, choose it for new messages and replies. Save.</li>
+        </ol>
+        <ol data-p="classic" hidden>
+          <li>Click <b>Copy signature</b> above.</li>
+          <li>In Outlook, go to <b>File</b> → <b>Options</b> → <b>Mail</b> → <b>Signatures…</b></li>
+          <li>Click <b>New</b>, name it "Capstone", and paste into the edit box (<b>Ctrl+V</b>).</li>
+          <li>Set it as default for <b>New messages</b> and <b>Replies/forwards</b>. Click OK.</li>
+        </ol>
+        <ol data-p="mac" hidden>
+          <li>Click <b>Copy signature</b> above.</li>
+          <li>In Outlook, open <b>Outlook</b> menu → <b>Settings</b> → <b>Signatures</b>.</li>
+          <li>Click <b>+</b>, name it "Capstone", and paste (<b>Cmd+V</b>).</li>
+          <li>Choose it as the default for new messages and replies.</li>
+        </ol>
+        <p class="note">Send a test email to yourself after setting it up. Classic Outlook on Windows shows the logo without animation and with square corners. Everyone else sees the animated version.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>Capstone Creatives · by Capstone Property</footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  // Images must be absolute so they load in recipients' inboxes.
+  var ABS = 'https://ranielponesto.github.io/decks/signature/images/';
+  var LINKS = {
+    web: 'https://capstoneproperty.com/',
+    map: 'https://maps.app.goo.gl/vUx1QU2z1e2iej6c6',
+    ig:  'https://www.instagram.com/capstone.property/',
+    li:  'https://www.linkedin.com/company/capstone-property',
+    fb:  'https://www.facebook.com/CapstonePropertyQatar/',
+    x:   'https://x.com/CapstoneQa'
+  };
+  var DEF = {name:'Raniel Ponesto', title:'Marketing Assistant', wa:'70567823', email:''};
+  var $ = function(id){return document.getElementById(id)};
+  var f = {name:$('f-name'), title:$('f-title'), wa:$('f-wa'), email:$('f-email')};
+
+  // Pre-fill from ?name=&title=&wa=&email= or defaults
+  var q = new URLSearchParams(location.search);
+  Object.keys(f).forEach(function(k){ f[k].value = q.has(k) ? q.get(k) : DEF[k]; });
+
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function digits(s){return String(s).replace(/\D/g,'').replace(/^974/,'')}
+  function fmt(d){return d.length===8 ? d.slice(0,4)+' '+d.slice(4) : d}
+
+  function sigHTML(base){
+    var name = esc(f.name.value.trim() || 'Your Name');
+    var title = esc(f.title.value.trim() || 'Job Title');
+    var d = digits(f.wa.value), email = f.email.value.trim();
+    var font = "font-family:'Proxima Nova',Tahoma,Arial,sans-serif;";
+    var waBlock = d ? (
+      '<a href="https://wa.me/974'+d+'" target="_blank" style="text-decoration:none;color:#212721;">'+
+      '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;"><tr>'+
+      '<td valign="top" style="padding:2px 6px 0 0;"><img src="'+base+'chat.png" width="14" height="14" alt="WhatsApp" style="display:block;border:0;"></td>'+
+      '<td style="'+font+'font-size:12px;line-height:19px;color:#212721;white-space:nowrap;">'+
+      '<div style="font-weight:bold;color:#003850;">+974 '+fmt(d)+'</div>'+
+      '<div style="color:#45828C;">Chat on WhatsApp</div></td></tr></table></a>') : '';
+    var mailBlock = email ? '<div style="'+font+'font-size:12px;line-height:19px;padding-top:4px;"><a href="mailto:'+esc(email)+'" style="color:#212721;text-decoration:none;">'+esc(email)+'</a></div>' : '';
+    function icon(href,img,alt,last){return '<td style="padding:0 '+(last?0:6)+'px 0 0;"><a href="'+href+'" target="_blank"><img src="'+base+img+'" width="22" height="22" alt="'+alt+'" style="display:block;border:0;"></a></td>'}
+    return ''+
+'<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="560" bgcolor="#F3F4F6" style="border-collapse:separate;width:560px;background:#F3F4F6;border-radius:18px;'+font+'color:#212721;">'+
+ '<tr><td style="padding:22px 28px 0 26px;">'+
+  '<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr>'+
+   '<td valign="middle" width="226" style="width:226px;padding:0;"><a href="'+LINKS.web+'" target="_blank" style="text-decoration:none;"><img src="'+base+'capstone-emblem-premium.gif" width="196" height="69" alt="Capstone Property" style="display:block;border:0;width:196px;height:69px;"></a></td>'+
+   '<td valign="middle" style="padding:12px 0 0 0;'+font+'">'+
+    '<div style="font-size:21px;line-height:25px;font-weight:bold;color:#003850;">'+name+'</div>'+
+    '<div style="font-size:13px;line-height:18px;color:#45828C;">'+title+'</div>'+
+   '</td></tr></table>'+
+ '</td></tr>'+
+ '<tr><td style="padding:14px 28px 0 26px;"><table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr><td style="height:1px;line-height:1px;font-size:0;background:#D5D8DE;">&nbsp;</td></tr></table></td></tr>'+
+ '<tr><td style="padding:14px 28px 22px 26px;">'+
+  '<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr>'+
+   '<td valign="bottom" width="226" style="width:226px;padding:0;'+font+'font-size:12px;line-height:16px;font-weight:bold;"><a href="'+LINKS.web+'" target="_blank" style="color:#003850;text-decoration:none;">capstoneproperty.com</a></td>'+
+   '<td valign="top" style="padding:0 18px 0 0;'+font+'font-size:12px;line-height:19px;">'+
+        '<a href="'+LINKS.map+'" target="_blank" style="text-decoration:none;color:#212721;">'+
+    '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;"><tr>'+
+     '<td valign="top" style="padding:2px 6px 0 0;"><img src="'+base+'pin.png" width="14" height="14" alt="Map" style="display:block;border:0;"></td>'+
+     '<td style="'+font+'font-size:12px;line-height:19px;color:#212721;">'+
+      '<div style="font-weight:bold;color:#003850;">Marina Way 27</div><div>Porto Arabia</div><div>The Pearl, Qatar</div>'+
+     '</td></tr></table></a>'+
+   '</td>'+
+   '<td valign="top" style="padding:0;'+font+'font-size:12px;line-height:19px;white-space:nowrap;">'+
+        waBlock + mailBlock +
+    '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;margin-top:8px;"><tr>'+
+     icon(LINKS.ig,'instagram.png','Instagram')+icon(LINKS.li,'linkedin.png','LinkedIn')+icon(LINKS.fb,'facebook.png','Facebook')+icon(LINKS.x,'x.png','X',true)+
+    '</tr></table>'+
+   '</td></tr></table>'+
+ '</td></tr>'+
+'</table>';
+  }
+
+  var sig = $('sig');
+  function render(){ sig.innerHTML = sigHTML(ABS); }
+  Object.keys(f).forEach(function(k){ f[k].addEventListener('input', render); });
+  render();
+
+  var toastEl = $('toast'), tt;
+  function toast(m){ toastEl.textContent = m; toastEl.classList.add('show'); clearTimeout(tt); tt = setTimeout(function(){toastEl.classList.remove('show')}, 2200); }
+
+  function fallbackCopy(){
+    var r = document.createRange(); r.selectNodeContents(sig);
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    var ok = false; try { ok = document.execCommand('copy'); } catch(e){}
+    s.removeAllRanges(); return ok;
+  }
+  $('copy').addEventListener('click', function(){
+    var html = sigHTML(ABS);
+    if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], {type:'text/html'}),
+        'text/plain': new Blob([sig.innerText], {type:'text/plain'})
+      })]).then(function(){ toast('Signature copied. Paste it into Outlook.'); },
+               function(){ toast(fallbackCopy() ? 'Signature copied. Paste it into Outlook.' : 'Copy failed. Select the preview and copy it.'); });
+    } else {
+      toast(fallbackCopy() ? 'Signature copied. Paste it into Outlook.' : 'Copy failed. Select the preview and copy it.');
+    }
+  });
+
+  $('download').addEventListener('click', function(){
+    var doc = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Capstone signature</title></head><body>' + sigHTML(ABS) + '</body></html>';
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([doc], {type:'text/html'}));
+    var slug = (f.name.value.trim() || 'capstone').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    a.download = slug + '-signature.htm'; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
+  $('share').addEventListener('click', function(e){
+    e.preventDefault();
+    var p = new URLSearchParams();
+    Object.keys(f).forEach(function(k){ if (f[k].value.trim()) p.set(k, f[k].value.trim()); });
+    var url = location.origin + location.pathname + '?' + p.toString();
+    (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function(){ toast('Pre-filled link copied.'); }, function(){ prompt('Copy this link:', url); });
+  });
+
+  // Outlook instruction tabs
+  var tabs = document.querySelectorAll('.tab'), panes = document.querySelectorAll('ol[data-p]');
+  tabs.forEach(function(t){ t.addEventListener('click', function(){
+    tabs.forEach(function(x){ x.setAttribute('aria-selected', x === t); });
+    panes.forEach(function(p){ p.hidden = p.dataset.p !== t.dataset.t; });
+  }); });
+})();
+</script>
+</body>
+</html>
