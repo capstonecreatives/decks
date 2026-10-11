@@ -187,6 +187,10 @@
     var T = THEMES[style] || THEMES.navy;
     var name = esc(f.name.value.trim() || 'Your Name');
     var title = esc(f.title.value.trim() || 'Job Title');
+    // big name (25px), shrunk only if a long name wouldn't fit beside the logo
+    var cv = sigHTML.cv || (sigHTML.cv = document.createElement('canvas')), cx = cv.getContext('2d');
+    cx.font = 'bold 25px Arial, Helvetica, sans-serif';
+    var ns = Math.max(16, Math.min(25, Math.floor(25 * 268 / cx.measureText(f.name.value.trim() || 'Your Name').width)));
     var d = digits(f.wa.value), email = f.email.value.trim();
     // Email-safe: one plain font stack on every text cell, no wrapping links around tables,
     // colour set on both <a> and inner <span> so Outlook mobile/iOS can't recolour or underline it.
@@ -210,11 +214,11 @@
 '<table '+TB+' width="560" bgcolor="'+T.bg+'" style="border-collapse:separate;width:560px;max-width:560px;background-color:'+T.bg+';border-radius:18px;">'+
  '<tr><td style="padding:22px 26px 0 26px;">'+
   '<table '+TB+' width="100%" style="border-collapse:collapse;"><tr>'+
-   '<td valign="middle" width="216" style="width:216px;padding:0 20px 0 0;"><a href="'+LINKS.web+'" target="_blank" style="text-decoration:none;">'+img('capstone-emblem-premium'+T.sfx+'.gif',196,69,'Capstone Property')+'</a></td>'+
-   '<td valign="top" style="padding:24px 0 0 20px;">'+
+   '<td valign="top" width="216" style="width:216px;padding:0 20px 0 0;"><a href="'+LINKS.web+'" target="_blank" style="text-decoration:none;">'+img('capstone-emblem-premium'+T.sfx+'.gif',196,69,'Capstone Property')+'</a></td>'+
+   '<td valign="top" style="padding:23px 0 0 20px;">'+
     '<table '+TB+' style="border-collapse:collapse;">'+
-     '<tr><td '+tx(20,25,T.strong,true)+'>'+name+'</td></tr>'+
-     '<tr><td '+tx(13,18,T.accent,false,'padding-top:4px;')+'>'+title+'</td></tr>'+
+     '<tr><td '+tx(ns,30,T.strong,true,'white-space:nowrap;')+'>'+name+'</td></tr>'+
+     '<tr><td '+tx(13,18,T.accent,false,'padding-top:0px;')+'>'+title+'</td></tr>'+
     '</table>'+
    '</td></tr></table>'+
  '</td></tr>'+
