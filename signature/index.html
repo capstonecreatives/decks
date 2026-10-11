@@ -188,43 +188,55 @@
     var name = esc(f.name.value.trim() || 'Your Name');
     var title = esc(f.title.value.trim() || 'Job Title');
     var d = digits(f.wa.value), email = f.email.value.trim();
-    var font = "font-family:'Proxima Nova',Tahoma,Arial,sans-serif;";
-    var waBlock = d ? (
-      '<a href="https://wa.me/974'+d+'" target="_blank" style="text-decoration:none;color:'+T.text+';">'+
-      '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;"><tr>'+
-      '<td valign="top" style="padding:2px 6px 0 0;"><img src="'+base+'chat'+T.sfx+'.png" width="14" height="14" alt="WhatsApp" style="display:block;border:0;"></td>'+
-      '<td style="'+font+'font-size:12px;line-height:19px;color:'+T.text+';white-space:nowrap;">'+
-      '<div style="font-weight:bold;color:'+T.strong+';">+974 '+fmt(d)+'</div>'+
-      '<div style="color:'+T.accent+';">Chat on WhatsApp</div></td></tr></table></a>') : '';
-    var mailBlock = email ? '<div style="'+font+'font-size:12px;line-height:19px;padding-top:4px;"><a href="mailto:'+esc(email)+'" style="color:'+T.text+';text-decoration:none;">'+esc(email)+'</a></div>' : '';
-    function icon(href,img,alt,last){return '<td style="padding:0 '+(last?0:6)+'px 0 0;"><a href="'+href+'" target="_blank"><img src="'+base+img+'" width="22" height="22" alt="'+alt+'" style="display:block;border:0;"></a></td>'}
+    // Email-safe: one plain font stack on every text cell, no wrapping links around tables,
+    // colour set on both <a> and inner <span> so Outlook mobile/iOS can't recolour or underline it.
+    var FF = 'font-family:Arial,Helvetica,sans-serif;';
+    function tx(size, lh, color, bold, extra){ return 'style="'+FF+'font-size:'+size+'px;line-height:'+lh+'px;color:'+color+';'+(bold?'font-weight:bold;':'font-weight:normal;')+'mso-line-height-rule:exactly;'+(extra||'')+'"'; }
+    function lnk(href, text, color, bold){
+      return '<a href="'+href+'" target="_blank" style="'+FF+'color:'+color+';text-decoration:none;'+(bold?'font-weight:bold;':'')+'">'+
+             '<span style="'+FF+'color:'+color+';text-decoration:none;'+(bold?'font-weight:bold;':'')+'">'+text+'</span></a>';
+    }
+    function img(src, w, h, alt){ return '<img src="'+base+src+'" width="'+w+'" height="'+h+'" alt="'+alt+'" border="0" style="display:block;border:0;outline:none;width:'+w+'px;height:'+h+'px;">'; }
+    function icon(href, src, alt, last){ return '<td style="padding:0 '+(last?0:6)+'px 0 0;"><a href="'+href+'" target="_blank" style="text-decoration:none;">'+img(src,22,22,alt)+'</a></td>'; }
+    // phone number: zero-width non-joiners stop iOS auto-linking it in blue
+    var num = d ? ('+974 '+fmt(d)).replace(/(\d)/g,'$1&#8204;') : '';
+    var waRows = d ? (
+      '<tr><td valign="top" width="20" style="width:20px;padding:2px 0 0 0;"><a href="https://wa.me/974'+d+'" target="_blank" style="text-decoration:none;">'+img('chat'+T.sfx+'.png',14,14,'WhatsApp')+'</a></td>'+
+      '<td '+tx(12,19,T.strong,true,'white-space:nowrap;')+'>'+lnk('https://wa.me/974'+d, num, T.strong, true)+'</td></tr>'+
+      '<tr><td width="20" style="width:20px;"></td><td '+tx(12,19,T.accent,false,'white-space:nowrap;')+'>'+lnk('https://wa.me/974'+d,'Chat on WhatsApp',T.accent,false)+'</td></tr>') : '';
+    var mailRow = email ? '<tr><td width="20" style="width:20px;"></td><td '+tx(12,19,T.text,false,'white-space:nowrap;')+'>'+lnk('mailto:'+esc(email), esc(email), T.text, false)+'</td></tr>' : '';
+    var TB = 'cellpadding="0" cellspacing="0" border="0" role="presentation"';
     return ''+
-'<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="560" bgcolor="'+T.bg+'" style="border-collapse:separate;width:560px;background:'+T.bg+';border-radius:18px;'+font+'color:'+T.text+';">'+
- '<tr><td style="padding:22px 28px 0 26px;">'+
-  '<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr>'+
-   '<td valign="middle" width="226" style="width:226px;padding:0;"><a href="'+LINKS.web+'" target="_blank" style="text-decoration:none;"><img src="'+base+'capstone-emblem-premium'+T.sfx+'.gif" width="196" height="69" alt="Capstone Property" style="display:block;border:0;width:196px;height:69px;"></a></td>'+
-   '<td valign="middle" style="padding:12px 0 0 0;'+font+'">'+
-    '<div style="font-size:21px;line-height:25px;font-weight:bold;color:'+T.strong+';">'+name+'</div>'+
-    '<div style="font-size:13px;line-height:18px;color:'+T.accent+';">'+title+'</div>'+
+'<table '+TB+' width="560" bgcolor="'+T.bg+'" style="border-collapse:separate;width:560px;max-width:560px;background-color:'+T.bg+';border-radius:18px;">'+
+ '<tr><td style="padding:22px 26px 0 26px;">'+
+  '<table '+TB+' width="100%" style="border-collapse:collapse;"><tr>'+
+   '<td valign="middle" width="216" style="width:216px;padding:0 20px 0 0;"><a href="'+LINKS.web+'" target="_blank" style="text-decoration:none;">'+img('capstone-emblem-premium'+T.sfx+'.gif',196,69,'Capstone Property')+'</a></td>'+
+   '<td valign="middle" style="padding:8px 0 0 0;">'+
+    '<table '+TB+' style="border-collapse:collapse;">'+
+     '<tr><td '+tx(20,25,T.strong,true)+'>'+name+'</td></tr>'+
+     '<tr><td '+tx(13,18,T.accent,false)+'>'+title+'</td></tr>'+
+    '</table>'+
    '</td></tr></table>'+
  '</td></tr>'+
- '<tr><td style="padding:14px 28px 0 26px;"><table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr><td style="height:1px;line-height:1px;font-size:0;background:'+T.line+';">&nbsp;</td></tr></table></td></tr>'+
- '<tr><td style="padding:14px 28px 22px 26px;">'+
-  '<table cellpadding="0" cellspacing="0" border="0" role="presentation" width="100%" style="border-collapse:collapse;"><tr>'+
-   '<td valign="bottom" width="226" style="width:226px;padding:0;'+font+'font-size:12px;line-height:16px;font-weight:bold;"><a href="'+LINKS.web+'" target="_blank" style="color:'+T.strong+';text-decoration:none;">capstoneproperty.com</a></td>'+
-   '<td valign="top" style="padding:0 18px 0 0;'+font+'font-size:12px;line-height:19px;">'+
-        '<a href="'+LINKS.map+'" target="_blank" style="text-decoration:none;color:'+T.text+';">'+
-    '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;"><tr>'+
-     '<td valign="top" style="padding:2px 6px 0 0;"><img src="'+base+'pin'+T.sfx+'.png" width="14" height="14" alt="Map" style="display:block;border:0;"></td>'+
-     '<td style="'+font+'font-size:12px;line-height:19px;color:'+T.text+';">'+
-      '<div style="font-weight:bold;color:'+T.strong+';">Marina Way 27</div><div>Porto Arabia</div><div>The Pearl, Qatar</div>'+
-     '</td></tr></table></a>'+
+ // divider: top border only, so it stays a 1px line even if a client inflates the cell height
+ '<tr><td style="padding:14px 26px 0 26px;"><table '+TB+' width="100%" style="border-collapse:collapse;"><tr><td height="1" style="height:1px;border-top:1px solid '+T.line+';font-size:1px;line-height:1px;mso-line-height-rule:exactly;"></td></tr></table></td></tr>'+
+ '<tr><td style="padding:14px 26px 22px 26px;">'+
+  '<table '+TB+' width="100%" style="border-collapse:collapse;"><tr>'+
+   '<td valign="bottom" width="216" '+tx(12,16,T.strong,true,'width:216px;padding:0 20px 0 0;')+'>'+lnk(LINKS.web,'capstoneproperty.com',T.strong,true)+'</td>'+
+   '<td valign="top" style="padding:0 16px 0 0;">'+
+    '<table '+TB+' style="border-collapse:collapse;">'+
+     '<tr><td valign="top" width="20" style="width:20px;padding:2px 0 0 0;"><a href="'+LINKS.map+'" target="_blank" style="text-decoration:none;">'+img('pin'+T.sfx+'.png',14,14,'Map')+'</a></td>'+
+     '<td '+tx(12,19,T.strong,true,'white-space:nowrap;')+'>'+lnk(LINKS.map,'Marina Way 27',T.strong,true)+'</td></tr>'+
+     '<tr><td width="20" style="width:20px;"></td><td '+tx(12,19,T.text,false,'white-space:nowrap;')+'>'+lnk(LINKS.map,'Porto Arabia',T.text,false)+'</td></tr>'+
+     '<tr><td width="20" style="width:20px;"></td><td '+tx(12,19,T.text,false,'white-space:nowrap;')+'>'+lnk(LINKS.map,'The Pearl, Qatar',T.text,false)+'</td></tr>'+
+    '</table>'+
    '</td>'+
-   '<td valign="top" style="padding:0;'+font+'font-size:12px;line-height:19px;white-space:nowrap;">'+
-        waBlock + mailBlock +
-    '<table cellpadding="0" cellspacing="0" border="0" role="presentation" style="border-collapse:collapse;margin-top:8px;"><tr>'+
-     icon(LINKS.ig,'instagram'+T.sfx+'.png','Instagram')+icon(LINKS.li,'linkedin'+T.sfx+'.png','LinkedIn')+icon(LINKS.fb,'facebook'+T.sfx+'.png','Facebook')+icon(LINKS.x,'x'+T.sfx+'.png','X',true)+
-    '</tr></table>'+
+   '<td valign="top" style="padding:0;">'+
+    '<table '+TB+' style="border-collapse:collapse;">'+ waRows + mailRow +
+     '<tr><td colspan="2" style="padding:8px 0 0 0;"><table '+TB+' style="border-collapse:collapse;"><tr>'+
+      icon(LINKS.ig,'instagram'+T.sfx+'.png','Instagram')+icon(LINKS.li,'linkedin'+T.sfx+'.png','LinkedIn')+icon(LINKS.fb,'facebook'+T.sfx+'.png','Facebook')+icon(LINKS.x,'x'+T.sfx+'.png','X',true)+
+     '</tr></table></td></tr>'+
+    '</table>'+
    '</td></tr></table>'+
  '</td></tr>'+
 '</table>';
