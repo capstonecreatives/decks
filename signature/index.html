@@ -206,9 +206,8 @@
     // phone number: zero-width non-joiners stop iOS auto-linking it in blue
     var num = d ? ('+974 '+fmt(d)).replace(/(\d)/g,'$1&#8204;') : '';
     var waRows = d ? (
-      '<tr><td valign="top" width="20" style="width:20px;padding:2px 0 0 0;"><a href="https://wa.me/974'+d+'" target="_blank" style="text-decoration:none;">'+img('chat'+T.sfx+'.png',14,14,'WhatsApp')+'</a></td>'+
-      '<td '+tx(12,19,T.strong,true,'white-space:nowrap;')+'>'+lnk('https://wa.me/974'+d, num, T.strong, true)+'</td></tr>'+
-      '<tr><td width="20" style="width:20px;"></td><td '+tx(12,19,T.accent,false,'white-space:nowrap;')+'>'+lnk('https://wa.me/974'+d,'Chat on WhatsApp',T.accent,false)+'</td></tr>') : '';
+      '<tr><td valign="top" width="20" style="width:20px;padding:2px 0 0 0;"><a href="https://wa.me/974'+d+'" target="_blank" style="text-decoration:none;">'+img('whatsapp'+T.sfx+'.png',14,14,'WhatsApp')+'</a></td>'+
+      '<td '+tx(12,19,T.strong,true,'white-space:nowrap;')+'>'+lnk('https://wa.me/974'+d, num, T.strong, true)+'</td></tr>') : '';
     var mailRow = email ? '<tr><td width="20" style="width:20px;"></td><td '+tx(12,19,T.text,false,'white-space:nowrap;')+'>'+lnk('mailto:'+esc(email), esc(email), T.text, false)+'</td></tr>' : '';
     var TB = 'cellpadding="0" cellspacing="0" border="0" role="presentation"';
     return ''+
@@ -227,8 +226,8 @@
  '<tr><td style="padding:14px 26px 0 26px;"><table '+TB+' width="100%" style="border-collapse:collapse;"><tr><td height="1" style="height:1px;border-top:1px solid '+T.line+';font-size:1px;line-height:1px;mso-line-height-rule:exactly;"></td></tr></table></td></tr>'+
  '<tr><td style="padding:14px 26px 22px 26px;">'+
   '<table '+TB+' width="100%" style="border-collapse:collapse;"><tr>'+
-   '<td valign="bottom" width="216" '+tx(12,16,T.strong,true,'width:216px;padding:0 20px 0 0;')+'>'+lnk(LINKS.web,'capstoneproperty.com',T.strong,true)+'</td>'+
-   '<td valign="top" style="padding:0 16px 0 0;">'+
+   '<td rowspan="2" valign="bottom" width="216" '+tx(12,16,T.strong,true,'width:216px;padding:0 20px 3px 0;')+'>'+lnk(LINKS.web,'capstoneproperty.com',T.strong,true)+'</td>'+
+   '<td rowspan="2" valign="top" style="padding:0 16px 0 0;">'+
     '<table '+TB+' style="border-collapse:collapse;">'+
      '<tr><td valign="top" width="20" style="width:20px;padding:2px 0 0 0;"><a href="'+LINKS.map+'" target="_blank" style="text-decoration:none;">'+img('pin'+T.sfx+'.png',14,14,'Map')+'</a></td>'+
      '<td '+tx(12,19,T.strong,true,'white-space:nowrap;')+'>'+lnk(LINKS.map,'Marina Way 27',T.strong,true)+'</td></tr>'+
@@ -237,12 +236,12 @@
     '</table>'+
    '</td>'+
    '<td valign="top" style="padding:0;">'+
-    '<table '+TB+' style="border-collapse:collapse;">'+ waRows + mailRow +
-     '<tr><td colspan="2" style="padding:8px 0 0 0;"><table '+TB+' style="border-collapse:collapse;"><tr>'+
+    '<table '+TB+' style="border-collapse:collapse;">'+ waRows + mailRow + '</table>'+
+   '</td></tr>'+
+   // icons pinned to the bottom so they line up with the website link
+   '<tr><td valign="bottom" style="padding:8px 0 0 0;"><table '+TB+' style="border-collapse:collapse;"><tr>'+
       icon(LINKS.ig,'instagram'+T.sfx+'.png','Instagram')+icon(LINKS.li,'linkedin'+T.sfx+'.png','LinkedIn')+icon(LINKS.fb,'facebook'+T.sfx+'.png','Facebook')+icon(LINKS.x,'x'+T.sfx+'.png','X',true)+
-     '</tr></table></td></tr>'+
-    '</table>'+
-   '</td></tr></table>'+
+   '</tr></table></td></tr></table>'+
  '</td></tr>'+
 '</table>';
   }
