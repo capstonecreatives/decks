@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Email Signature v2 — Capstone Property</title>
+<style>
+  :root{--navy:#003850;--teal:#45828C;--line:#E3E6EB;--muted:#6B7480;--bg:#F7F8FA}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:#212721;line-height:1.5}
+  .wrap{max-width:1040px;margin:0 auto;padding:28px 20px 60px}
+  a.back{font-size:14px;font-weight:600;color:var(--navy);text-decoration:none}
+  h1{font-size:32px;color:var(--navy);margin:12px 0 4px}
+  .lead{color:var(--muted);margin-bottom:26px;max-width:62ch}
+  .grid{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}
+  .panel h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
+  label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin:14px 0 6px}
+  label:first-of-type{margin-top:0}
+  input{width:100%;font:inherit;font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;outline:none}
+  input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(69,130,140,.18)}
+  .prefix{display:flex}.prefix span{display:flex;align-items:center;padding:0 12px;border:1px solid var(--line);border-right:0;border-radius:10px 0 0 10px;background:var(--bg);color:var(--muted)}
+  .prefix input{border-radius:0 10px 10px 0}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .btns{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+  button{font:inherit;font-size:14px;font-weight:700;border-radius:10px;padding:12px 16px;cursor:pointer;border:1px solid var(--navy);background:#fff;color:var(--navy)}
+  button.primary{background:var(--navy);color:#fff}
+  button:disabled{opacity:.5;cursor:wait}
+  .stage{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;transition:background .25s}
+  .stage.dark{background:#1F1F1F;border-color:#1F1F1F}
+  .stage-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:10px;flex-wrap:wrap}
+  .seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+  .seg button{border:0;padding:6px 12px;font-size:12px;background:transparent}
+  .seg button[aria-pressed="true"]{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  #out{display:block;max-width:100%;height:auto}
+  .status{font-size:13px;color:var(--muted);margin-top:12px;min-height:20px}
+  ol{padding-left:20px;font-size:14px}ol li{margin:6px 0}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .tab{padding:7px 12px;font-size:13px;background:var(--bg);border:1px solid var(--line)}
+  .tab[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+  .note{font-size:13px;color:var(--muted);border-left:3px solid var(--teal);padding-left:12px;margin-top:14px}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 20px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.show{opacity:1}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../">← Signature tool</a>
+  <h1>Email signature v2</h1>
+  <p class="lead">Type your name, title and WhatsApp number. The card updates live, then download it and add it to Outlook. It looks the same in every email app, in light and dark mode.</p>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Your details</h2>
+      <label for="f-name">Full name</label>
+      <input id="f-name" value="Raniel Ponesto" autocomplete="name">
+      <label for="f-title">Job title</label>
+      <input id="f-title" value="Marketing Assistant">
+      <label for="f-wa">WhatsApp number</label>
+      <div class="prefix"><span>+974</span><input id="f-wa" inputmode="numeric" value="7056 7823"></div>
+      <p class="hint">8 digits, Qatar number.</p>
+      <div class="btns">
+        <button class="primary" id="dl">Download signature (GIF)</button>
+        <button id="copy">Copy signature</button>
+      </div>
+      <p class="status" id="status"></p>
+    </section>
+
+    <section>
+      <div class="stage" id="stage">
+        <div class="stage-h">
+          <h2 style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)">Preview</h2>
+          <div class="seg"><button aria-pressed="true" data-m="l">Light inbox</button><button aria-pressed="false" data-m="d">Dark inbox</button></div>
+        </div>
+        <canvas id="out"></canvas>
+      </div>
+
+      <div class="panel" style="margin-top:20px">
+        <h2>Add it to Outlook</h2>
+        <div class="tabs" role="tablist">
+          <button class="tab" aria-selected="true" data-t="mac">Outlook for Mac</button>
+          <button class="tab" aria-selected="false" data-t="win">Outlook for Windows</button>
+          <button class="tab" aria-selected="false" data-t="web">Outlook web / New Outlook</button>
+        </div>
+        <ol data-p="mac">
+          <li>Click <b>Download signature (GIF)</b>.</li>
+          <li>Outlook → <b>Settings → Signatures</b> → select your signature and delete everything in it.</li>
+          <li>Drag the downloaded GIF into the signature box (or Picture icon → Picture from File).</li>
+          <li>Click the image, press <b>Cmd+K</b>, paste <b>https://capstoneproperty.com</b>, and save.</li>
+        </ol>
+        <ol data-p="win" hidden>
+          <li>Click <b>Download signature (GIF)</b>.</li>
+          <li>Outlook → <b>File → Options → Mail → Signatures</b> → select your signature and delete everything in it.</li>
+          <li>Click the <b>Picture</b> icon in the editor and choose the downloaded GIF.</li>
+          <li>Select the image, click the <b>Hyperlink</b> icon, paste <b>https://capstoneproperty.com</b>, then OK.</li>
+        </ol>
+        <ol data-p="web" hidden>
+          <li>Click <b>Copy signature</b>.</li>
+          <li>Outlook → <b>Settings → Accounts → Signatures</b> → delete everything in the signature box.</li>
+          <li>Paste (<b>Ctrl+V</b> / <b>Cmd+V</b>) and save. If the picture doesn't appear, use the image icon in the editor to insert the downloaded GIF instead.</li>
+        </ol>
+        <p class="note">Send yourself a test email from your computer and check it on your phone. The logo animates; tapping the card opens capstoneproperty.com.</p>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { GIFEncoder, quantize, applyPalette } from './assets/gifenc.esm.js';
+
+const $ = id => document.getElementById(id);
+const NAVY = [0, 56, 80];
+const S = 2;                 // working resolution: 2 px per design px
+const M = 28;                // equal margin around content (design px)
+const SCALE = 500 / 560;     // card display scale (same as template v2)
+const FONT = 'Arial, Helvetica, sans-serif';
+
+function loadImg(src){ return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+const A = 'assets/';
+const [sprite, meta, waI, igI, liI, fbI, xI, ytI, pinI] = await Promise.all([
+  loadImg(A + 'logo-frames.png'), fetch(A + 'logo-frames.json').then(r => r.json()),
+  ...['whatsapp-circle-navy','instagram-navy','linkedin-navy','facebook-navy','x-navy','youtube-navy','pin-navy'].map(n => loadImg(A + n + '.png'))
+]);
+
+const work = document.createElement('canvas'); work.width = 700 * S; work.height = 300 * S;
+const w = work.getContext('2d');
+
+function fmt(d){ d = d.replace(/\D/g, '').replace(/^974/, ''); return d.length === 8 ? d.slice(0, 4) + ' ' + d.slice(4) : d; }
+function font(px, bold){ return (bold ? 'bold ' : '') + (px * S) + 'px ' + FONT; }
+// draw text so its line box (top..top+lh) is vertically centred like CSS
+function text(str, x, top, lh, px, bold, color, align){
+  w.font = font(px, bold); w.fillStyle = color; w.textAlign = align || 'left'; w.textBaseline = 'alphabetic';
+  const m = w.measureText(str), asc = m.fontBoundingBoxAscent, desc = m.fontBoundingBoxDescent;
+  w.fillText(str, x * S, top * S + (lh * S - (asc + desc)) / 2 + asc);
+  return m.width / S;
+}
+function icon(img, x, rowTop, size){ w.drawImage(img, x * S, (rowTop + (30 - size) / 2) * S, size * S, size * S); }
+
+// Lay out everything except the logo (static layer), return it
+function drawStatic(name, title, num){
+  w.fillStyle = 'rgb(' + NAVY + ')'; w.fillRect(0, 0, work.width, work.height);
+  w.font = font(25, true); const nfs = Math.min(25, 25 * 280 / (w.measureText(name).width / S));  // long names shrink to keep the card balanced
+  const nameW = text(name, 262, 45, 30, nfs, true, '#FFFFFF');
+  const titleW = text(title, 262, 75, 18, 13, false, '#8CC3CB');
+  const L = 28.75, T0 = 120;
+  w.font = font(13, true); const webW = w.measureText('capstoneproperty.com').width / S;
+  // row 0: WhatsApp icon + number, justified to website width
+  icon(waI, L, T0, 22);
+  w.font = font(13, true); const nw = w.measureText(num).width / S, fs = 13 * (webW - 30) / nw;
+  text(num, L + webW, T0, 30, fs, true, '#FFFFFF', 'right');
+  // row 1: five icons justified across website width
+  const icons = [igI, liI, fbI, xI, ytI], gap = (webW - 22 * 5) / 4;
+  icons.forEach((im, i) => icon(im, L + i * (22 + gap), T0 + 30, 22));
+  // row 2: website
+  text('capstoneproperty.com', L, T0 + 60, 30, 13, true, '#FFFFFF');
+  // right column: address aligned to name
+  icon(pinI, 240, T0, 14);
+  const a1 = text('Marina Way 27', 262, T0, 30, 13, true, '#FFFFFF');
+  const a2 = text('Porto Arabia', 262, T0 + 30, 30, 13, false, '#DCE6EA');
+  const a3 = text('The Pearl, Qatar', 262, T0 + 60, 30, 13, false, '#DCE6EA');
+  const R = Math.max(262 + nameW, 262 + titleW, 262 + a1, 262 + a2, 262 + a3, L + webW);
+  w.fillStyle = '#2B5A6E'; w.fillRect(L * S, 105 * S, (R - L) * S, 1 * S);
+  return w.getImageData(0, 0, work.width, work.height);
+}
+
+function frameAt(i){ w.drawImage(sprite, 0, i * meta.h, meta.w, meta.h, 26 * S, 22 * S, meta.w, meta.h); }
+
+// ink box of the finished card (first frame = full logo)
+function inkBox(){
+  const d = w.getImageData(0, 0, work.width, work.height).data, W = work.width, H = work.height;
+  let x0 = W, y0 = H, x1 = 0, y1 = 0;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const k = (y * W + x) * 4;
+    if (Math.abs(d[k] - NAVY[0]) + Math.abs(d[k + 1] - NAVY[1]) + Math.abs(d[k + 2] - NAVY[2]) > 60) {
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+    }
+  }
+  const m = M * S; return { x: x0 - m, y: y0 - m, w: (x1 + 1 - x0) + 2 * m, h: (y1 + 1 - y0) + 2 * m };
+}
+
+const out = $('out'), o = out.getContext('2d');
+let box, OW, OH, staticLayer;
+
+function roundMask(ctx, W, H, r){ ctx.globalCompositeOperation = 'destination-in'; ctx.beginPath(); ctx.roundRect(0, 0, W, H, r); ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
+
+function composeFrame(i, target){
+  w.putImageData(staticLayer, 0, 0); frameAt(i);
+  const t = target.getContext('2d'); t.clearRect(0, 0, OW, OH);
+  t.imageSmoothingQuality = 'high';
+  t.drawImage(work, box.x, box.y, box.w, box.h, 0, 0, OW, OH);
+  roundMask(t, OW, OH, 36 * SCALE);
+}
+
+function layout(){
+  const name = $('f-name').value.trim() || 'Your Name';
+  const title = $('f-title').value.trim() || 'Job Title';
+  const num = '+974 ' + fmt($('f-wa').value);
+  staticLayer = drawStatic(name, title, num);
+  frameAt(0); box = inkBox();
+  OW = Math.round(box.w / 2 * SCALE) * 2; OH = Math.round(box.h * OW / box.w);
+  out.width = OW; out.height = OH; out.style.width = (OW / 2) + 'px';
+}
+
+// live animated preview
+let fi = 0, timer;
+function tick(){ composeFrame(fi, out); const d = meta.durs[fi]; fi = (fi + 1) % meta.n; timer = setTimeout(tick, d); }
+function refresh(){ clearTimeout(timer); layout(); fi = 0; tick(); }
+['f-name', 'f-title', 'f-wa'].forEach(id => $(id).addEventListener('input', refresh));
+refresh();
+
+function slug(){ return ($('f-name').value.trim() || 'capstone').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+
+async function buildGif(){
+  layout();
+  const c = document.createElement('canvas'); c.width = OW; c.height = OH;
+  const frames = [];
+  for (let i = 0; i < meta.n; i++) { composeFrame(i, c); frames.push(c.getContext('2d').getImageData(0, 0, OW, OH).data.slice()); }
+  // one shared palette from a few frames, index 0 reserved for transparency
+  const sample = new Uint8ClampedArray(OW * OH * 4 * 3);
+  [0, Math.floor(meta.n / 2), meta.n - 1].forEach((k, j) => sample.set(frames[k], j * OW * OH * 4));
+  const palette = quantize(sample, 255, { format: 'rgb565' });
+  palette.unshift([0, 0, 0]);
+  const enc = GIFEncoder();
+  // frames after the first only store changed pixels (the rest stay transparent), which keeps the file small
+  let prev = null;
+  frames.forEach((px, i) => {
+    const idx = applyPalette(px, palette.slice(1), 'rgb565');
+    for (let p = 0; p < idx.length; p++) idx[p] = px[p * 4 + 3] < 128 ? 0 : idx[p] + 1;
+    const full = idx.slice();
+    if (prev) for (let p = 0; p < idx.length; p++) if (idx[p] === prev[p]) idx[p] = 0;
+    prev = full;
+    enc.writeFrame(idx, OW, OH, { palette: i === 0 ? palette : undefined, delay: meta.durs[i], transparent: true, transparentIndex: 0, repeat: 0, dispose: 1 });
+  });
+  enc.finish();
+  refresh();
+  return new Blob([enc.bytes()], { type: 'image/gif' });
+}
+
+const toastEl = $('toast'); let tt;
+function toast(m){ toastEl.textContent = m; toastEl.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('show'), 2400); }
+function busy(on, msg){ $('dl').disabled = $('copy').disabled = on; $('status').textContent = msg || ''; }
+
+$('dl').onclick = async () => {
+  busy(true, 'Building your animated signature…');
+  const blob = await buildGif();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = slug() + '-signature.gif';
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  busy(false, 'Downloaded ' + a.download + ' (' + Math.round(blob.size / 1024) + ' KB).');
+};
+
+$('copy').onclick = async () => {
+  busy(true, 'Preparing…');
+  const blob = await buildGif();
+  const dataUrl = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(blob); });
+  const html = '<a href="https://capstoneproperty.com/" target="_blank" style="text-decoration:none;display:block;max-width:' + (OW / 2) + 'px;">' +
+    '<img src="' + dataUrl + '" width="' + (OW / 2) + '" alt="' + ($('f-name').value || '').replace(/"/g, '') + ' | Capstone Property" border="0" style="display:block;border:0;width:' + (OW / 2) + 'px;max-width:100%;height:auto;"></a>';
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([$('f-name').value], { type: 'text/plain' }) })]);
+    busy(false, 'Copied. Paste it into your Outlook signature.'); toast('Signature copied');
+  } catch (e) { busy(false, 'Copy was blocked by the browser. Use Download instead.'); }
+};
+
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  $('stage').classList.toggle('dark', b.dataset.m === 'd');
+});
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+  document.querySelectorAll('ol[data-p]').forEach(p => p.hidden = p.dataset.p !== t.dataset.t);
+});
+</script>
+</body>
+</html>
