@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:transparent}
+#card{position:relative;width:700px;height:300px;background:#003850;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
+.abs{position:absolute;white-space:nowrap}
+#name{font-weight:bold;font-size:25px;line-height:30px;color:#fff}
+#title{font-size:13px;line-height:18px;color:#8CC3CB}
+#rule{left:26px;right:26px;height:1px;background:#2B5A6E}
+.row{display:flex;align-items:center;height:30px}
+.t{font-size:13px;color:#DCE6EA}
+.b{font-weight:bold;color:#fff}
+.ic{width:14px;height:14px;margin-right:8px}
+.soc img{width:22px;height:22px;display:block}
+</style></head><body>
+<div id="card">
+ <div class="abs" id="logo" style="left:26px;top:22px;width:196px;height:69px"></div>
+ <div class="abs" id="name" style="left:262px;top:45px">NAME</div>
+ <div class="abs" id="title" style="left:262px;top:75px">TITLE</div>
+ <div class="abs" id="rule" style="top:105px"></div>
+ <!-- left column: aligned to logo edge -->
+ <div class="abs" style="left:28.75px;top:120px">
+   <div class="row t b" id="wa" style="justify-content:space-between"><img src="icons/whatsapp-circle-navy.png" style="width:22px;height:22px;display:block"><span id="num" style="white-space:nowrap">NUMBER</span></div>
+   <div class="row soc" id="soc" style="justify-content:space-between"><img src="icons/instagram-navy.png"><img src="icons/linkedin-navy.png"><img src="icons/facebook-navy.png"><img src="icons/x-navy.png"><img src="icons/youtube-navy.png"></div>
+   <div class="row t b"><span id="web">capstoneproperty.com</span></div>
+ </div>
+ <!-- right column: text aligned to name -->
+ <div class="abs" style="left:240px;top:120px">
+   <div class="row t b"><img class="ic" src="icons/pin-navy.png"><span>Marina Way 27</span></div>
+   <div class="row t" style="padding-left:22px"><span>Porto Arabia</span></div>
+   <div class="row t" style="padding-left:22px"><span>The Pearl, Qatar</span></div>
+ </div>
+</div><script>var w=document.getElementById("web").getBoundingClientRect().width;document.getElementById("soc").style.width=(w-0.25)+"px";document.getElementById("wa").style.width=w+"px";var n=document.getElementById("num"),fs=13;n.style.fontSize=fs+"px";var avail=w-22-8;fs=fs*avail/n.getBoundingClientRect().width;n.style.fontSize=fs+"px";var c=document.getElementById("card").getBoundingClientRect(),R=0;document.querySelectorAll("#card .abs").forEach(function(e){if(e.id!=="rule"&&e.id!=="logo"){e.querySelectorAll("span,img,#name,#title").forEach(function(x){R=Math.max(R,x.getBoundingClientRect().right)});R=Math.max(R,e.id==="name"||e.id==="title"?e.getBoundingClientRect().right:0)}});var r=document.getElementById("rule");r.style.left="28.75px";r.style.right="auto";r.style.width=(R-c.left-28.75)+"px";</script></body></html>
