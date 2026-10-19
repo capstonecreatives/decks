@@ -1622,7 +1622,8 @@ function browseSlide(){
      (stills → carousels → stories → reels → …); each thumb carries its type
      for the filter row and its own type colour */
   if(regularTypes.length){
-    const kids = byNewest(CREATIVES.filter(c=>regularTypes.includes(c.type)));  /* same-day ties follow CREATIVES order, newest entries placed first */
+    const kids = byNewest(CREATIVES.filter(c=>regularTypes.includes(c.type) && c.section!=='booth'));  /* same-day ties follow CREATIVES order, newest entries placed first */
+    const boothKids = byNewest(CREATIVES.filter(c=>c.section==='booth'));
     const g = el(`<div class="bgroup social" data-t="social">
       <div class="section-h" style="margin-top:6px">Social creatives · ${kids.length} ${kids.length===1?'creative':'creatives'}</div>
       <div class="bgrid"></div></div>`);
@@ -1657,6 +1658,13 @@ function browseSlide(){
       grid.appendChild(t2);
     }
     host.appendChild(g);
+    /* event decks: booth creatives (LED screens, booth films) get their own section above social */
+    if(boothKids.length){
+      const bg = el(`<div class="bgroup booth" data-t="booth"><div class="section-h" style="margin-top:6px">Booth creatives · ${boothKids.length} ${boothKids.length===1?'creative':'creatives'}</div><div class="bgrid"></div></div>`);
+      boothKids.forEach(c=>renderThumb(c, bg.querySelector('.bgrid')));
+      host.insertBefore(bg, g);
+    }
+    if(!kids.length) g.remove();
   }
 
   const galSection = featSection('gallery', 'Photo gallery');
@@ -1666,7 +1674,9 @@ function browseSlide(){
   fbtns.forEach(b=>b.addEventListener('click',()=>{
     fbtns.forEach(x=>x.classList.toggle('on',x===b));
     const f=b.dataset.f;
-    host.querySelectorAll('.bgroup:not(.social)').forEach(g=>g.classList.toggle('hide', f!=='all' && g.dataset.t!==f));
+    host.querySelectorAll('.bgroup:not(.social):not(.booth)').forEach(g=>g.classList.toggle('hide', f!=='all' && g.dataset.t!==f));
+    const booth = host.querySelector('.bgroup.booth');
+    if(booth){ let any=false; booth.querySelectorAll('.thumb').forEach(t=>{const h=f!=='all'&&t.dataset.t!==f; t.classList.toggle('hide',h); if(!h) any=true;}); booth.classList.toggle('hide', !any); }
     const soc = host.querySelector('.bgroup.social');
     if(soc){
       soc.classList.toggle('hide', f!=='all' && !regularTypes.includes(f));
@@ -2121,7 +2131,7 @@ add(browseSlide());
 (function(){
   const FEAT=['brochure','flipbook','gallery'];
   const feat=ORDER.filter(t=>FEAT.includes(t)&&t!=='gallery').flatMap(t=>byNewest(CREATIVES.filter(c=>c.type===t)));
-  const social=byNewest(CREATIVES.filter(c=>ORDER.includes(c.type)&&!FEAT.includes(c.type)));
+  const social=[...byNewest(CREATIVES.filter(c=>c.section==='booth')), ...byNewest(CREATIVES.filter(c=>ORDER.includes(c.type)&&!FEAT.includes(c.type)&&c.section!=='booth'))];
   const gal=byNewest(CREATIVES.filter(c=>c.type==='gallery'));
   [...feat,...social,...gal].forEach(c=>add(creativeSlide(c), c.id));
 })();
