@@ -153,7 +153,7 @@ main.grp-grid{padding-bottom:28px}
         '<div class="agent-url">'+esc(url.replace(/^https:\/\//,''))+'</div>'+
         '<div class="agent-actions"><button type="button" data-copy="'+esc(url)+'">Copy link</button><a href="'+rel+'qr.svg" download="'+esc(a.slug)+'-qr.svg">QR code</a><a href="'+rel+'contact.vcf">Contact file</a></div></div>';
     };
-    const order=['Sales','Leasing','Resale','Marketing'];const groups={};list.forEach(a=>{const k=a.department||'Team';(groups[k]=groups[k]||[]).push(a)});
+    const order=['Management','Sales','Leasing','Resale','Marketing'];const groups={};list.forEach(a=>{const k=a.department||'Team';(groups[k]=groups[k]||[]).push(a)});
     const keys=Object.keys(groups).sort((x,y)=>{const i=order.indexOf(x),j=order.indexOf(y);return (i<0?99:i)-(j<0?99:j)||x.localeCompare(y)});
     grid.innerHTML=keys.map(k=>'<div class="sec"><h2>'+esc(k)+'</h2><span>'+groups[k].length+' card'+(groups[k].length===1?'':'s')+'</span></div><main class="grp-grid">'+groups[k].map(tile).join('')+'</main>').join('');
     grid.addEventListener('click',e=>{const b=e.target.closest('[data-copy]');if(!b)return;
