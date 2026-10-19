@@ -152,8 +152,15 @@ def page(a, c, url, qr_svg):
         + f'<button class="icb" type="button" id="shb" aria-label="Share card" title="Share card">{icon("share")}</button>'
         + '</nav>')
     desc = f"{a['name']} · {a.get('title','')} at {c['name']}"
-    photo_hero = (f'<img class="hp" src="{E(a["photo"])}" alt="{E(a["name"])}"' + (f' style="--pos:{E(a.get("photo_pos","50% 12%"))};--zoom:{E(str(a.get("photo_zoom",1)))}"' if (a.get("photo_pos") or a.get("photo_zoom")) else "") + '>' if a.get("photo")
-                  else f'<span class="hm" aria-hidden="true">{E(initials)}</span>')
+    fr = a.get("photo_frame")
+    if a.get("photo") and fr:
+        st = f'--z:{fr["zoom"]};--fx:{fr["fx"]};--fy:{fr["fy"]};--t:{fr["top"]}'
+        photo_hero = (f'<img class="hb" src="{E(a["photo"])}" alt="" aria-hidden="true">'
+                      f'<img class="hp fr" src="{E(a["photo"])}" alt="{E(a["name"])}" style="{st}">')
+    elif a.get("photo"):
+        photo_hero = f'<img class="hp" src="{E(a["photo"])}" alt="{E(a["name"])}">'
+    else:
+        photo_hero = f'<span class="hm" aria-hidden="true">{E(initials)}</span>'
     return f'''<!doctype html>
 <html lang="en" dir="ltr">
 <head>
@@ -180,6 +187,9 @@ body{{min-height:100svh;font-family:var(--f);color:var(--txt);background:#040F17
 @media (min-width:560px) and (min-height:700px){{body{{align-items:center}}.card{{height:min(900px,calc(100svh - 64px));border-radius:32px;box-shadow:0 40px 100px rgba(0,0,0,.55)}}}}
 .hero{{position:relative;flex:1 1 0;min-height:110px;background:#0B3042;overflow:hidden}}
 .hp{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--pos,50% 12%);transform:scale(var(--zoom,1));transform-origin:var(--pos,50% 12%)}}
+.hero{{container-type:inline-size}}
+.hp.fr{{object-fit:fill;max-width:none;inset:auto;width:calc(var(--z) * 100cqw);height:calc(var(--z) * 100cqw);left:calc(50cqw - var(--fx) * var(--z) * 100cqw);top:calc(var(--t) * 100% - var(--fy) * var(--z) * 100cqw);transform:none}}
+.hb{{position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(30px) brightness(.75)}}
 .hm{{position:absolute;inset:0;display:grid;place-items:center;font:300 88px/1 var(--f);color:var(--gold)}}
 .hero::after{{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,26,38,.55) 0,rgba(7,26,38,0) 22%,rgba(7,26,38,0) 55%,var(--bg) 100%)}}
 .top{{position:absolute;z-index:2;inset:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:calc(20px + env(safe-area-inset-top,0px)) 22px 0}}
