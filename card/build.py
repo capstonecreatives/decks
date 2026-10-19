@@ -140,15 +140,19 @@ def page(a, c, url, qr_svg):
     for k, v in (c.get("socials") or {}).items():
         v = clean_handle(v)
         if v and k in SOCIAL:
-            links.append((SOCIAL[k][2](v), k, c["name"] + " " + SOCIAL[k][0]))
+            links.append((SOCIAL[k][2](v), "co_" + k, c["name"] + " on " + SOCIAL[k][0]))
+    def link_icon(i):
+        if i.startswith("co_"):  # company account: Capstone emblem with a small platform badge
+            return f'<span class="emb" aria-hidden="true"></span><span class="badge">{icon(i[3:])}</span>'
+        return icon(i)
     icons_html = ('<nav class="icons">' + "".join(
-        f'<a class="icb" href="{E(h)}" target="_blank" rel="noopener" aria-label="{E(l)}" title="{E(l)}">{icon(i)}</a>' for h, i, l in links)
+        f'<a class="icb" href="{E(h)}" target="_blank" rel="noopener" aria-label="{E(l)}" title="{E(l)}">{link_icon(i)}</a>' for h, i, l in links)
         + '<span class="sep" aria-hidden="true"></span>'
         + f'<button class="icb" type="button" id="qrb" aria-label="QR code" title="QR code">{icon("qr")}</button>'
         + f'<button class="icb" type="button" id="shb" aria-label="Share card" title="Share card">{icon("share")}</button>'
         + '</nav>')
     desc = f"{a['name']} · {a.get('title','')} at {c['name']}"
-    photo_hero = (f'<img class="hp" src="{E(a["photo"])}" alt="{E(a["name"])}">' if a.get("photo")
+    photo_hero = (f'<img class="hp" src="{E(a["photo"])}" alt="{E(a["name"])}"' + (f' style="--pos:{E(a.get("photo_pos","50% 12%"))};--zoom:{E(str(a.get("photo_zoom",1)))}"' if (a.get("photo_pos") or a.get("photo_zoom")) else "") + '>' if a.get("photo")
                   else f'<span class="hm" aria-hidden="true">{E(initials)}</span>')
     return f'''<!doctype html>
 <html lang="en" dir="ltr">
@@ -175,7 +179,7 @@ body{{min-height:100svh;font-family:var(--f);color:var(--txt);background:#040F17
 .card{{width:100%;max-width:440px;height:100vh;height:100svh;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column}}
 @media (min-width:560px) and (min-height:700px){{body{{align-items:center}}.card{{height:min(900px,calc(100svh - 64px));border-radius:32px;box-shadow:0 40px 100px rgba(0,0,0,.55)}}}}
 .hero{{position:relative;flex:1 1 0;min-height:110px;background:#0B3042;overflow:hidden}}
-.hp{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}}
+.hp{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--pos,50% 12%);transform:scale(var(--zoom,1));transform-origin:var(--pos,50% 12%)}}
 .hm{{position:absolute;inset:0;display:grid;place-items:center;font:300 88px/1 var(--f);color:var(--gold)}}
 .hero::after{{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,26,38,.55) 0,rgba(7,26,38,0) 22%,rgba(7,26,38,0) 55%,var(--bg) 100%)}}
 .top{{position:absolute;z-index:2;inset:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:calc(20px + env(safe-area-inset-top,0px)) 22px 0}}
@@ -207,6 +211,10 @@ h1{{font-weight:400;font-size:clamp(26px,min(9vw,4.6svh),40px);line-height:1.04;
 .icons .sep{{width:1px;align-self:center;height:24px;background:var(--line);margin:0 4px}}
 .icb{{background:transparent;cursor:pointer;padding:0;width:clamp(46px,6.4svh,54px);height:clamp(46px,6.4svh,54px);border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--gold);transition:background .2s,color .2s}}
 .icb .ic{{width:22px;height:22px}}
+.icb{{position:relative}}
+.emb{{width:13px;height:24px;background:currentColor;-webkit-mask:url(data:image/png;base64,{LOGO}) left center/auto 100% no-repeat;mask:url(data:image/png;base64,{LOGO}) left center/auto 100% no-repeat}}
+.badge{{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;color:#fff}}
+.badge .ic{{width:12px;height:12px}}
 @media (hover:hover){{.icb:hover{{background:rgba(255,255,255,.06);color:#fff}}}}
 .tools-unused{{padding-top:clamp(6px,1.6svh,22px);display:flex;justify-content:center;gap:8px}}
 .tool{{display:flex;align-items:center;gap:8px;padding:10px 16px;border:0;border-radius:99px;background:transparent;color:var(--sub);font:400 14px/1 var(--f);cursor:pointer;transition:color .2s,background .2s}}

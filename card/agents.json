@@ -8,7 +8,9 @@
     "address": "",
     "address_ar": "",
     "maps_url": "",
-    "socials": {}
+    "socials": {
+      "instagram": "capstone.property"
+    }
   },
   "agents": [
     {
@@ -40,7 +42,7 @@
       "phone": "+97477722243",
       "whatsapp": "",
       "email": "edyta@capstoneproperty.com",
-      "photo": "",
+      "photo": "edyta.png",
       "license": "",
       "languages": [],
       "languages_ar": [],
@@ -56,7 +58,7 @@
       "phone": "+97477996919",
       "whatsapp": "",
       "email": "hamza@capstoneproperty.com",
-      "photo": "",
+      "photo": "hamza.png",
       "license": "",
       "languages": [],
       "languages_ar": [],
@@ -72,7 +74,7 @@
       "phone": "+97430550344",
       "whatsapp": "",
       "email": "maya@capstoneproperty.com",
-      "photo": "",
+      "photo": "maya.png",
       "license": "",
       "languages": [],
       "languages_ar": [],
@@ -88,7 +90,7 @@
       "phone": "+97470567823",
       "whatsapp": "",
       "email": "raniel@capstoneproperty.com",
-      "photo": "",
+      "photo": "raniel.png",
       "license": "",
       "languages": [],
       "languages_ar": [],
@@ -104,7 +106,7 @@
       "phone": "+97472200488",
       "whatsapp": "",
       "email": "raymart@capstoneproperty.com",
-      "photo": "",
+      "photo": "raymart.png",
       "license": "",
       "languages": [],
       "languages_ar": [],
@@ -120,7 +122,7 @@
       "phone": "+97471006588",
       "whatsapp": "",
       "email": "leo@capstoneproperty.com",
-      "photo": "",
+      "photo": "leo.png",
       "license": "",
       "languages": [],
       "languages_ar": [],
