@@ -89,10 +89,23 @@ function draw(){
   if(agent||phone){
     const line=lang==='en'?'We look forward to meeting you!':'نتطلع إلى لقائكم!';
     if(lang==='en') txt(line,'600 Spx MT',30,c.line,'#4a5560',900); else txt(line,'700 Spx TJ',34,c.line,'#4a5560',900,'rtl');
-    if(phone){
-      ctx.direction='ltr';const s=fit(phone,'700 Spx MT',44,760);const tw=ctx.measureText(phone).width;const ih=50,gap=14;const x0=540-(ih+gap+tw)/2;
-      ctx.drawImage(wa,x0,c.phone-ih/2-2,ih,ih);ctx.save();ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle=TEAL;ctx.font='700 '+s+'px MT';ctx.fillText(phone,x0+ih+gap,c.phone);ctx.restore();
-    }
+    // bottom row: "Agent Name | (wa) Number"; Arabic reads right-to-left so the name sits on the right
+    const nf=lang==='en'?['600 ','MT',40]:['700 ','TJ',44],ih=50,gap=14,sep=28;
+    const row=k=>{const segs=[];
+      if(agent){ctx.font=nf[0]+(nf[2]*k)+'px '+nf[1];segs.push({t:'name',w:ctx.measureText(agent).width})}
+      if(agent&&phone){ctx.font='300 '+(44*k)+'px MT';segs.push({t:'sep',w:ctx.measureText('|').width+2*sep*k})}
+      if(phone){ctx.font='700 '+(44*k)+'px MT';segs.push({t:'phone',w:(ih+gap)*k+ctx.measureText(phone).width})}
+      return lang==='en'?segs:segs.reverse()};
+    let k=1,segs=row(1),tot=segs.reduce((a,b)=>a+b.w,0);
+    if(tot>900){k=900/tot;segs=row(k);tot=segs.reduce((a,b)=>a+b.w,0)}
+    let x=540-tot/2;const y=c.phone;
+    ctx.save();ctx.textAlign='left';ctx.textBaseline='middle';
+    for(const g of segs){
+      if(g.t==='name'){ctx.direction=lang==='en'?'ltr':'rtl';ctx.textAlign=lang==='en'?'left':'right';ctx.font=nf[0]+(nf[2]*k)+'px '+nf[1];ctx.fillStyle=INK;ctx.fillText(agent,lang==='en'?x:x+g.w,y);ctx.direction='ltr';ctx.textAlign='left'}
+      else if(g.t==='sep'){ctx.font='300 '+(44*k)+'px MT';ctx.fillStyle='#9aa7b0';ctx.fillText('|',x+sep*k,y)}
+      else{ctx.drawImage(wa,x,y-ih*k/2-2,ih*k,ih*k);ctx.font='700 '+(44*k)+'px MT';ctx.fillStyle=TEAL;ctx.fillText(phone,x+(ih+gap)*k,y)}
+      x+=g.w}
+    ctx.restore();
   } else {
     txt('WWW.CAPSTONEPROPERTY.COM','500 Spx MT',24,c.web,NAVY,900);
   }
