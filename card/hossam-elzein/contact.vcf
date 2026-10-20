@@ -1,0 +1,11 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Elzein;Hossam;;;
+FN:Hossam Elzein
+ORG:Capstone Property
+TITLE:Property Advisor
+TEL;TYPE=CELL,VOICE:+97471444296
+TEL;TYPE=WORK,VOICE:+97430473333
+EMAIL;TYPE=INTERNET,WORK:hossam@capstoneproperty.com
+URL:https://www.capstoneproperty.com
+END:VCARD

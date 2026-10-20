@@ -1,0 +1,11 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Jane De Jesus;Baby;;;
+FN:Baby Jane De Jesus
+ORG:Capstone Property
+TITLE:Leasing Consultant
+TEL;TYPE=CELL,VOICE:+97430899932
+TEL;TYPE=WORK,VOICE:+97430473333
+EMAIL;TYPE=INTERNET,WORK:jane.j@capstoneproperty.com
+URL:https://www.capstoneproperty.com
+END:VCARD
