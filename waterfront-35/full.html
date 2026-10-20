@@ -1586,7 +1586,8 @@ function browseSlide(){
 
   function featSection(type, heading){
     if(!groups.includes(type)) return null;
-    const kids = byNewest(CREATIVES.filter(c=>c.type===type));
+    const kids = byNewest(CREATIVES.filter(c=>c.type===type && c.section!=='booth'));
+    if(!kids.length) return null;
     const g = el(`<div class="bgroup" data-t="${type}">
       <div class="section-h">${esc(heading)} · ${kids.length} item${kids.length===1?'':'s'}</div>
       <div class="feat-grid"></div></div>`);
@@ -1643,7 +1644,7 @@ function browseSlide(){
     });
     function renderThumb(c, grid){ const t=c.type;
       const pic = (c.type==='carousel'||c.type==='wati') ? ((c.cards||[]).find(x=>has(x.src))||{}).src
-                : isVid(c) ? (c.poster||'') : c.src;
+                : isVid(c) ? (c.poster||'') : c.type==='gallery' ? (((c.photos||[]).find(x=>has(x.thumb||x.src))||{}).thumb||'') : c.src;
       const badge = (c.type==='reels'||c.type==='construction'||c.type==='walkthrough') ? ICONS.film : (c.type==='carousel'||c.type==='wati') ? ICONS.cards
                   : c.type==='story' ? ICONS.ring : '';
       const t2 = el(`<button class="thumb" data-go="${c.id}" style="--tcol:${TYPES[t].col}">
@@ -2132,7 +2133,7 @@ add(browseSlide());
   const FEAT=['brochure','flipbook','gallery'];
   const feat=ORDER.filter(t=>FEAT.includes(t)&&t!=='gallery').flatMap(t=>byNewest(CREATIVES.filter(c=>c.type===t)));
   const social=[...byNewest(CREATIVES.filter(c=>c.section==='booth')), ...byNewest(CREATIVES.filter(c=>ORDER.includes(c.type)&&!FEAT.includes(c.type)&&c.section!=='booth'))];
-  const gal=byNewest(CREATIVES.filter(c=>c.type==='gallery'));
+  const gal=byNewest(CREATIVES.filter(c=>c.type==='gallery'&&c.section!=='booth'));
   [...feat,...social,...gal].forEach(c=>add(creativeSlide(c), c.id));
 })();
 /* Copy matrix only earns a slide when at least one creative carries ad copy;
