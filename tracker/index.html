@@ -971,7 +971,7 @@ $("#gateForm").addEventListener("submit",async e=>{
 $("#lock").onclick=()=>{ store.del("lt-pass"); store.del("lt-admin"); location.reload(); };
 
 /* ---------- publish from the browser: encrypt here, push to GitHub, no server involved ---------- */
-const REPO="ranielponesto/decks", GH="https://api.github.com/repos/"+REPO+"/contents/";
+const REPO="capstonecreatives/decks", GH="https://api.github.com/repos/"+REPO+"/contents/";
 const b64e=bytes=>{let s="";for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(s)};
 const utf8b64=str=>b64e(new TextEncoder().encode(str));
 const b64utf8=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g,"")),c=>c.charCodeAt(0)));
