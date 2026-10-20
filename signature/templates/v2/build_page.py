@@ -1,6 +1,6 @@
 import sys, html
 SLUG, NAME, TITLE, WA = sys.argv[1:5]
-ABS='https://ranielponesto.github.io/decks/signature/'
+ABS='https://capstonecreatives.github.io/decks/signature/'
 SH=ABS+'images/slices/'; PP=ABS+f'people/{SLUG}/'; IM=ABS+'images/'
 L={'web':'https://capstoneproperty.com/','map':'https://maps.app.goo.gl/vUx1QU2z1e2iej6c6','wa':f'https://wa.me/974{WA}',
    'ig':'https://www.instagram.com/capstone.property/','li':'https://www.linkedin.com/company/capstone-property',
