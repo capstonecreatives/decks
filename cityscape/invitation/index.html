@@ -87,7 +87,7 @@ function draw(){
     else txt(($('gender').value==='f'?'عزيزتي ':'عزيزي ')+client+'،','700 Spx TJ',54,c.greet,INK,900,'rtl');
   }
   if(agent||phone){
-    const line=agent?(lang==='en'?'Book your visit with '+agent:'احجز زيارتك مع '+agent):(lang==='en'?'Book your visit':'احجز زيارتك');
+    const line=lang==='en'?'We look forward to meeting you!':'نتطلع إلى لقائكم!';
     if(lang==='en') txt(line,'600 Spx MT',30,c.line,'#4a5560',900); else txt(line,'700 Spx TJ',34,c.line,'#4a5560',900,'rtl');
     if(phone){
       ctx.direction='ltr';const s=fit(phone,'700 Spx MT',44,760);const tw=ctx.measureText(phone).width;const ih=50,gap=14;const x0=540-(ih+gap+tw)/2;
