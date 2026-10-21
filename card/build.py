@@ -152,6 +152,8 @@ def page(a, c, url, qr_svg):
         + f'<button class="icb" type="button" id="shb" aria-label="Share card" title="Share card">{icon("share")}</button>'
         + '</nav>')
     desc = f"{a['name']} · {a.get('title','')} at {c['name']}"
+    name_block = (f'<h1 data-en="{E(a["name"])}" data-ar="{E(a.get("name_ar") or a["name"])}">{E(a["name"])}</h1>\n'
+                  f'  <p class="ttl" data-en="{E(a.get("title",""))}" data-ar="{E(a.get("title_ar") or a.get("title",""))}">{E(a.get("title",""))}</p>')
     fr = a.get("photo_frame")
     if a.get("photo") and fr:
         st = f'--z:{fr["zoom"]};--fx:{fr["fx"]};--fy:{fr["fy"]};--t:{fr["top"]}'
@@ -160,7 +162,11 @@ def page(a, c, url, qr_svg):
     elif a.get("photo"):
         photo_hero = f'<img class="hp" src="{E(a["photo"])}" alt="{E(a["name"])}">'
     else:
-        photo_hero = f'<span class="hm" aria-hidden="true">{E(initials)}</span>'
+        # no photo: no initials, the name and position sit centred in the hero instead
+        photo_hero = ('<div class="hn">'
+        f'<h1 data-en="{E(a["name"])}" data-ar="{E(a.get("name_ar") or a["name"])}">{E(a["name"])}</h1>'
+        f'<p class="ttl" data-en="{E(a.get("title",""))}" data-ar="{E(a.get("title_ar") or a.get("title",""))}">{E(a.get("title",""))}</p>'
+        '</div>')
     return f'''<!doctype html>
 <html lang="en" dir="ltr">
 <head>
@@ -190,7 +196,12 @@ body{{min-height:100svh;font-family:var(--f);color:var(--txt);background:#040F17
 .hero{{container-type:inline-size}}
 .hp.fr{{object-fit:fill;max-width:none;inset:auto;width:calc(var(--z) * 100cqw);height:calc(var(--z) * 100cqw);left:calc(50cqw - var(--fx) * var(--z) * 100cqw);top:calc(var(--t) * 100% - var(--fy) * var(--z) * 100cqw);transform:none}}
 .hb{{position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(30px) brightness(.75)}}
-.hm{{position:absolute;inset:0;display:grid;place-items:center;font:300 88px/1 var(--f);color:var(--gold)}}
+.hn{{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:calc(56px + env(safe-area-inset-top,0px)) 26px 8px}}
+.hn h1{{font-size:clamp(30px,min(10vw,5.4svh),44px)}}
+.hn .ttl{{margin-top:clamp(8px,1.4svh,14px)}}
+.nophoto .hero{{background:radial-gradient(120% 80% at 50% 45%,#0F3A50 0,#0B3042 45%,var(--bg) 100%)}}
+.nophoto .hero::after{{background:linear-gradient(180deg,rgba(7,26,38,.35) 0,rgba(7,26,38,0) 30%,rgba(7,26,38,0) 70%,var(--bg) 100%)}}
+.nophoto .body{{margin-top:0}}
 .hero::after{{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,26,38,.55) 0,rgba(7,26,38,0) 22%,rgba(7,26,38,0) 55%,var(--bg) 100%)}}
 .top{{position:absolute;z-index:2;inset:0 0 auto;display:flex;justify-content:space-between;align-items:center;padding:calc(20px + env(safe-area-inset-top,0px)) 22px 0}}
 .logo{{width:112px;aspect-ratio:640/171;background:#fff;-webkit-mask:url(data:image/png;base64,{LOGO}) left center/contain no-repeat;mask:url(data:image/png;base64,{LOGO}) left center/contain no-repeat}}
@@ -251,13 +262,12 @@ a:focus-visible,button:focus-visible{{outline:2px solid var(--gold);outline-offs
 </style>
 </head>
 <body>
-<main class="card">
+<main class="card{"" if a.get("photo") else " nophoto"}">
  <div class="hero">{photo_hero}
   <div class="top"><span class="logo" role="img" aria-label="{E(c["name"])}"></span><button class="lang" id="lang" type="button" lang="ar">عربي</button></div>
  </div>
  <div class="body">
-  <h1 data-en="{E(a["name"])}" data-ar="{E(a.get("name_ar") or a["name"])}">{E(a["name"])}</h1>
-  <p class="ttl" data-en="{E(a.get("title",""))}" data-ar="{E(a.get("title_ar") or a.get("title",""))}">{E(a.get("title",""))}</p>
+  {"" if not a.get("photo") else name_block}
   {meta_html}
   <div class="cta">
    {wa_btn}
