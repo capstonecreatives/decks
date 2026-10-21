@@ -65,7 +65,7 @@ def vcard(a, c, url):
     parts = a["name"].split()
     first, last = (parts[0], " ".join(parts[1:])) if len(parts) > 1 else (a["name"], "")
     L = ["BEGIN:VCARD", "VERSION:3.0",
-         f"N:{esc(last)};{esc(first)};;;", f"FN:{esc(a['name'])}",
+         f"N:{esc((last + ' - Capstone').strip(' -') if last else 'Capstone')};{esc(first)};;;", f"FN:{esc(a['name'])} - Capstone",
          f"ORG:{esc(c['name'])}"]
     if a.get("title"): L.append(f"TITLE:{esc(a['title'])}")
     if a.get("phone"): L.append(f"TEL;TYPE=CELL,VOICE:{a['phone']}")
