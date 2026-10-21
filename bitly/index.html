@@ -160,6 +160,7 @@ td a{color:inherit}
   <button class="btn" id="create">Create missing links</button>
   <label class="chk"><input type="checkbox" id="custom"> Readable endings (bit.ly/capstone-name, paid plans)</label>
   <button class="btn" id="refresh">Refresh visits</button>
+  <button class="btn" id="txt">Copy list for NFC</button>
   <button class="btn" id="csv">Download CSV</button>
   <button class="btn" id="json">Download links file</button>
   <span class="status" id="prog"></span>
@@ -285,6 +286,14 @@ async function refresh(){
   await Promise.all([work(),work(),work(),work()]);
   $('prog').textContent='Visits updated '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'.';$('refresh').disabled=false;
 }
+
+$('txt').onclick=()=>{
+  const R=rows().sort((x,y)=>(rank(x.department)-rank(y.department))||x.name.localeCompare(y.name));
+  const missing=R.filter(r=>!r.link).length;
+  const text=R.filter(r=>r.link).map(r=>r.name+' - '+r.link.replace(/^https?:\/\//,'')).join('\n');
+  if(!text){toast('No Bitly links yet');return}
+  navigator.clipboard.writeText(text).then(()=>toast('Copied '+R.filter(r=>r.link).length+' names and links'+(missing?' · '+missing+' still missing':'')),()=>prompt('Copy',text));
+};
 $('refresh').onclick=refresh;
 function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
 $('csv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
