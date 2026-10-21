@@ -517,7 +517,7 @@ const savedTheme=store.get(THEMEKEY); if(savedTheme) root.dataset.theme=savedThe
 $("#theme").onclick=()=>{const dark=root.dataset.theme?root.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;root.dataset.theme=dark?"light":"dark";store.set(THEMEKEY,root.dataset.theme)};
 
 /* ---------- parsing (shared by embedded snapshot and uploaded exports) ---------- */
-const COLS={project:/project name/i,group:/leasing project/i,offproj:/off ?plan project/i,comm:/^comm/i,sub:/sub community/i,unit:/unit number/i,ref:/ref no/i,status:/^status$/i,beds:/bedroom/i,price:/listing price/i,agent:/owner name/i,rtype:/record type/i,portals:/portals/i,furn:/furnish/i,ptype:/property type|unit type|property sub ?type/i,managed:/managed by/i};
+const COLS={project:/project name/i,group:/leasing project/i,offproj:/off ?plan project/i,comm:/^comm/i,sub:/sub community/i,unit:/unit number/i,ref:/ref no/i,status:/^status$/i,beds:/bedroom/i,price:/listing price/i,agent:/owner name/i,rtype:/record type/i,portals:/portals/i,furn:/furnish/i,ptype:/property type|unit type|property sub ?type/i,managed:/managed by/i,dept:/^department$/i,bills:/bills included/i};
 function furnCode(v){ v=String(v||"").trim().toLowerCase(); if(!v) return "";
   if(/^uf$|unfurn|not furn|^no$/.test(v)) return "UF";
   if(/^sf$|^pf$|semi|part/.test(v)) return "SF";
@@ -556,13 +556,14 @@ const pkey=s=>String(s||"").replace(/\s+/g," ").trim().toLowerCase();
 let DEPTS={};
 function deptShort0(d){ if(/tenant commercial/i.test(d)) return "Commercial"; return d.replace(/\s+agents?$/i,"").replace(/\s*-\s*general enquiry$/i," enquiry").trim(); }
 let DLAB={};
-function deptLabels(){ const seen={}; const all=[...new Set(Object.values(DEPTS))]; for(const d of all){ const s=deptShort0(d).toLowerCase(); (seen[s]=seen[s]||[]).push(d); }
+function deptLabels(extra){ const seen={}; const all=[...new Set([...Object.values(DEPTS),...(extra||[])])]; for(const d of all){ const s=deptShort0(d).toLowerCase(); (seen[s]=seen[s]||[]).push(d); }
   DLAB={}; for(const d of all) DLAB[d]=seen[deptShort0(d).toLowerCase()].length>1?d:deptShort0(d); }
 function deptShort(d){ return DLAB[d]||deptShort0(d); }
 /* Salesforce "Project Name / Department" report -> {project: most common department} */
 function deptsFromAoa(aoa){
   const hi=aoa.findIndex(r=>r&&r.some(c=>c&&/^department$/i.test(String(c).trim()))&&r.some(c=>c&&/project/i.test(String(c))));
   if(hi<0) return null;
+  if(aoa[hi].some(c=>c&&/ref no/i.test(String(c)))) return null;
   const pc=aoa[hi].findIndex(c=>c&&/project/i.test(String(c))), dc=aoa[hi].findIndex(c=>c&&/^department$/i.test(String(c).trim()));
   const cnt={};
   for(const r of aoa.slice(hi+1)){ const p=pkey(r&&r[pc]), d=String((r&&r[dc])||"").trim(); if(!p||!d||/^test/i.test(d)) continue; (cnt[p]=cnt[p]||{})[d]=((cnt[p]||{})[d]||0)+1; }
@@ -571,6 +572,7 @@ function deptsFromAoa(aoa){
 function parseTable(asOf,header,rows){
   deptLabels();
   const ix={};for(const k in COLS){ix[k]=header.findIndex(h=>h&&COLS[k].test(String(h).trim()))}
+  const hasDeptCol=ix.dept>=0;
   if(ix.ref<0) throw new Error("This file has no \u201cListings Ref No.\u201d column. Export the All Listings report from Salesforce and try again.");
   const g=(r,k)=>{const v=ix[k]>=0?r[ix[k]]:null;return v==null?"":String(v).trim()};
   const out=[];const commByProj={};
@@ -585,14 +587,15 @@ function parseTable(asOf,header,rows){
     const pr=parseFloat(String(g(r,"price")).replace(/[^\d.]/g,""));
     let unit=g(r,"unit"); if(unit==="0") unit="";
     const o={ref,refN:parseInt(ref.replace(/\D/g,""),10)||0,project,comm:g(r,"comm"),sub:g(r,"sub"),unit,status:g(r,"status"),beds,bedNote,
-      price:isFinite(pr)&&pr>0?pr:null,agent:g(r,"agent"),rtype,portals:g(r,"portals"),furn:furnCode(g(r,"furn")),ptype:ptypeOf(g(r,"ptype")),managed:g(r,"managed"),mg:/^(yes|true|1)$/i.test(g(r,"managed")),
+      price:isFinite(pr)&&pr>0?pr:null,agent:g(r,"agent"),rtype,portals:g(r,"portals"),furn:furnCode(g(r,"furn")),ptype:ptypeOf(g(r,"ptype")),managed:g(r,"managed"),deptCol:g(r,"dept"),bills:g(r,"bills"),mg:/^(yes|true|1)$/i.test(g(r,"managed")),
       deal:/rent/i.test(rtype)?"rent":"sale",use:/commercial/i.test(rtype)?"com":"res",offplan:/off ?plan/i.test(rtype)};
     if(o.comm&&project){(commByProj[project]=commByProj[project]||{})[o.comm]=((commByProj[project]||{})[o.comm]||0)+1}
     out.push(o);
   }
   // fill missing community from the project's other listings
   for(const o of out){ if(!o.comm&&commByProj[o.project]){const c=commByProj[o.project];o.comm=Object.keys(c).sort((a,b)=>c[b]-c[a])[0];o.commInferred=true} }
-  for(const o of out){ if(!o.ptype){o.ptype=guessType(o);o.ptypeGuess=true} o.loc=o.comm||o.sub||""; o.area=areaOf(o.comm)||areaOf(o.sub); o.dept=DEPTS[pkey(o.project)]||""; o.hay=[o.ref,o.project,o.unit,o.comm,o.sub,o.agent,o.ptype,o.dept].join(" \u0001 ").toLowerCase(); }
+  for(const o of out){ if(!o.ptype){o.ptype=guessType(o);o.ptypeGuess=true} o.loc=o.comm||o.sub||""; o.area=areaOf(o.comm)||areaOf(o.sub); o.dept=o.deptCol||DEPTS[pkey(o.project)]||""; o.hay=[o.ref,o.project,o.unit,o.comm,o.sub,o.agent,o.ptype,o.dept].join(" \u0001 ").toLowerCase(); }
+  deptLabels(out.map(o=>o.dept).filter(Boolean));
   return {asOf:String(asOf||"").replace(/\s*\u2022.*$/,"").replace(/Arabia Standard Time\/AST/,"AST"),list:out,raw:{asOf:String(asOf||""),header,rows,depts:DEPTS}};
 }
 function fromSheetArrays(aoa){
@@ -815,6 +818,7 @@ function render(){
       <div><dt>Furnishing</dt><dd>${o.furn?FURN[o.furn]:"Not in the export"}</dd></div>
       <div><dt>Status</dt><dd>${esc(o.status||"\u2014")}</dd></div>
       <div><dt>Department</dt><dd>${esc(o.dept||"Not set in Salesforce")}</dd></div>
+      <div><dt>Bills included</dt><dd>${esc(o.bills||"\u2014")}</dd></div>
       <div><dt>Record type</dt><dd>${esc(o.rtype||"\u2014")}</dd></div>
       <div><dt>Community</dt><dd>${esc(o.comm||"\u2014")}${o.commInferred?' <span class="sub">(from project)</span>':""}</dd></div>
       <div><dt>Sub community</dt><dd>${esc(o.sub||"\u2014")}</dd></div>
