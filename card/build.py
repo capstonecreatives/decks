@@ -324,9 +324,10 @@ def main():
         d = os.path.join(HERE, slug); os.makedirs(d, exist_ok=True)
         if a.get("photo") and not os.path.exists(os.path.join(d, a["photo"])):
             raise SystemExit(f"{slug}: photo {a['photo']} missing in card/{slug}/")
-        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(a, c, url, qr_svg(url)))
+        share = a.get("bitly") or url  # Bitly link (tracked) when set, else the card URL
+        open(os.path.join(d, "index.html"), "w", encoding="utf-8").write(page(a, c, share, qr_svg(share)))
         open(os.path.join(d, "contact.vcf"), "w", encoding="utf-8", newline="").write(vcard(a, c, url))
-        open(os.path.join(d, "qr.svg"), "w", encoding="utf-8").write(qr_print(url))
+        open(os.path.join(d, "qr.svg"), "w", encoding="utf-8").write(qr_print(share))
         print("built", url)
 
 if __name__ == "__main__":

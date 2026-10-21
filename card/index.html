@@ -145,7 +145,7 @@ main.grp-grid{padding-bottom:28px}
     
     if(!list.length){grid.innerHTML='<div class="empty" style="display:block">No agent cards yet.</div>';return}
     const tile=a=>{
-      const url=d.base_url+a.slug+'/', rel=a.slug+'/';
+      const url=a.bitly||(d.base_url+a.slug+'/'), rel=a.slug+'/';
       const ini=a.name.split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();const fr=a.photo_frame;const pic=a.photo?(fr?'<img class="card-img" alt="" aria-hidden="true" style="inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);filter:blur(24px) brightness(.75);transform:none" loading="lazy" src="'+rel+esc(a.photo)+'"><img class="card-img fr" alt="'+esc(a.name)+'" loading="lazy" src="'+rel+esc(a.photo)+'" style="--z:'+fr.zoom+';--fx:'+fr.fx+';--fy:'+fr.fy+';--t:'+fr.top+'">':'<img class="card-img" alt="'+esc(a.name)+'" loading="lazy" src="'+rel+esc(a.photo)+'">'):'<span class="ini">'+esc(ini)+'</span>';
       return '<div class="agent"><a class="card" href="'+rel+'" target="_blank" rel="noopener"><span class="card-pic'+(a.photo?'':' plain')+'">'+pic+'<span class="card-shade"></span><span class="card-dim"></span>'+
         '<span class="card-over"><b class="card-name">'+esc(a.name)+'</b><span class="card-area">'+esc(a.title)+'</span><span class="card-btn">Open card</span></span></span>'+
