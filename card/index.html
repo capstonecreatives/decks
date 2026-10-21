@@ -104,7 +104,7 @@ a.card.soon .card-pic{filter:saturate(.6)}
 .agent-actions button:hover,.agent-actions a:hover{border-color:var(--ink)}
 .agent{display:flex;flex-direction:column}
 .agent .card-pic{container-type:inline-size}
-.card-img.fr{object-fit:fill;max-width:none;inset:auto;width:calc(var(--z) * 100cqw);height:calc(var(--z) * 100cqw);left:calc(50cqw - var(--fx) * var(--z) * 100cqw);top:calc(var(--t) * 100% - var(--fy) * var(--z) * 100cqw)}
+.card-img.fr{object-fit:fill;max-width:none;inset:auto;width:calc(var(--z) * 100cqw);height:calc(var(--z) * var(--ar,1) * 100cqw);left:calc(50cqw - var(--fx) * var(--z) * 100cqw);top:calc(var(--t) * 100% - var(--fy) * var(--z) * var(--ar,1) * 100cqw)}
 .ini{position:absolute;inset:0 0 30%;display:grid;place-items:center;font:300 56px/1 Archivo,sans-serif;letter-spacing:.06em;color:#C9A77C}
 main.grp-grid{padding-bottom:28px}
 .agent .card-pic{aspect-ratio:4/5}
@@ -151,7 +151,7 @@ main.grp-grid{padding-bottom:28px}
     if(!list.length){grid.innerHTML='<div class="empty" style="display:block">No agent cards yet.</div>';return}
     const tile=a=>{
       const url=a.bitly||(bmap[a.slug]&&bmap[a.slug].link)||(d.base_url+a.slug+'/'), rel=a.slug+'/';
-      const ini=a.name.split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();const fr=a.photo_frame;const pic=a.photo?(fr?'<img class="card-img" alt="" aria-hidden="true" style="inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);filter:blur(24px) brightness(.75);transform:none" loading="lazy" src="'+rel+esc(a.photo)+'"><img class="card-img fr" alt="'+esc(a.name)+'" loading="lazy" src="'+rel+esc(a.photo)+'" style="--z:'+fr.zoom+';--fx:'+fr.fx+';--fy:'+fr.fy+';--t:'+fr.top+'">':'<img class="card-img" alt="'+esc(a.name)+'" loading="lazy" src="'+rel+esc(a.photo)+'">'):'<span class="ini">'+esc(ini)+'</span>';
+      const ini=a.name.split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();const fr=a.photo_frame;const pic=a.photo?(fr?'<img class="card-img" alt="" aria-hidden="true" style="inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);filter:blur(24px) brightness(.75);transform:none" loading="lazy" src="'+rel+esc(a.photo)+'"><img class="card-img fr" alt="'+esc(a.name)+'" loading="lazy" src="'+rel+esc(a.photo)+'" style="--z:'+fr.zoom+';--fx:'+fr.fx+';--fy:'+fr.fy+';--t:'+fr.top+';--ar:'+(fr.ar||1)+'">':'<img class="card-img" alt="'+esc(a.name)+'" loading="lazy" src="'+rel+esc(a.photo)+'">'):'<span class="ini">'+esc(ini)+'</span>';
       return '<div class="agent"><a class="card" href="'+rel+'" target="_blank" rel="noopener"><span class="card-pic'+(a.photo?'':' plain')+'">'+pic+'<span class="card-shade"></span><span class="card-dim"></span>'+
         '<span class="card-over"><b class="card-name">'+esc(a.name)+'</b><span class="card-area">'+esc(a.title)+'</span><span class="card-btn">Open card</span></span></span>'+
         '<span class="card-under"><span class="u-area">'+esc(a.title)+'</span></span></a>'+

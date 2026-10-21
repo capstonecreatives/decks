@@ -156,7 +156,7 @@ def page(a, c, url, qr_svg):
                   f'  <p class="ttl" data-en="{E(a.get("title",""))}" data-ar="{E(a.get("title_ar") or a.get("title",""))}">{E(a.get("title",""))}</p>')
     fr = a.get("photo_frame")
     if a.get("photo") and fr:
-        st = f'--z:{fr["zoom"]};--fx:{fr["fx"]};--fy:{fr["fy"]};--t:{fr["top"]}'
+        st = f'--z:{fr["zoom"]};--fx:{fr["fx"]};--fy:{fr["fy"]};--t:{fr["top"]};--ar:{fr.get("ar",1)}'
         photo_hero = (f'<img class="hb" src="{E(a["photo"])}" alt="" aria-hidden="true">'
                       f'<img class="hp fr" src="{E(a["photo"])}" alt="{E(a["name"])}" style="{st}">')
     elif a.get("photo"):
@@ -194,7 +194,7 @@ body{{min-height:100svh;font-family:var(--f);color:var(--txt);background:#040F17
 .hero{{position:relative;flex:1 1 0;min-height:110px;background:#0B3042;overflow:hidden}}
 .hp{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--pos,50% 12%);transform:scale(var(--zoom,1));transform-origin:var(--pos,50% 12%)}}
 .hero{{container-type:inline-size}}
-.hp.fr{{object-fit:fill;max-width:none;inset:auto;width:calc(var(--z) * 100cqw);height:calc(var(--z) * 100cqw);left:calc(50cqw - var(--fx) * var(--z) * 100cqw);top:calc(var(--t) * 100% - var(--fy) * var(--z) * 100cqw);transform:none}}
+.hp.fr{{object-fit:fill;max-width:none;inset:auto;width:calc(var(--z) * 100cqw);height:calc(var(--z) * var(--ar,1) * 100cqw);left:calc(50cqw - var(--fx) * var(--z) * 100cqw);top:calc(var(--t) * 100% - var(--fy) * var(--z) * var(--ar,1) * 100cqw);transform:none}}
 .hb{{position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(30px) brightness(.75)}}
 .hn{{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:calc(56px + env(safe-area-inset-top,0px)) 26px 8px}}
 .hn h1{{font-size:clamp(30px,min(10vw,5.4svh),44px)}}

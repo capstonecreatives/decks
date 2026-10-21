@@ -1241,16 +1241,17 @@
       "phone": "+97470549765",
       "whatsapp": "",
       "email": "a.farghly@capstoneproperty.com",
-      "photo": "amr-farghaly.png",
+      "photo": "amr-farghaly.jpg",
       "license": "",
       "languages": [],
       "languages_ar": [],
       "socials": {},
       "photo_frame": {
-        "zoom": 2.05,
-        "fx": 0.555,
-        "fy": 0.4,
-        "top": 0.14
+        "zoom": 1.75,
+        "fx": 0.517,
+        "fy": 0.31,
+        "top": 0.13,
+        "ar": 1.3333
       }
     },
     {
