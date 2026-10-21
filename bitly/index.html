@@ -156,7 +156,8 @@ td a{color:inherit}
   <div class="stat"><b id="s30">0</b><span>visits, last 30 days</span></div>
 </div>
 <div class="tools2" id="actions" hidden>
-  <button class="btn pri" id="create">Create missing links</button>
+  <button class="btn pri" id="fix">Find &amp; fix existing links</button>
+  <button class="btn" id="create">Create missing links</button>
   <label class="chk"><input type="checkbox" id="custom"> Readable endings (bit.ly/capstone-name, paid plans)</label>
   <button class="btn" id="refresh">Refresh visits</button>
   <button class="btn" id="csv">Download CSV</button>
@@ -244,6 +245,35 @@ $('create').onclick=async()=>{
   }
   $('prog').textContent=stop||('Done. '+Object.keys(map).length+' cards have Bitly links.');
   busy=false;$('create').disabled=false;refresh();
+};
+
+$('fix').onclick=async()=>{
+  if(busy)return;busy=true;$('fix').disabled=true;$('create').disabled=true;
+  const bySlug={};agents.forEach(a=>bySlug[a.slug]=a);
+  let page=1,found=0,fixed=0,failed=[],cantEdit=false,all=[];
+  try{
+    let path='/groups/'+group+'/bitlinks?size=100&page=1';
+    while(path){$('prog').textContent='Reading your Bitly links… page '+page;
+      const r=await api(path);all=all.concat(r.links||[]);
+      const nx=r.pagination&&r.pagination.next;path=nx?nx.replace(/^https?:\/\/api-ssl\.bitly\.com\/v4/,''):'';page++;if(page>50)break;}
+  }catch(e){$('prog').textContent='Could not read your Bitly links: '+e.message;busy=false;$('fix').disabled=false;$('create').disabled=false;return}
+  for(const l of all){
+    const m=(l.long_url||'').match(/\/card\/([a-z0-9-]+)\/?(?:[?#].*)?$/);if(!m||!bySlug[m[1]])continue;
+    const slug=m[1],want=base+slug+'/';found++;
+    const short=(l.custom_bitlinks&&l.custom_bitlinks[0])||l.link;
+    if(map[slug]&&map[slug].long===want&&map[slug].id!==l.id&&l.long_url!==want)continue; // already have a correct link for this card
+    if(l.long_url!==want){
+      $('prog').textContent='Fixing '+bySlug[slug].name+'…';
+      try{await api('/bitlinks/'+encodeURIComponent(l.id),{method:'PATCH',body:JSON.stringify({long_url:want})});fixed++;}
+      catch(e){if(e.status===402||e.status===403){cantEdit=true}failed.push(bySlug[slug].name);continue}
+      await sleep(200);
+    }
+    map[slug]={id:l.id,link:short,long:want};
+  }
+  saveMap();render();
+  let msg='Found '+found+' card links in Bitly, fixed '+fixed+' destination'+(fixed===1?'':'s')+'.';
+  if(failed.length)msg+=cantEdit?' Your Bitly plan does not allow changing a link\'s destination, so '+failed.length+' could not be fixed. Press Create missing links to make new, correct ones.':' '+failed.length+' could not be fixed ('+failed.slice(0,3).join(', ')+(failed.length>3?'…':'')+').';
+  busy=false;$('fix').disabled=false;$('create').disabled=false;await refresh();$('prog').textContent=msg;
 };
 async function refresh(){
   const ids=agents.filter(a=>map[a.slug]);if(!ids.length||!token)return;
