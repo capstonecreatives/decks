@@ -1241,11 +1241,17 @@
       "phone": "+97470549765",
       "whatsapp": "",
       "email": "a.farghly@capstoneproperty.com",
-      "photo": "",
+      "photo": "amr-farghaly.png",
       "license": "",
       "languages": [],
       "languages_ar": [],
-      "socials": {}
+      "socials": {},
+      "photo_frame": {
+        "zoom": 2.05,
+        "fx": 0.555,
+        "fy": 0.4,
+        "top": 0.14
+      }
     },
     {
       "slug": "fares-aljaabari",
