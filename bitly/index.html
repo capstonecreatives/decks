@@ -299,7 +299,7 @@ function dl(name,text,type){const a=document.createElement('a');a.href=URL.creat
 $('csv').onclick=()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   dl('capstone-card-visits.csv','\ufeff'+['Name,Department,Bitly link,Visits all time,Visits 30 days,Card URL'].concat(rows().map(r=>[r.name,r.department,r.link,r.all??'',r.d30??'',r.url].map(q).join(','))).join('\r\n'),'text/csv')};
 $('json').onclick=()=>dl('bitly-links.json',JSON.stringify(map,null,1),'application/json');
-fetch('../card/agents.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{agents=d.agents||[];base=d.base_url;
+fetch('../card/agents.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{agents=(d.agents||[]).filter(a=>!a.unlisted);base=d.base_url;
   (d.agents||[]).forEach(a=>{if(a.bitly&&!map[a.slug])map[a.slug]={id:a.bitly.replace(/^https?:\/\//,''),link:a.bitly,long:base+a.slug+'/'}});
   render();if(token)connect();}).catch(()=>{$('tb').innerHTML='<tr><td colspan="6">Cards could not load. Refresh the page.</td></tr>'});
 })();

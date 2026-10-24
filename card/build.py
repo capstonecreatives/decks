@@ -176,7 +176,7 @@ def page(a, c, url, qr_svg):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{E(a["name"])} · {E(c["name"])}</title>
 <meta name="description" content="{E(desc)}">
-<meta name="theme-color" content="#071A26">
+<meta name="theme-color" content="#071A26">{'<meta name="robots" content="noindex, nofollow">' if a.get("unlisted") else ""}
 <meta property="og:title" content="{E(a["name"])}">
 <meta property="og:description" content="{E(a.get("title",""))} · {E(c["name"])}">
 <meta property="og:url" content="{E(url)}">

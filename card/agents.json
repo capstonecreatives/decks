@@ -1463,6 +1463,25 @@
       "languages": [],
       "languages_ar": [],
       "socials": {}
+    },
+    {
+      "slug": "leila-awkar",
+      "name": "Leila Awkar",
+      "name_ar": "",
+      "title": "Marketing Manager",
+      "title_ar": "",
+      "department": "Marketing",
+      "phone": "",
+      "whatsapp": "",
+      "email": "",
+      "photo": "leila-awkar.png",
+      "photo_pos": "50% 0%",
+      "no_contact": true,
+      "unlisted": true,
+      "license": "",
+      "languages": [],
+      "languages_ar": [],
+      "socials": {}
     }
   ]
 }

@@ -198,6 +198,6 @@ a.card.soon .card-pic{filter:saturate(.6)}
   apply(get()||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
   btn.addEventListener('click',()=>{const v=document.documentElement.dataset.theme==='dark'?'light':'dark';apply(v);store(v)});
 })();
-fetch('../card/agents.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{const n=(d.agents||[]).length;document.getElementById('agentCount').textContent=n+' agent'+(n===1?'':'s')+' · NFC & QR'}).catch(()=>{});
+fetch('../card/agents.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{const n=(d.agents||[]).filter(x=>!x.unlisted).length;document.getElementById('agentCount').textContent=n+' agent'+(n===1?'':'s')+' · NFC & QR'}).catch(()=>{});
 </script>
 </body></html>

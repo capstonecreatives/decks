@@ -146,7 +146,7 @@ main.grp-grid{padding-bottom:28px}
   fetch('agents.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(d=>{
     const pending=(d.agents||[]).filter(a=>!a.bitly&&bmap[a.slug]).length;
     if(pending){document.getElementById('bitlyNote').hidden=false;document.getElementById('bitlyMsg').textContent='Showing '+pending+' Bitly links saved in this browser. Download the links file and send it to Claude to put them on the cards and QR codes for everyone.';document.getElementById('bitlyDl').onclick=()=>{const x=document.createElement('a');x.href=URL.createObjectURL(new Blob([JSON.stringify(bmap,null,1)],{type:'application/json'}));x.download='bitly-links.json';x.click()}}
-    const list=d.agents||[];
+    const list=(d.agents||[]).filter(a=>!a.unlisted);
     
     if(!list.length){grid.innerHTML='<div class="empty" style="display:block">No agent cards yet.</div>';return}
     const tile=a=>{
