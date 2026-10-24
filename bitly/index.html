@@ -197,7 +197,7 @@ async function api(path,opt={},tries=3){
   if(!r.ok){const e=new Error((j&&(j.description||j.message))||('HTTP '+r.status));e.status=r.status;e.body=j;throw e}
   return j;
 }
-const order=['Management','Heads of Department','Sales','Leasing','Resale','Valuation','Property Management','Marketing','HR'];
+const order=['Management','Brand Ambassador','Heads of Department','Sales','Leasing','Resale','Valuation','Property Management','Marketing','HR'];
 const rank=d=>{const i=order.indexOf(d);return i<0?99:i};
 function rows(){
   return agents.map(a=>({slug:a.slug,name:a.name,department:a.department||'Team',url:base+a.slug+'/',link:map[a.slug]?map[a.slug].link:'',all:stats[a.slug]?stats[a.slug].all:null,d30:stats[a.slug]?stats[a.slug].d30:null}));

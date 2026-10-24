@@ -130,6 +130,7 @@ def page(a, c, url, qr_svg):
     comp_html = (f'<section class="grp"><h2 data-en="{E(c["name"])}" data-ar="{E(c.get("name_ar") or c["name"])}">{E(c["name"])}</h2>{"".join(comp)}</section>'
                  if comp else "")
 
+    save_btn = f'<a class="btn" href="contact.vcf">{icon("save")}<span data-en="Save contact" data-ar="حفظ جهة الاتصال">Save contact</span></a>'
     links = []
     for k, v in (a.get("socials") or {}).items():
         v = clean_handle(v)
@@ -160,7 +161,8 @@ def page(a, c, url, qr_svg):
         photo_hero = (f'<img class="hb" src="{E(a["photo"])}" alt="" aria-hidden="true">'
                       f'<img class="hp fr" src="{E(a["photo"])}" alt="{E(a["name"])}" style="{st}">')
     elif a.get("photo"):
-        photo_hero = f'<img class="hp" src="{E(a["photo"])}" alt="{E(a["name"])}">'
+        pos = f' style="object-position:{E(a["photo_pos"])}"' if a.get("photo_pos") else ""
+        photo_hero = f'<img class="hp" src="{E(a["photo"])}" alt="{E(a["name"])}"{pos}>'
     else:
         # no photo: no initials, the name and position sit centred in the hero instead
         photo_hero = ('<div class="hn">'
@@ -271,7 +273,7 @@ a:focus-visible,button:focus-visible{{outline:2px solid var(--gold);outline-offs
   {meta_html}
   <div class="cta">
    {wa_btn}
-   <a class="btn" href="contact.vcf">{icon("save")}<span data-en="Save contact" data-ar="حفظ جهة الاتصال">Save contact</span></a>
+   {"" if a.get("no_contact") else save_btn}
    <div class="pair">{"".join(actions)}</div>
   </div>
   {icons_html}
