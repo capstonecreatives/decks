@@ -1163,6 +1163,9 @@ const CREATIVES = [
   "src": ""
  }
 ];
+const docRank=c=>{const n=((c.name||'')+' '+(c.typeLabel||'')).toLowerCase(), p=c.placement||''; if(p==='Availability'||/availability|price list/.test(n)) return 2; if(p==='Payment plan'||/payment (plan|schedule)/.test(n)) return 3; if(/brochure|presentation|pitch/.test(n)) return (c.set==='Arabic'||/\(ar\)|arabic/.test(n))?0.5:0; return 1;};
+const rankDocs=a=>a.slice().sort((x,y)=>(x.type==='brochure'&&y.type==='brochure')?docRank(x)-docRank(y):0);
+
 
 /* ------------------------------------------------------------------ *
  *  Creative types.  Adding a type here + a builder below is all it
@@ -2029,7 +2032,7 @@ function browseSlide(){
 
   function featSection(type, heading){
     if(!groups.includes(type)) return null;
-    const kids = byNewest(CREATIVES.filter(c=>c.type===type));
+    const kids = rankDocs(byNewest(CREATIVES.filter(c=>c.type===type)));
     const g = el(`<div class="bgroup" data-t="${type}">
       <div class="section-h">${esc(heading)} · ${kids.length} item${kids.length===1?'':'s'}</div>
       <div class="feat-grid"></div></div>`);
@@ -2549,7 +2552,7 @@ function add(node,id){ if(!node) return; if(id) node.dataset.cid=id; stage.appen
 add(browseSlide());
 (function(){
   const FEAT=['brochure','flipbook','gallery'];
-  const feat=ORDER.filter(t=>FEAT.includes(t)&&t!=='gallery').flatMap(t=>byNewest(CREATIVES.filter(c=>c.type===t)));
+  const feat=ORDER.filter(t=>FEAT.includes(t)&&t!=='gallery').flatMap(t=>rankDocs(byNewest(CREATIVES.filter(c=>c.type===t))));
   const social=byNewest(CREATIVES.filter(c=>ORDER.includes(c.type)&&!FEAT.includes(c.type)));
   const gal=byNewest(CREATIVES.filter(c=>c.type==='gallery'));
   [...feat,...social,...gal].forEach(c=>add(creativeSlide(c), c.id));
