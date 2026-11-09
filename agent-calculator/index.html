@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>Agent Calculator — Capstone App</title>
+<link rel="icon" href="../favicon.ico?v=20260924" sizes="256x256" type="image/x-icon">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--navy-800:#003850;--navy-900:#002233;--teal-600:#3a7079;--teal-300:#9cc0c5;--ink:#212721;--gray-600:#5c615b;--gray-300:#c0c2cb;--sand-50:#faf7f2;
+  --font-display:'Playfair Display',Georgia,'Times New Roman',serif;--font-sans:'Mulish',Tahoma,system-ui,-apple-system,'Segoe UI',sans-serif;--shadow-sm:0 2px 6px rgba(0,35,51,.08)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--sand-50);color:var(--ink);font-family:var(--font-sans)}
+.wrap{max-width:1240px;margin:0 auto;padding:clamp(20px,4vw,48px) clamp(16px,3.5vw,40px) 48px}
+.back{display:inline-block;margin-bottom:18px;color:var(--teal-600);text-decoration:none;font-size:14px;font-weight:700}
+.back:hover{color:var(--navy-800)}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.eyebrow{font-size:clamp(11px,1.3vw,14px);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-600)}
+h1{margin:10px 0 0;font-family:var(--font-display);font-weight:700;font-size:clamp(30px,4.6vw,52px);line-height:1.1;color:var(--navy-800)}
+.btn{font-family:var(--font-sans);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:11px 18px;border-radius:4px;border:1px solid var(--navy-800);background:transparent;color:var(--navy-800);cursor:pointer}
+.btn:hover{background:var(--navy-800);color:#fff}
+.grid{margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:24px}
+.card{background:#fff;padding:24px clamp(18px,3vw,32px);display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow-sm)}
+.label{font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gray-600)}
+.sl{display:flex;flex-direction:column;gap:8px}
+.sl-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.sl-name{font-size:18px;font-weight:700}.sl-hint{font-size:14px;font-weight:400;color:var(--gray-600)}
+.sl-val{font-size:24px;font-weight:800;color:var(--navy-800);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;height:26px;margin:0;accent-color:var(--navy-800)}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tog{font-family:var(--font-sans);text-align:left;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:4px;border:1px solid var(--gray-300);background:#fff;color:var(--navy-800);cursor:pointer}
+.tog .box{width:24px;height:24px;flex:none;border-radius:4px;border:2px solid currentColor;display:flex;align-items:center;justify-content:center}
+.tog .t1{font-size:15px;font-weight:800;display:block}.tog .t2{font-size:14px;display:block}
+.tog.on{background:var(--navy-800);color:#fff;border-color:var(--navy-800)}
+.tog:not(.on) .box svg{display:none}
+.out{background:var(--navy-800);color:#fff;padding:24px clamp(18px,3vw,36px);display:flex;flex-direction:column;gap:14px}
+.out .label{color:var(--teal-300)}
+.total{display:flex;align-items:baseline;gap:12px}
+.total .cur{font-size:22px;font-weight:700}.total .num{font-family:var(--font-display);font-weight:700;font-size:clamp(52px,8vw,84px);line-height:1;font-variant-numeric:tabular-nums}
+.rows{border-top:1px solid rgba(255,255,255,.25)}
+.row{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:16px}
+.row b{font-weight:800;font-variant-numeric:tabular-nums}
+.row.zero{color:rgba(255,255,255,.6)}.row.hl{color:var(--teal-300)}
+.cmp{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.cmp small{font-size:15px;color:rgba(255,255,255,.85)}
+.bar{position:relative;height:22px;background:rgba(255,255,255,.12)}
+.bar .band{position:absolute;top:0;bottom:0;left:16.67%;width:25%;background:rgba(255,255,255,.22)}
+.bar .fill{position:absolute;top:0;bottom:0;left:0;background:var(--teal-300);transition:width .2s}
+.verdict{font-size:17px;font-weight:700;color:var(--teal-300)}
+@media(max-width:520px){.toggles{grid-template-columns:1fr}.head .btn{order:3}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../app/">← Capstone App</a>
+  <div class="head">
+    <div><div class="eyebrow">Agent Social Advisor Programme · Calculator</div><h1>What will I earn this month?</h1></div>
+    <button class="btn" id="reset" type="button">Reset</button>
+  </div>
+  <div class="grid">
+    <section class="card">
+      <div class="label">My month</div>
+      <div id="sliders"></div>
+      <div class="toggles" id="toggles"></div>
+    </section>
+    <section class="out" aria-live="polite">
+      <div class="label">My monthly budget</div>
+      <div class="total"><span class="cur">QAR</span><span class="num" id="total">0</span></div>
+      <div class="rows" id="rows"></div>
+      <div class="cmp">
+        <small>vs. today’s flat budget (QAR 2,000–5,000)</small>
+        <div class="bar"><div class="band"></div><div class="fill" id="fill"></div></div>
+        <div class="verdict" id="verdict"></div>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+  const DEF={cReels:6,cStories:40,cQuality:false,cConsist:true,cSnap:true,cPrize:false,cBookings:1};
+  let s={...DEF};
+  const f=n=>n.toLocaleString('en-US');
+  const SL=[{k:'cReels',label:'Reels',max:10,hint:'QAR 180 each, up to 10'},{k:'cStories',label:'Stories',max:60,hint:'QAR 20 each, up to 60'},{k:'cBookings',label:'Online bookings',max:10,hint:'QAR 1,000 each, uncapped'}];
+  const TG=[{k:'cQuality',label:'Top quality score',amt:'+ 500'},{k:'cConsist',label:'20+ active days',amt:'+ 500'},{k:'cSnap',label:'Snapchat daily',amt:'+ 1,000'},{k:'cPrize',label:'Best account',amt:'+ 5,000 ads'}];
+  const tick='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
+  const sl=document.getElementById('sliders'), tg=document.getElementById('toggles');
+  sl.innerHTML=SL.map(c=>`<div class="sl"><div class="sl-top"><span class="sl-name">${c.label} <span class="sl-hint">· ${c.hint}</span></span><span class="sl-val" id="v-${c.k}"></span></div><input type="range" min="0" max="${c.max}" step="1" id="r-${c.k}" aria-label="${c.label}"></div>`).join('');
+  tg.innerHTML=TG.map(t=>`<button type="button" class="tog" id="t-${t.k}" aria-pressed="false"><span class="box">${tick}</span><span><span class="t1">${t.label}</span><span class="t2">${t.amt}</span></span></button>`).join('');
+  SL.forEach(c=>document.getElementById('r-'+c.k).addEventListener('input',e=>{s[c.k]=Number(e.target.value);render();}));
+  TG.forEach(t=>document.getElementById('t-'+t.k).addEventListener('click',()=>{s[t.k]=!s[t.k];render();}));
+  document.getElementById('reset').addEventListener('click',()=>{s={...DEF};render();});
+  function render(){
+    const reels=s.cReels*180, stories=s.cStories*20, q=s.cQuality?500:0, c=s.cConsist?500:0, sn=s.cSnap?1000:0, b=s.cBookings*1000;
+    const cash=reels+stories+q+c+sn+b, prize=s.cPrize?5000:0, tot=cash+prize;
+    SL.forEach(x=>{document.getElementById('r-'+x.k).value=s[x.k];document.getElementById('v-'+x.k).textContent=s[x.k];});
+    TG.forEach(x=>{const el=document.getElementById('t-'+x.k);el.classList.toggle('on',!!s[x.k]);el.setAttribute('aria-pressed',!!s[x.k]);});
+    const row=(l,v,hl)=>`<div class="row${v?(hl?' hl':''):' zero'}"><span>${l}</span><b>${v?'+ '+f(v):'—'}</b></div>`;
+    document.getElementById('rows').innerHTML=row('Reels ('+s.cReels+')',reels)+row('Stories ('+s.cStories+')',stories)+row('Quality',q)+row('Consistency',c)+row('Snapchat',sn)+row('Bookings ('+s.cBookings+')',b,true)+row('Media prize (ads)',prize,true);
+    document.getElementById('total').textContent=f(tot);
+    document.getElementById('fill').style.width=Math.min(100,tot/12000*100).toFixed(1)+'%';
+    document.getElementById('verdict').textContent= tot>5000 ? f(tot-5000)+' above today’s top flat budget' : tot>=2000 ? 'Within today’s flat range' : f(2000-tot)+' below today’s lowest flat budget';
+  }
+  render();
+})();
+</script>
+</body>
+</html>
