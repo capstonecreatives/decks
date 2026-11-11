@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Listing Post Studio · Capstone Property</title>
+<link rel="icon" href="../favicon.ico?v=20260924">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Tajawal:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#EDF0F3;--panel:#FFFFFF;--ink:#212721;--muted:#5D6973;--line:#D7DDE2;--field:#F6F8F9;
+  --navy:#003850;--teal:#45828C;--accent-ink:#FFFFFF;--chip:#E3EDEF;--focus:#45828C;
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#06161E;--panel:#0B2430;--ink:#EEF2F4;--muted:#9DB0BA;--line:#1E3D4B;--field:#0F2D3A;
+  --navy:#0B4A66;--teal:#5B9AA4;--chip:#123643;--focus:#7FB7C0;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#06161E;--panel:#0B2430;--ink:#EEF2F4;--muted:#9DB0BA;--line:#1E3D4B;--field:#0F2D3A;
+  --navy:#0B4A66;--teal:#5B9AA4;--chip:#123643;--focus:#7FB7C0;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 "Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+header{background:#003850;color:#fff;padding:18px clamp(16px,4vw,36px);display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header img{height:34px;width:auto;display:block}
+header h1{margin:0;font:600 22px/1.2 "Playfair Display",Georgia,serif;padding-left:18px;border-left:1px solid rgba(255,255,255,.25)}
+header p{margin:0 0 0 auto;color:#C0C2CB;font-size:14px}
+main{display:grid;grid-template-columns:minmax(330px,420px) 1fr;gap:22px;padding:22px clamp(12px,3vw,36px) 48px;max-width:1600px;margin:0 auto;align-items:start}
+@media (max-width:980px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px}
+form.panel{padding:6px 20px 20px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+@media (max-width:980px){form.panel{position:static;max-height:none}}
+fieldset{border:0;margin:0;padding:16px 0 4px;border-bottom:1px solid var(--line)}
+fieldset:last-child{border-bottom:0}
+legend{font:600 17px/1.3 "Playfair Display",Georgia,serif;padding:0;margin-bottom:10px;color:var(--ink)}
+label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:0 0 5px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.f{margin-bottom:12px;min-width:0}
+input[type=text],input[type=tel],input[type=number],select,textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:42px;outline:none}
+textarea{min-height:60px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,.seg input:focus-visible+span{outline:2px solid var(--focus);outline-offset:2px}
+.hint{font-size:12.5px;color:var(--muted);margin:4px 0 0}
+.seg{display:flex;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg label{flex:1;margin:0;position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;inset:0;cursor:pointer;z-index:1;margin:0}
+.seg span{display:block;text-align:center;padding:8px 6px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted);line-height:1.2}
+.seg input:checked+span{background:var(--navy);color:#fff}
+.seg small{display:block;font-weight:500;font-size:11.5px;opacity:.8}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--ink);margin:2px 0 12px;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--teal)}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1.5px dashed var(--line);border-radius:12px;padding:18px;text-align:center;cursor:pointer;background:var(--field)}
+.drop.over{border-color:var(--teal);background:var(--chip)}
+.drop strong{font-size:15px}
+.drop span{font-size:13px;color:var(--muted)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-top:10px}
+.thumb{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid transparent;background:var(--field);cursor:pointer;padding:0}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.sel{border-color:var(--teal)}
+.thumb b{position:absolute;left:4px;top:4px;background:rgba(0,56,80,.9);color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px}
+.focus{margin-top:10px;display:none}
+.focus.on{display:block}
+.focuswrap{position:relative;display:inline-block;max-width:100%;cursor:crosshair;border-radius:10px;overflow:hidden;line-height:0}
+.focuswrap img{max-width:100%;max-height:220px;display:block}
+.dot{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #003850;pointer-events:none}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;min-height:38px;font-weight:600;font-size:14px;cursor:pointer}
+.btn:hover{border-color:var(--teal)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.teal{background:#45828C;border-color:#45828C;color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.out{padding:18px 20px 22px;min-width:0}
+.outhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.outhead h2{margin:0 auto 0 0;font:600 22px/1.25 "Playfair Display",Georgia,serif}
+.sec{margin-top:18px}
+.sechead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.sechead h3{margin:0;font-size:16px;font-weight:700}
+.sechead p{margin:0 auto 0 0;color:var(--muted);font-size:13px}
+.strip{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory}
+.slide{flex:0 0 auto;width:min(300px,72vw);scroll-snap-align:start}
+.slide canvas{width:100%;height:auto;display:block;border-radius:10px;box-shadow:0 1px 0 var(--line),0 10px 28px rgba(0,20,30,.16);background:#0B3042}
+.slide .cap{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13px;color:var(--muted)}
+.slide .cap button{border:0;background:none;color:var(--teal);font-weight:700;cursor:pointer;padding:6px 2px}
+.story .slide{width:min(250px,60vw)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#003850;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;z-index:20}
+.toast.on{opacity:1}
+.note{font-size:12.5px;color:var(--muted);margin:14px 0 0}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <a href="../app/" aria-label="Back to the Capstone App" style="display:block"><img src="data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjQ4IDM4NSA5ODQgMjY4Ij4KICAKICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzAwMzg0ZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgCiAgPGc+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTY4OS40Niw2NTAuNDR2LTMxLjA1aDEzLjY0YzYuNTIsMCwxMC4xNSw0LjQ3LDEwLjE1LDkuNzNzLTMuNjgsOS43My0xMC4xNSw5LjczaC04LjE5djExLjU5aC01LjQ1Wk03MDIuMzUsNjI0LjE5aC03LjQ1djkuODdoNy40NWMzLjA3LDAsNS4zMS0xLjk1LDUuMzEtNC45M3MtMi4yMy00LjkzLTUuMzEtNC45M1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTc0Ni45LDY1MC40NGwtNi44OS0xMS41OWgtNS40djExLjU5aC01LjQ1di0zMS4wNWgxMy42NGM2LjE0LDAsMTAuMTUsNCwxMC4xNSw5Ljczcy0zLjYzLDguNTItNy4zNSw5LjEybDcuNTksMTIuMmgtNi4yOFpNNzQyLjA2LDYyNC4xOWgtNy40NXY5Ljg3aDcuNDVjMy4wNywwLDUuMzEtMS45NSw1LjMxLTQuOTNzLTIuMjMtNC45My01LjMxLTQuOTNaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03ODQuMjgsNjE4Ljg4YzkuMzEsMCwxNS44Nyw2LjgsMTUuODcsMTYuMDZzLTYuNTYsMTYuMDYtMTUuODcsMTYuMDYtMTUuODctNi44LTE1Ljg3LTE2LjA2LDYuNTYtMTYuMDYsMTUuODctMTYuMDZaTTc4NC4yOCw2MjMuNzJjLTYuMjgsMC0xMC4yOSw0Ljc5LTEwLjI5LDExLjIyczQsMTEuMjIsMTAuMjksMTEuMjIsMTAuMjktNC44NCwxMC4yOS0xMS4yMi00LjA1LTExLjIyLTEwLjI5LTExLjIyWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODE2LjgyLDY1MC40NHYtMzEuMDVoMTMuNjRjNi41MiwwLDEwLjE1LDQuNDcsMTAuMTUsOS43M3MtMy42OCw5LjczLTEwLjE1LDkuNzNoLTguMTl2MTEuNTloLTUuNDVaTTgyOS43MSw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODU2LjUyLDY1MC40NHYtMzEuMDVoMjEuMjd2NC43OWgtMTUuODN2OC4wNWgxNS41djQuNzloLTE1LjV2OC42MWgxNS44M3Y0Ljc5aC0yMS4yN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTkxMi41Miw2NTAuNDRsLTYuODktMTEuNTloLTUuNHYxMS41OWgtNS40NXYtMzEuMDVoMTMuNjRjNi4xNCwwLDEwLjE1LDQsMTAuMTUsOS43M3MtMy42Myw4LjUyLTcuMzUsOS4xMmw3LjU5LDEyLjJoLTYuMjhaTTkwNy42OCw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTQyLjM2LDY1MC40NHYtMjYuMjVoLTkuNHYtNC43OWgyNC4yNXY0Ljc5aC05LjR2MjYuMjVoLTUuNDVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05ODIuMDIsNjUwLjQ0di0xMi44OWwtMTIuMDYtMTguMTVoNi4yNGw4LjU2LDEzLjMxLDguNDctMTMuMzFoNi4yNGwtMTIuMDEsMTguMTV2MTIuODloLTUuNDVaIi8+CiAgICA8L2c+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTMwNy45Niw0NTUuMDljLTcuMjgsMC0xMy45MSw1LjEzLTE5Ljc5LDE1LjUtNS44OCwxMC4zNi04Ljg3LDI2LjQyLTguODcsNDguMjdzMi44OSwzOCw4Ljc4LDQ4LjkyYzUuODgsMTAuOTMsMTIuNTEsMTYuNDMsMTkuODksMTYuNDMsNi42MywwLDE0LjE5LTQuMywyMi42LTEyLjk4LDguNC04LjY4LDE2LjI1LTE4LjY4LDIzLjUzLTMwLjA2aDEuMzFsLTMuODMsNDMuNmMtMTUuOTcsMy44My0zMS4wOSw1Ljc5LTQ1LjM4LDUuODgtOS4xNSwwLTE3LjY1LTEuMjEtMjUuNTgtMy42NC03Ljk0LTIuNDMtMTUuMjItNi4yNi0yMS45NC0xMS4zOS02LjcyLTUuMTQtMTIuMDQtMTIuMzMtMTUuOTctMjEuNTctMy45Mi05LjI0LTUuODgtMjAuMTctNS44OC0zMi42OCwwLTIzLjYyLDYuNTQtNDEuNjQsMTkuNjEtNTMuOTcsMTMuMDctMTIuMzIsMjkuODgtMTguNDksNTAuNDItMTguNDksMTEuODYsMCwyNi44LDEuODcsNDQuODIsNS43bDMuODMsNDIuNjdoLTEuMzFjLTE4Ljg2LTI4LjEtMzQuMjctNDIuMi00Ni4zMS00Mi4yaC4wOVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTQzOC45OCw1OTAuMTJjLTcuMTcsMC0xMi4yNi0yLTE1LjI2LTUuOTktMy00LTQuMzYtOC43Mi00LjA5LTE0LjE3aC0uMzZjLTIuNjMsNS40NS02LjgxLDEwLjE3LTEyLjUzLDE0LjE3LTUuNzIsNC0xMi4zNSw1Ljk5LTE5Ljg5LDUuOTlzLTEzLjktMi4wOS0xOC41My02LjI3Yy00LjYzLTQuMTgtNi45LTkuNDUtNi45LTE1Ljg5LDAtOS41Myw1LjA5LTE3LjQ0LDE1LjI2LTIzLjYxLDEwLjE3LTYuMTcsMjQuNDMtMTEuNTMsNDIuNzctMTUuOThsLjE4LTE2LjE2YzAtMy4wOS0uNzMtNS44MS0yLjE4LTguMDgtMS40NS0yLjI3LTMuODItMy40NS02Ljk5LTMuNDUtNC44MSwwLTguNzIsMy4xOC0xMS43MSw5LjUzLTMsNi4zNi01LjA5LDEzLjgxLTYuMjcsMjIuMjVsLTEuMDkuMTgtMjIuNy0xMi41M2MzLjA5LTYuNDUsOC41NC0xMi4wOCwxNi4zNS0xNi45OCw3LjgxLTQuOSwxOC4wNy03LjM2LDMwLjctNy4zNiw2LjYzLDAsMTIuMzUuODIsMTcuMTYsMi40NSw0LjgyLDEuNjMsOC40NSwzLjYzLDEwLjk5LDUuOTksMi41NCwyLjM2LDQuNTQsNS4yNyw1Ljk5LDguNzIsMS40NSwzLjQ1LDIuMzYsNi41NCwyLjYzLDkuMjYuMjcsMi43Mi4zNiw1LjgxLjI3LDkuMjZsLS45MSwzOS44N2MwLDQuMDksMS40NSw2LjA5LDQuNDUsNS45OSwzLjA5LDAsNS43Mi0yLjM2LDcuODEtNy4wOGwxLjQ1LjgyYy0xLjcyLDUuMTgtNC44MSw5LjYzLTkuMTcsMTMuMzUtNC4zNiwzLjcyLTEwLjA4LDUuNjMtMTcuMTYsNS42M2wtLjI3LjA5Wk00MDYuNzQsNTcwLjk1YzQuNjMsMCw4LjcyLTIuNDUsMTIuMjYtNy4yN2wuNzMtMzEuMjRjLTE0Ljk4LDQuMjctMjIuNTIsMTIuNTMtMjIuNTIsMjQuNzksMCw0LjQ1LjkxLDcuOSwyLjYzLDEwLjI2LDEuNzIsMi4zNiwzLjk5LDMuNTQsNi44MSwzLjU0bC4wOS0uMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01MzQuOTEsNDk1LjY3YzkuNzIsMCwxOC4xNiwzLjcyLDI1LjQzLDExLjE3LDcuMjcsNy40NSwxMC45LDE4Ljk4LDEwLjksMzQuNnMtMy45OSwyOC41MS0xMS45OSwzNi42Yy03Ljk5LDguMDgtMTcuMTYsMTIuMDgtMjcuNjEsMTIuMDgtOC44MSwwLTE2LjgtMi41NC0yMy45Ny03LjU0aC0uMzd2MzAuNTZjMCw2LjYzLjgyLDExLjA4LDIuNDUsMTMuMzUsMS42MywyLjI3LDUuMjcsNC42MywxMC44MSw3LjA4djEuMzZoLTU3LjMxdi0xLjM2YzQtMi42Myw2LjU0LTUuMDksNy43Mi03LjI3LDEuMTgtMi4xOCwxLjczLTYuNjMsMS43My0xMy4yNnYtOTUuMzFjMC0zLjQ1LS42NC02LjA5LTEuOTEtNy44MS0xLjI3LTEuNzItMy44MS0zLjcyLTcuNjMtNS45OXYtMS4wOWMxNS4yNi0xLDI5LjctMy41NCw0My4zMi03LjYzbC0uMTgsMTUuOTguMzYuMThjNy41NC0xMC41MywxNi44OS0xNS44LDI4LjA2LTE1LjhsLjE4LjA5Wk01MzUuMzYsNTQ5LjQzYzAtMjcuMTUtNS00MC43OC0xNS4wOC00MC43OC00LjM2LDAtOC42MywyLjkxLTEyLjksOC42M3YzOS41OWMxLjM2LDcuMDgsMy40NSwxMy4xNyw2LjE4LDE4LjM1LDIuNzIsNS4xOCw2LjE3LDcuNzIsMTAuMjYsNy43Miw3LjcyLDAsMTEuNTMtMTEuMTcsMTEuNTMtMzMuNTFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02MTcuOTMsNTkwLjc1Yy04LjksMC0yMC4zNC0xLjkxLTM0LjQyLTUuODFsLTMuNTQtMzEuMDYsMS4zNi0uMThjMTQuNTMsMjEuMzQsMjYuNywzMS45NywzNi40MiwzMS45NywyLjgyLDAsNS4xNy0uODIsNi45OS0yLjQ1LDEuODItMS42NCwyLjcyLTMuOTEsMi43Mi02LjcyLDAtMy41NC0xLjU1LTYuODEtNC43Mi05Ljcycy04LjYzLTYuNTQtMTYuMzUtMTAuODFjLTMtMS43Mi01LjA4LTMtNi4zNi0zLjcyLTEuMjctLjczLTMuMjctMi02LTMuODEtMi43Mi0xLjgyLTQuNzItMy40NS01Ljk5LTQuOTEtMS4yNy0xLjQ1LTIuNzItMy4yNy00LjM2LTUuNDUtMS42My0yLjE4LTIuODItNC41NC0zLjU0LTcuMDgtLjczLTIuNTQtMS4wOS01LjI3LTEuMDktOC4wOCwwLTguNjMsMy4xOC0xNS4zNSw5LjQ1LTIwLjE2LDYuMjctNC44MSwxNC4zNS03LjE3LDI0LjE2LTcuMTcsNy44MSwwLDE4LjI1LDEuNjMsMzEuNDIsNC44MmwyLjgyLDI4Ljg4LTEuMzYuMzdjLTEzLjYyLTE5LjE2LTI0Ljc5LTI4Ljc5LTMzLjQyLTI4Ljg4LTIuNjMsMC00LjcyLjgyLTYuMzYsMi4zNi0xLjY0LDEuNTQtMi40NSwzLjYzLTIuNDUsNi4yNywwLDMuOTksMS44Miw3LjM2LDUuMzYsMTAuMDgsMy41NCwyLjcyLDkuMjYsNS45OSwxNy4wNyw5LjksOC41NCw0LjM2LDE1LjE3LDguOTksMTkuODksMTMuOTgsNC43Miw1LDcuMDgsMTEuMzUsNy4wOCwxOS4wNywwLDguNTQtMy4wOSwxNS4zNS05LjI2LDIwLjUyLTYuMTcsNS4xOC0xNC43MSw3LjcyLTI1LjcsNy43MmwuMTguMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02ODkuMzgsNTg5LjkzYy03LjU0LDAtMTMuNzEtMi4xOC0xOC42Mi02LjU0LTQuOS00LjM2LTcuMzYtMTAuOS03LjM2LTE5LjUzdi01OS41N2gtOC40NXYtOC43MmMyMC44LTExLjUzLDM0LjI0LTIxLjUyLDQwLjMyLTMxLjIxaDIuMTh2MzAuOTRoMjAuODlsLS45MSw4Ljk5aC0xOS41MmwtLjY0LDUzLjk0Yy0uMDksMTAuNjMsMy44MiwxNS45OCwxMS43MSwxNS45OCw0LjI3LDAsOC4yNy0xLjkxLDExLjk5LTUuNzJsMS4wOSwxLjA5Yy04LjA4LDEzLjYyLTE4Ljk4LDIwLjQzLTMyLjY5LDIwLjQzdi0uMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03NzAuODEsNTkwLjEyYy0xNC45OCwwLTI2Ljk3LTMuOS0zNi4wNS0xMS44MS05LjA4LTcuOS0xMy42Mi0xOS4zNC0xMy42Mi0zNC40MnM0LjYzLTI3LjE1LDEzLjg5LTM1LjZjOS4yNi04LjQ1LDIxLjctMTIuNzEsMzcuMzMtMTIuNzFzMjYuOTcsMy45MSwzNS45NiwxMS44MWM4Ljk5LDcuOSwxMy41MywxOS40NCwxMy41MywzNC42OXMtNC41NCwyNy4wNi0xMy43MSwzNS40MmMtOS4xNyw4LjM1LTIxLjUyLDEyLjUzLTM3LjE0LDEyLjUzbC0uMTguMDlaTTc3Ni4xNyw1ODQuODVjMy4wOSwwLDUuNjMtMS44Miw3LjU0LTUuMzYsMS45MS0zLjU0LDIuOTEtOC45OSwyLjkxLTE2LjI2LDAtNi40NS0uNDYtMTMuOTktMS40NS0yMi43LTEtOC43Mi0zLjA5LTE3LjUzLTYuMjctMjYuMzQtMy4xOC04LjgxLTcuMTctMTMuMjYtMTEuOS0xMy4yNi0zLjA5LDAtNS42MywxLjgyLTcuNjMsNS40NS0yLDMuNjMtMyw5LjE3LTMsMTYuNjIsMCw2LjQ1LjU0LDEzLjk5LDEuNTQsMjIuNjEsMSw4LjYzLDMuMDksMTcuMzUsNi4yNywyNi4wNiwzLjE4LDguNzIsNy4xNywxMy4wOCwxMS45OSwxMy4wOHYuMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05MjkuMDYsNTY2LjQxYzAsNi42My41NCwxMS4wOCwxLjYzLDEzLjM1LDEuMDksMi4yNywzLjcyLDQuNjMsNy44MSw3LjA4djEuMjdoLTUzLjU4di0xLjI3YzQuMjctMi43Miw2LjktNS4xNyw3LjktNy4zNiwxLTIuMTgsMS42My02LjU0LDEuOTEtMTMuMTcuMDktNS40NS4xOC0xOC4yNS4xOC0zOC41MSwwLTUuMzYtMS4wOS05LjM1LTMuMzYtMTEuOTlzLTUuMTgtMy45LTguNzItMy45Yy00LjgxLDAtOS41NCwzLjA5LTE0LjA4LDkuMTd2NDUuMTNjMCw2LjYzLjY0LDExLjA4LDEuODIsMTMuMzUsMS4xOCwyLjI3LDMuNzIsNC43Miw3LjYzLDcuMzZ2MS4yN2gtNTMuNTh2LTEuMjdjNC4wOS0yLjQ1LDYuNzItNC44MSw3LjgxLTcuMDgsMS4wOS0yLjI3LDEuNjMtNi43MiwxLjYzLTEzLjM1di0zNi45NmMwLTguMTctLjU0LTEzLjYyLTEuNjMtMTYuMzUtMS4wOS0yLjcyLTMuNjMtNS43Mi03LjYzLTguOTl2LTEuMjdjMTQuMDgtLjczLDI4LjUyLTMuMjcsNDMuMzItNy42M3YxOS4zNGMzLjE4LTQuODEsNy41NC05LjE3LDEyLjk5LTEzLjA4LDUuNDUtMy45LDExLjgxLTUuOSwxOS4xNi01LjksMi44MiwwLDUuNjMuMzcsOC40NSwxLjA5LDIuODIuNzMsNS45LDIsOS4xNywzLjgyLDMuMjcsMS44Miw1LjksNC44MSw3LjksOC45OSwyLDQuMTgsMyw5LjE3LDMsMTUuMDd2NDEuNzhoLjI3WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAzMC40NCw1NTQuNDNjLTUuMDgsMjMuNy0xOC45OCwzNS41MS00MS42OCwzNS41MS0xMy43MSwwLTI1LjE2LTQuMjctMzQuMjQtMTIuNzEtOS4wOC04LjQ0LTEzLjYyLTIwLjE2LTEzLjYyLTM1LjE0czQuNTQtMjYuNDMsMTMuNjItMzQuNTFjOS4wOC04LjA4LDIwLjYxLTEyLjE3LDM0LjUxLTEyLjE3czIzLjc5LDMuNjMsMzAuNzksMTAuOWM2Ljk5LDcuMjcsMTAuNTMsMTUuNjIsMTAuNTMsMjQuOTd2Mi4wOWgtNTguMDN2MS42M2MwLDExLjM1LDMuMDksMTkuNjIsOS4yNiwyNC44OCw2LjE3LDUuMjcsMTMuNjIsNy45LDIyLjQzLDcuOSwxMS41MywwLDIwLjA3LTQuNjMsMjUuNTItMTMuOTlsLjkxLjY0Wk05ODUuNzYsNTAwLjY2Yy04LjA4LDAtMTIuNTMsOS4xNy0xMy4zNSwyNy42MWgyNy4xNWMtLjQ1LTE4LjQ0LTUuMDgtMjcuNjEtMTMuODktMjcuNjFoLjA5WiIvPgogICAgPC9nPgogICAgPGc+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMjMuNDcsNjMxLjg5bC0uMDctLjExLS42NCwzLjE1LTEuODMtLjM4Yy0zLjQtOS4xNi0xMi45Mi0xOS44NS0yOC4zLTMzLjEybDEuNTEtNy4yOSwxMS4zOS01NC43N3MwLS4wMi4wMS0uMDVsMzEuNjUtMTUyLjIxLjAyLS4xMSwxLjgxLjM4YzMuNCw5LjE2LDEyLjkyLDE5Ljg2LDI4LjMyLDMzLjEzbC0xLjUxLDcuMjktLjQ3LDIuMjYuMDYuMDktNDEuOTQsMjAxLjc1WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAwLjU3LDUxNC40NWwtNi41MiwzMS42Ni0xLjI0LS4yNmMtLjU3LTEuNTQtMS40MS0zLjE2LTIuNS00Ljg0LS4yNy0uNDEtLjU1LS44NS0uODctMS4yOS0uOTEtMS4yOS0xLjk1LTIuNjMtMy4xNS00LjAzLTMuMi0zLjctNy40Mi03Ljc1LTEyLjYxLTEyLjI0bDguMzctNDAuMjFzLjA2LS4xNy4xNi0uNTFsMTQuMTItNjcuOTYuNjQtMy4wMiw0LjA1LTE5Ljg0LDEuMjUuMjZjLjQzLDEuMTYsMSwyLjM2LDEuNzEsMy41OSwzLjEyLDUuMzcsOC45MywxMS41LDE3LjQsMTguOGwtMi4xOCwxMC40OC0zLjczLDE4cy0uMDcuMjUtLjIxLjYzbC0xNC4xOSw2OC4xOHYuMDJzLS41MiwyLjU2LS41MiwyLjU2WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODIuMTQsNTQyLjkybC02LjAyLDI4Ljk0LTI2LjU2LTQwLjUsMTMuNDYtNjQuNzEsOS44NywxNS4wNSwxLjM4LDEuOTYtOC45Niw0My4xMSwzLjkzLDMuNDNjNS43Myw0LjkyLDEwLjA0LDkuMTcsMTIuOSwxMi43MyIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTYxLjczLDYxOS40NmwtMS4yNC0uMjZjLTIuMzUtNi4zMy04LjkxLTEzLjctMTkuNTItMjIuODVsLjY2LTMuMjUuNy0zLjMyLDcuMTYtMzQuNDVzMC0uMDIsMC0uMDRsMTguOTgtOTEuMywxLjI2LjI2YzIuMzUsNi4zMyw4LjkxLDEzLjcsMTkuNTIsMjIuODVsLTEuMDYsNS4wMi00Ljk5LDI0LjA1cy0uMTIuMzgtLjM0Ljk4di4wNXMtMTAuMDgsNDguNDEtMTAuMDgsNDguNDFjMCwwLDAsLjAyLDAsLjA0LS4xLjU1LS4xOCwxLjAzLS4yNSwxLjRsLTEwLjgsNTIuNDFaIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4=" alt="Capstone Property"></a>
+  <h1>Listing post studio</h1>
+  <p>Post, carousel and story from one listing</p>
+</header>
+<main>
+<form class="panel" id="f" autocomplete="off" onsubmit="return false">
+  <fieldset>
+    <legend>Design</legend>
+    <div class="f"><label>Template</label>
+      <div class="seg">
+        <label><input type="radio" name="tpl" value="signature" checked><span>Signature<small>New, brand-led</small></span></label>
+        <label><input type="radio" name="tpl" value="frosted"><span>Frosted<small>Current style</small></span></label>
+      </div></div>
+    <div class="f"><label>Post size</label>
+      <div class="seg">
+        <label><input type="radio" name="size" value="portrait" checked><span>Portrait<small>1080 × 1350</small></span></label>
+        <label><input type="radio" name="size" value="square"><span>Square<small>1080 × 1080</small></span></label>
+      </div>
+      <p class="hint">Square also works as WhatsApp (WATI) cards. Stories are always 1080 × 1920.</p></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Photos</legend>
+    <div class="drop" id="drop" role="button" tabindex="0">
+      <strong>Add photos</strong><span>Tap to choose or drop them here. The first photo is the cover.</span>
+    </div>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="focus" id="focus">
+      <p class="hint" style="margin:0 0 6px">Tap the photo to set what stays in frame when it's cropped.</p>
+      <div class="focuswrap" id="focuswrap"><img id="focusimg" alt=""><div class="dot" id="dot"></div></div>
+      <div class="tools">
+        <button type="button" class="btn" id="mvL">Move earlier</button>
+        <button type="button" class="btn" id="mvR">Move later</button>
+        <button type="button" class="btn" id="mkCover">Make cover</button>
+        <button type="button" class="btn" id="rm">Remove</button>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Listing</legend>
+    <div class="f"><label>Offer</label>
+      <div class="seg">
+        <label><input type="radio" name="listing" value="rent" checked><span>For rent</span></label>
+        <label><input type="radio" name="listing" value="sale"><span>For sale</span></label>
+        <label><input type="radio" name="listing" value="offplan"><span>Off-plan</span></label>
+      </div></div>
+    <div class="row">
+      <div class="f"><label for="type">Property type</label>
+        <select id="type" name="type">
+          <option>Apartment</option><option>Villa</option><option>Townhouse</option><option>Penthouse</option><option>Duplex</option><option>Hotel Apartment</option><option>Office</option><option>Shop</option><option>Land</option><option value="">None</option>
+        </select></div>
+      <div class="f"><label for="beds">Bedrooms</label>
+        <select id="beds" name="beds"><option value="studio">Studio</option><option value="1" selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option value="">Not shown</option></select></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="baths">Bathrooms</label>
+        <select id="baths" name="baths"><option value="">Not shown</option><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></div>
+      <div class="f"><label for="area">Area (sqm)</label><input type="text" inputmode="decimal" id="area" name="area" placeholder="e.g. 85"></div>
+    </div>
+    <div class="f"><label for="location">Location</label><input type="text" id="location" name="location" list="locs" value="Marina District, Lusail">
+      <datalist id="locs"><option>Marina District, Lusail</option><option>Lusail Waterfront</option><option>Fox Hills, Lusail</option><option>Qetaifan Island North, Lusail</option><option>Porto Arabia, The Pearl</option><option>Viva Bahriya, The Pearl</option><option>Qanat Quartier, The Pearl</option><option>West Bay</option><option>West Bay Lagoon</option><option>Msheireb Downtown</option><option>Al Waab</option><option>Gewan Island</option></datalist></div>
+    <div class="row">
+      <div class="f"><label for="price">Price (QR)</label><input type="text" inputmode="decimal" id="price" name="price" value="8250"></div>
+      <div class="f"><label for="period">Shown as</label>
+        <select id="period" name="period"><option value="month">per month</option><option value="year">per year</option><option value="total">total price</option></select></div>
+    </div>
+    <label class="check"><input type="checkbox" id="from" name="from"> Show as starting price</label>
+    <div class="f"><label for="extra">Highlight (optional)</label><input type="text" id="extra" name="extra" value="Bills included" maxlength="32" placeholder="e.g. Fully furnished, Sea view">
+      <p class="hint">Keep it short. Only say "Bills included" if every bill is.</p></div>
+    <div class="row">
+      <div class="f"><label for="ref">Reference</label><input type="text" id="ref" name="ref" value="CAP-7412"></div>
+      <div class="f"><label for="phone">WhatsApp</label><input type="tel" id="phone" name="phone" value="7770 4768"></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Wording</legend>
+    <div class="f"><label for="headline">Headline</label><input type="text" id="headline" name="headline" maxlength="40" placeholder="">
+      <p class="hint">Leave empty to build it from bedrooms and type.</p></div>
+    <div class="f"><label for="arabic">Arabic line (optional)</label><input type="text" id="arabic" name="arabic" dir="rtl" lang="ar" maxlength="48" placeholder="شقة غرفة نوم واحدة للإيجار"></div>
+    <label class="check"><input type="checkbox" id="cta" name="cta" checked> End the carousel with a contact slide</label>
+    <div class="f"><label for="disclaimer">Small print on contact slide</label><input type="text" id="disclaimer" name="disclaimer" maxlength="70" value="Agency fee & T&Cs apply"></div>
+    <div class="f"><label for="fmt">File type</label>
+      <select id="fmt" name="fmt"><option value="jpg">JPG, high quality (smaller files)</option><option value="png">PNG, lossless</option></select></div>
+  </fieldset>
+</form>
+
+<section class="panel out" aria-live="polite">
+  <div class="outhead">
+    <h2>Your posts</h2>
+    <button type="button" class="btn primary" id="saveAll">Save all as ZIP</button>
+  </div>
+  <div class="sec">
+    <div class="sechead"><h3>Post and carousel</h3><p id="carInfo">Slide 1 is the single post.</p>
+      <button type="button" class="btn" id="savePost">Save post</button>
+      <button type="button" class="btn" id="saveCar">Save carousel</button></div>
+    <div class="strip" id="car"></div>
+  </div>
+  <div class="sec story">
+    <div class="sechead"><h3>Story</h3><p>Text stays clear of the top and bottom bars Instagram covers.</p>
+      <button type="button" class="btn" id="saveStory">Save story</button></div>
+    <div class="strip" id="story"></div>
+  </div>
+  <p class="note">Logos are the official files from the Capstone brand kit. Body text uses Figtree as a stand-in for Proxima Nova, which is licensed and can't load on the web.</p>
+</section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+"use strict";
+const LOGO_W = "data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjQ4IDM4NSA5ODQgMjY4Ij4KICAKICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzAwMzg0ZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgCiAgPGc+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTY4OS40Niw2NTAuNDR2LTMxLjA1aDEzLjY0YzYuNTIsMCwxMC4xNSw0LjQ3LDEwLjE1LDkuNzNzLTMuNjgsOS43My0xMC4xNSw5LjczaC04LjE5djExLjU5aC01LjQ1Wk03MDIuMzUsNjI0LjE5aC03LjQ1djkuODdoNy40NWMzLjA3LDAsNS4zMS0xLjk1LDUuMzEtNC45M3MtMi4yMy00LjkzLTUuMzEtNC45M1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTc0Ni45LDY1MC40NGwtNi44OS0xMS41OWgtNS40djExLjU5aC01LjQ1di0zMS4wNWgxMy42NGM2LjE0LDAsMTAuMTUsNCwxMC4xNSw5Ljczcy0zLjYzLDguNTItNy4zNSw5LjEybDcuNTksMTIuMmgtNi4yOFpNNzQyLjA2LDYyNC4xOWgtNy40NXY5Ljg3aDcuNDVjMy4wNywwLDUuMzEtMS45NSw1LjMxLTQuOTNzLTIuMjMtNC45My01LjMxLTQuOTNaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03ODQuMjgsNjE4Ljg4YzkuMzEsMCwxNS44Nyw2LjgsMTUuODcsMTYuMDZzLTYuNTYsMTYuMDYtMTUuODcsMTYuMDYtMTUuODctNi44LTE1Ljg3LTE2LjA2LDYuNTYtMTYuMDYsMTUuODctMTYuMDZaTTc4NC4yOCw2MjMuNzJjLTYuMjgsMC0xMC4yOSw0Ljc5LTEwLjI5LDExLjIyczQsMTEuMjIsMTAuMjksMTEuMjIsMTAuMjktNC44NCwxMC4yOS0xMS4yMi00LjA1LTExLjIyLTEwLjI5LTExLjIyWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODE2LjgyLDY1MC40NHYtMzEuMDVoMTMuNjRjNi41MiwwLDEwLjE1LDQuNDcsMTAuMTUsOS43M3MtMy42OCw5LjczLTEwLjE1LDkuNzNoLTguMTl2MTEuNTloLTUuNDVaTTgyOS43MSw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODU2LjUyLDY1MC40NHYtMzEuMDVoMjEuMjd2NC43OWgtMTUuODN2OC4wNWgxNS41djQuNzloLTE1LjV2OC42MWgxNS44M3Y0Ljc5aC0yMS4yN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTkxMi41Miw2NTAuNDRsLTYuODktMTEuNTloLTUuNHYxMS41OWgtNS40NXYtMzEuMDVoMTMuNjRjNi4xNCwwLDEwLjE1LDQsMTAuMTUsOS43M3MtMy42Myw4LjUyLTcuMzUsOS4xMmw3LjU5LDEyLjJoLTYuMjhaTTkwNy42OCw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTQyLjM2LDY1MC40NHYtMjYuMjVoLTkuNHYtNC43OWgyNC4yNXY0Ljc5aC05LjR2MjYuMjVoLTUuNDVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05ODIuMDIsNjUwLjQ0di0xMi44OWwtMTIuMDYtMTguMTVoNi4yNGw4LjU2LDEzLjMxLDguNDctMTMuMzFoNi4yNGwtMTIuMDEsMTguMTV2MTIuODloLTUuNDVaIi8+CiAgICA8L2c+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTMwNy45Niw0NTUuMDljLTcuMjgsMC0xMy45MSw1LjEzLTE5Ljc5LDE1LjUtNS44OCwxMC4zNi04Ljg3LDI2LjQyLTguODcsNDguMjdzMi44OSwzOCw4Ljc4LDQ4LjkyYzUuODgsMTAuOTMsMTIuNTEsMTYuNDMsMTkuODksMTYuNDMsNi42MywwLDE0LjE5LTQuMywyMi42LTEyLjk4LDguNC04LjY4LDE2LjI1LTE4LjY4LDIzLjUzLTMwLjA2aDEuMzFsLTMuODMsNDMuNmMtMTUuOTcsMy44My0zMS4wOSw1Ljc5LTQ1LjM4LDUuODgtOS4xNSwwLTE3LjY1LTEuMjEtMjUuNTgtMy42NC03Ljk0LTIuNDMtMTUuMjItNi4yNi0yMS45NC0xMS4zOS02LjcyLTUuMTQtMTIuMDQtMTIuMzMtMTUuOTctMjEuNTctMy45Mi05LjI0LTUuODgtMjAuMTctNS44OC0zMi42OCwwLTIzLjYyLDYuNTQtNDEuNjQsMTkuNjEtNTMuOTcsMTMuMDctMTIuMzIsMjkuODgtMTguNDksNTAuNDItMTguNDksMTEuODYsMCwyNi44LDEuODcsNDQuODIsNS43bDMuODMsNDIuNjdoLTEuMzFjLTE4Ljg2LTI4LjEtMzQuMjctNDIuMi00Ni4zMS00Mi4yaC4wOVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTQzOC45OCw1OTAuMTJjLTcuMTcsMC0xMi4yNi0yLTE1LjI2LTUuOTktMy00LTQuMzYtOC43Mi00LjA5LTE0LjE3aC0uMzZjLTIuNjMsNS40NS02LjgxLDEwLjE3LTEyLjUzLDE0LjE3LTUuNzIsNC0xMi4zNSw1Ljk5LTE5Ljg5LDUuOTlzLTEzLjktMi4wOS0xOC41My02LjI3Yy00LjYzLTQuMTgtNi45LTkuNDUtNi45LTE1Ljg5LDAtOS41Myw1LjA5LTE3LjQ0LDE1LjI2LTIzLjYxLDEwLjE3LTYuMTcsMjQuNDMtMTEuNTMsNDIuNzctMTUuOThsLjE4LTE2LjE2YzAtMy4wOS0uNzMtNS44MS0yLjE4LTguMDgtMS40NS0yLjI3LTMuODItMy40NS02Ljk5LTMuNDUtNC44MSwwLTguNzIsMy4xOC0xMS43MSw5LjUzLTMsNi4zNi01LjA5LDEzLjgxLTYuMjcsMjIuMjVsLTEuMDkuMTgtMjIuNy0xMi41M2MzLjA5LTYuNDUsOC41NC0xMi4wOCwxNi4zNS0xNi45OCw3LjgxLTQuOSwxOC4wNy03LjM2LDMwLjctNy4zNiw2LjYzLDAsMTIuMzUuODIsMTcuMTYsMi40NSw0LjgyLDEuNjMsOC40NSwzLjYzLDEwLjk5LDUuOTksMi41NCwyLjM2LDQuNTQsNS4yNyw1Ljk5LDguNzIsMS40NSwzLjQ1LDIuMzYsNi41NCwyLjYzLDkuMjYuMjcsMi43Mi4zNiw1LjgxLjI3LDkuMjZsLS45MSwzOS44N2MwLDQuMDksMS40NSw2LjA5LDQuNDUsNS45OSwzLjA5LDAsNS43Mi0yLjM2LDcuODEtNy4wOGwxLjQ1LjgyYy0xLjcyLDUuMTgtNC44MSw5LjYzLTkuMTcsMTMuMzUtNC4zNiwzLjcyLTEwLjA4LDUuNjMtMTcuMTYsNS42M2wtLjI3LjA5Wk00MDYuNzQsNTcwLjk1YzQuNjMsMCw4LjcyLTIuNDUsMTIuMjYtNy4yN2wuNzMtMzEuMjRjLTE0Ljk4LDQuMjctMjIuNTIsMTIuNTMtMjIuNTIsMjQuNzksMCw0LjQ1LjkxLDcuOSwyLjYzLDEwLjI2LDEuNzIsMi4zNiwzLjk5LDMuNTQsNi44MSwzLjU0bC4wOS0uMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01MzQuOTEsNDk1LjY3YzkuNzIsMCwxOC4xNiwzLjcyLDI1LjQzLDExLjE3LDcuMjcsNy40NSwxMC45LDE4Ljk4LDEwLjksMzQuNnMtMy45OSwyOC41MS0xMS45OSwzNi42Yy03Ljk5LDguMDgtMTcuMTYsMTIuMDgtMjcuNjEsMTIuMDgtOC44MSwwLTE2LjgtMi41NC0yMy45Ny03LjU0aC0uMzd2MzAuNTZjMCw2LjYzLjgyLDExLjA4LDIuNDUsMTMuMzUsMS42MywyLjI3LDUuMjcsNC42MywxMC44MSw3LjA4djEuMzZoLTU3LjMxdi0xLjM2YzQtMi42Myw2LjU0LTUuMDksNy43Mi03LjI3LDEuMTgtMi4xOCwxLjczLTYuNjMsMS43My0xMy4yNnYtOTUuMzFjMC0zLjQ1LS42NC02LjA5LTEuOTEtNy44MS0xLjI3LTEuNzItMy44MS0zLjcyLTcuNjMtNS45OXYtMS4wOWMxNS4yNi0xLDI5LjctMy41NCw0My4zMi03LjYzbC0uMTgsMTUuOTguMzYuMThjNy41NC0xMC41MywxNi44OS0xNS44LDI4LjA2LTE1LjhsLjE4LjA5Wk01MzUuMzYsNTQ5LjQzYzAtMjcuMTUtNS00MC43OC0xNS4wOC00MC43OC00LjM2LDAtOC42MywyLjkxLTEyLjksOC42M3YzOS41OWMxLjM2LDcuMDgsMy40NSwxMy4xNyw2LjE4LDE4LjM1LDIuNzIsNS4xOCw2LjE3LDcuNzIsMTAuMjYsNy43Miw3LjcyLDAsMTEuNTMtMTEuMTcsMTEuNTMtMzMuNTFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02MTcuOTMsNTkwLjc1Yy04LjksMC0yMC4zNC0xLjkxLTM0LjQyLTUuODFsLTMuNTQtMzEuMDYsMS4zNi0uMThjMTQuNTMsMjEuMzQsMjYuNywzMS45NywzNi40MiwzMS45NywyLjgyLDAsNS4xNy0uODIsNi45OS0yLjQ1LDEuODItMS42NCwyLjcyLTMuOTEsMi43Mi02LjcyLDAtMy41NC0xLjU1LTYuODEtNC43Mi05Ljcycy04LjYzLTYuNTQtMTYuMzUtMTAuODFjLTMtMS43Mi01LjA4LTMtNi4zNi0zLjcyLTEuMjctLjczLTMuMjctMi02LTMuODEtMi43Mi0xLjgyLTQuNzItMy40NS01Ljk5LTQuOTEtMS4yNy0xLjQ1LTIuNzItMy4yNy00LjM2LTUuNDUtMS42My0yLjE4LTIuODItNC41NC0zLjU0LTcuMDgtLjczLTIuNTQtMS4wOS01LjI3LTEuMDktOC4wOCwwLTguNjMsMy4xOC0xNS4zNSw5LjQ1LTIwLjE2LDYuMjctNC44MSwxNC4zNS03LjE3LDI0LjE2LTcuMTcsNy44MSwwLDE4LjI1LDEuNjMsMzEuNDIsNC44MmwyLjgyLDI4Ljg4LTEuMzYuMzdjLTEzLjYyLTE5LjE2LTI0Ljc5LTI4Ljc5LTMzLjQyLTI4Ljg4LTIuNjMsMC00LjcyLjgyLTYuMzYsMi4zNi0xLjY0LDEuNTQtMi40NSwzLjYzLTIuNDUsNi4yNywwLDMuOTksMS44Miw3LjM2LDUuMzYsMTAuMDgsMy41NCwyLjcyLDkuMjYsNS45OSwxNy4wNyw5LjksOC41NCw0LjM2LDE1LjE3LDguOTksMTkuODksMTMuOTgsNC43Miw1LDcuMDgsMTEuMzUsNy4wOCwxOS4wNywwLDguNTQtMy4wOSwxNS4zNS05LjI2LDIwLjUyLTYuMTcsNS4xOC0xNC43MSw3LjcyLTI1LjcsNy43MmwuMTguMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02ODkuMzgsNTg5LjkzYy03LjU0LDAtMTMuNzEtMi4xOC0xOC42Mi02LjU0LTQuOS00LjM2LTcuMzYtMTAuOS03LjM2LTE5LjUzdi01OS41N2gtOC40NXYtOC43MmMyMC44LTExLjUzLDM0LjI0LTIxLjUyLDQwLjMyLTMxLjIxaDIuMTh2MzAuOTRoMjAuODlsLS45MSw4Ljk5aC0xOS41MmwtLjY0LDUzLjk0Yy0uMDksMTAuNjMsMy44MiwxNS45OCwxMS43MSwxNS45OCw0LjI3LDAsOC4yNy0xLjkxLDExLjk5LTUuNzJsMS4wOSwxLjA5Yy04LjA4LDEzLjYyLTE4Ljk4LDIwLjQzLTMyLjY5LDIwLjQzdi0uMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03NzAuODEsNTkwLjEyYy0xNC45OCwwLTI2Ljk3LTMuOS0zNi4wNS0xMS44MS05LjA4LTcuOS0xMy42Mi0xOS4zNC0xMy42Mi0zNC40MnM0LjYzLTI3LjE1LDEzLjg5LTM1LjZjOS4yNi04LjQ1LDIxLjctMTIuNzEsMzcuMzMtMTIuNzFzMjYuOTcsMy45MSwzNS45NiwxMS44MWM4Ljk5LDcuOSwxMy41MywxOS40NCwxMy41MywzNC42OXMtNC41NCwyNy4wNi0xMy43MSwzNS40MmMtOS4xNyw4LjM1LTIxLjUyLDEyLjUzLTM3LjE0LDEyLjUzbC0uMTguMDlaTTc3Ni4xNyw1ODQuODVjMy4wOSwwLDUuNjMtMS44Miw3LjU0LTUuMzYsMS45MS0zLjU0LDIuOTEtOC45OSwyLjkxLTE2LjI2LDAtNi40NS0uNDYtMTMuOTktMS40NS0yMi43LTEtOC43Mi0zLjA5LTE3LjUzLTYuMjctMjYuMzQtMy4xOC04LjgxLTcuMTctMTMuMjYtMTEuOS0xMy4yNi0zLjA5LDAtNS42MywxLjgyLTcuNjMsNS40NS0yLDMuNjMtMyw5LjE3LTMsMTYuNjIsMCw2LjQ1LjU0LDEzLjk5LDEuNTQsMjIuNjEsMSw4LjYzLDMuMDksMTcuMzUsNi4yNywyNi4wNiwzLjE4LDguNzIsNy4xNywxMy4wOCwxMS45OSwxMy4wOHYuMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05MjkuMDYsNTY2LjQxYzAsNi42My41NCwxMS4wOCwxLjYzLDEzLjM1LDEuMDksMi4yNywzLjcyLDQuNjMsNy44MSw3LjA4djEuMjdoLTUzLjU4di0xLjI3YzQuMjctMi43Miw2LjktNS4xNyw3LjktNy4zNiwxLTIuMTgsMS42My02LjU0LDEuOTEtMTMuMTcuMDktNS40NS4xOC0xOC4yNS4xOC0zOC41MSwwLTUuMzYtMS4wOS05LjM1LTMuMzYtMTEuOTlzLTUuMTgtMy45LTguNzItMy45Yy00LjgxLDAtOS41NCwzLjA5LTE0LjA4LDkuMTd2NDUuMTNjMCw2LjYzLjY0LDExLjA4LDEuODIsMTMuMzUsMS4xOCwyLjI3LDMuNzIsNC43Miw3LjYzLDcuMzZ2MS4yN2gtNTMuNTh2LTEuMjdjNC4wOS0yLjQ1LDYuNzItNC44MSw3LjgxLTcuMDgsMS4wOS0yLjI3LDEuNjMtNi43MiwxLjYzLTEzLjM1di0zNi45NmMwLTguMTctLjU0LTEzLjYyLTEuNjMtMTYuMzUtMS4wOS0yLjcyLTMuNjMtNS43Mi03LjYzLTguOTl2LTEuMjdjMTQuMDgtLjczLDI4LjUyLTMuMjcsNDMuMzItNy42M3YxOS4zNGMzLjE4LTQuODEsNy41NC05LjE3LDEyLjk5LTEzLjA4LDUuNDUtMy45LDExLjgxLTUuOSwxOS4xNi01LjksMi44MiwwLDUuNjMuMzcsOC40NSwxLjA5LDIuODIuNzMsNS45LDIsOS4xNywzLjgyLDMuMjcsMS44Miw1LjksNC44MSw3LjksOC45OSwyLDQuMTgsMyw5LjE3LDMsMTUuMDd2NDEuNzhoLjI3WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAzMC40NCw1NTQuNDNjLTUuMDgsMjMuNy0xOC45OCwzNS41MS00MS42OCwzNS41MS0xMy43MSwwLTI1LjE2LTQuMjctMzQuMjQtMTIuNzEtOS4wOC04LjQ0LTEzLjYyLTIwLjE2LTEzLjYyLTM1LjE0czQuNTQtMjYuNDMsMTMuNjItMzQuNTFjOS4wOC04LjA4LDIwLjYxLTEyLjE3LDM0LjUxLTEyLjE3czIzLjc5LDMuNjMsMzAuNzksMTAuOWM2Ljk5LDcuMjcsMTAuNTMsMTUuNjIsMTAuNTMsMjQuOTd2Mi4wOWgtNTguMDN2MS42M2MwLDExLjM1LDMuMDksMTkuNjIsOS4yNiwyNC44OCw2LjE3LDUuMjcsMTMuNjIsNy45LDIyLjQzLDcuOSwxMS41MywwLDIwLjA3LTQuNjMsMjUuNTItMTMuOTlsLjkxLjY0Wk05ODUuNzYsNTAwLjY2Yy04LjA4LDAtMTIuNTMsOS4xNy0xMy4zNSwyNy42MWgyNy4xNWMtLjQ1LTE4LjQ0LTUuMDgtMjcuNjEtMTMuODktMjcuNjFoLjA5WiIvPgogICAgPC9nPgogICAgPGc+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMjMuNDcsNjMxLjg5bC0uMDctLjExLS42NCwzLjE1LTEuODMtLjM4Yy0zLjQtOS4xNi0xMi45Mi0xOS44NS0yOC4zLTMzLjEybDEuNTEtNy4yOSwxMS4zOS01NC43N3MwLS4wMi4wMS0uMDVsMzEuNjUtMTUyLjIxLjAyLS4xMSwxLjgxLjM4YzMuNCw5LjE2LDEyLjkyLDE5Ljg2LDI4LjMyLDMzLjEzbC0xLjUxLDcuMjktLjQ3LDIuMjYuMDYuMDktNDEuOTQsMjAxLjc1WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAwLjU3LDUxNC40NWwtNi41MiwzMS42Ni0xLjI0LS4yNmMtLjU3LTEuNTQtMS40MS0zLjE2LTIuNS00Ljg0LS4yNy0uNDEtLjU1LS44NS0uODctMS4yOS0uOTEtMS4yOS0xLjk1LTIuNjMtMy4xNS00LjAzLTMuMi0zLjctNy40Mi03Ljc1LTEyLjYxLTEyLjI0bDguMzctNDAuMjFzLjA2LS4xNy4xNi0uNTFsMTQuMTItNjcuOTYuNjQtMy4wMiw0LjA1LTE5Ljg0LDEuMjUuMjZjLjQzLDEuMTYsMSwyLjM2LDEuNzEsMy41OSwzLjEyLDUuMzcsOC45MywxMS41LDE3LjQsMTguOGwtMi4xOCwxMC40OC0zLjczLDE4cy0uMDcuMjUtLjIxLjYzbC0xNC4xOSw2OC4xOHYuMDJzLS41MiwyLjU2LS41MiwyLjU2WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODIuMTQsNTQyLjkybC02LjAyLDI4Ljk0LTI2LjU2LTQwLjUsMTMuNDYtNjQuNzEsOS44NywxNS4wNSwxLjM4LDEuOTYtOC45Niw0My4xMSwzLjkzLDMuNDNjNS43Myw0LjkyLDEwLjA0LDkuMTcsMTIuOSwxMi43MyIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTYxLjczLDYxOS40NmwtMS4yNC0uMjZjLTIuMzUtNi4zMy04LjkxLTEzLjctMTkuNTItMjIuODVsLjY2LTMuMjUuNy0zLjMyLDcuMTYtMzQuNDVzMC0uMDIsMC0uMDRsMTguOTgtOTEuMywxLjI2LjI2YzIuMzUsNi4zMyw4LjkxLDEzLjcsMTkuNTIsMjIuODVsLTEuMDYsNS4wMi00Ljk5LDI0LjA1cy0uMTIuMzgtLjM0Ljk4di4wNXMtMTAuMDgsNDguNDEtMTAuMDgsNDguNDFjMCwwLDAsLjAyLDAsLjA0LS4xLjU1LS4xOCwxLjAzLS4yNSwxLjRsLTEwLjgsNTIuNDFaIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4=";
+const LOGO_N = "data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjQ4IDM4NSA5ODQgMjY4Ij4KICAKICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogIzAwMzg0ZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGc+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNjg5LjQ2LDY1MC40NHYtMzEuMDVoMTMuNjRjNi41MiwwLDEwLjE1LDQuNDcsMTAuMTUsOS43M3MtMy42OCw5LjczLTEwLjE1LDkuNzNoLTguMTl2MTEuNTloLTUuNDVaTTcwMi4zNSw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTc0Ni45LDY1MC40NGwtNi44OS0xMS41OWgtNS40djExLjU5aC01LjQ1di0zMS4wNWgxMy42NGM2LjE0LDAsMTAuMTUsNCwxMC4xNSw5Ljczcy0zLjYzLDguNTItNy4zNSw5LjEybDcuNTksMTIuMmgtNi4yOFpNNzQyLjA2LDYyNC4xOWgtNy40NXY5Ljg3aDcuNDVjMy4wNywwLDUuMzEtMS45NSw1LjMxLTQuOTNzLTIuMjMtNC45My01LjMxLTQuOTNaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNzg0LjI4LDYxOC44OGM5LjMxLDAsMTUuODcsNi44LDE1Ljg3LDE2LjA2cy02LjU2LDE2LjA2LTE1Ljg3LDE2LjA2LTE1Ljg3LTYuOC0xNS44Ny0xNi4wNiw2LjU2LTE2LjA2LDE1Ljg3LTE2LjA2Wk03ODQuMjgsNjIzLjcyYy02LjI4LDAtMTAuMjksNC43OS0xMC4yOSwxMS4yMnM0LDExLjIyLDEwLjI5LDExLjIyLDEwLjI5LTQuODQsMTAuMjktMTEuMjItNC4wNS0xMS4yMi0xMC4yOS0xMS4yMloiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04MTYuODIsNjUwLjQ0di0zMS4wNWgxMy42NGM2LjUyLDAsMTAuMTUsNC40NywxMC4xNSw5Ljczcy0zLjY4LDkuNzMtMTAuMTUsOS43M2gtOC4xOXYxMS41OWgtNS40NVpNODI5LjcxLDYyNC4xOWgtNy40NXY5Ljg3aDcuNDVjMy4wNywwLDUuMzEtMS45NSw1LjMxLTQuOTNzLTIuMjMtNC45My01LjMxLTQuOTNaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODU2LjUyLDY1MC40NHYtMzEuMDVoMjEuMjd2NC43OWgtMTUuODN2OC4wNWgxNS41djQuNzloLTE1LjV2OC42MWgxNS44M3Y0Ljc5aC0yMS4yN1oiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05MTIuNTIsNjUwLjQ0bC02Ljg5LTExLjU5aC01LjR2MTEuNTloLTUuNDV2LTMxLjA1aDEzLjY0YzYuMTQsMCwxMC4xNSw0LDEwLjE1LDkuNzNzLTMuNjMsOC41Mi03LjM1LDkuMTJsNy41OSwxMi4yaC02LjI4Wk05MDcuNjgsNjI0LjE5aC03LjQ1djkuODdoNy40NWMzLjA3LDAsNS4zMS0xLjk1LDUuMzEtNC45M3MtMi4yMy00LjkzLTUuMzEtNC45M1oiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05NDIuMzYsNjUwLjQ0di0yNi4yNWgtOS40di00Ljc5aDI0LjI1djQuNzloLTkuNHYyNi4yNWgtNS40NVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05ODIuMDIsNjUwLjQ0di0xMi44OWwtMTIuMDYtMTguMTVoNi4yNGw4LjU2LDEzLjMxLDguNDctMTMuMzFoNi4yNGwtMTIuMDEsMTguMTV2MTIuODloLTUuNDVaIi8+CiAgPC9nPgogIDxnPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTMwNy45Niw0NTUuMDljLTcuMjgsMC0xMy45MSw1LjEzLTE5Ljc5LDE1LjUtNS44OCwxMC4zNi04Ljg3LDI2LjQyLTguODcsNDguMjdzMi44OSwzOCw4Ljc4LDQ4LjkyYzUuODgsMTAuOTMsMTIuNTEsMTYuNDMsMTkuODksMTYuNDMsNi42MywwLDE0LjE5LTQuMywyMi42LTEyLjk4LDguNC04LjY4LDE2LjI1LTE4LjY4LDIzLjUzLTMwLjA2aDEuMzFsLTMuODMsNDMuNmMtMTUuOTcsMy44My0zMS4wOSw1Ljc5LTQ1LjM4LDUuODgtOS4xNSwwLTE3LjY1LTEuMjEtMjUuNTgtMy42NC03Ljk0LTIuNDMtMTUuMjItNi4yNi0yMS45NC0xMS4zOS02LjcyLTUuMTQtMTIuMDQtMTIuMzMtMTUuOTctMjEuNTctMy45Mi05LjI0LTUuODgtMjAuMTctNS44OC0zMi42OCwwLTIzLjYyLDYuNTQtNDEuNjQsMTkuNjEtNTMuOTcsMTMuMDctMTIuMzIsMjkuODgtMTguNDksNTAuNDItMTguNDksMTEuODYsMCwyNi44LDEuODcsNDQuODIsNS43bDMuODMsNDIuNjdoLTEuMzFjLTE4Ljg2LTI4LjEtMzQuMjctNDIuMi00Ni4zMS00Mi4yaC4wOVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik00MzguOTgsNTkwLjEyYy03LjE3LDAtMTIuMjYtMi0xNS4yNi01Ljk5LTMtNC00LjM2LTguNzItNC4wOS0xNC4xN2gtLjM2Yy0yLjYzLDUuNDUtNi44MSwxMC4xNy0xMi41MywxNC4xNy01LjcyLDQtMTIuMzUsNS45OS0xOS44OSw1Ljk5cy0xMy45LTIuMDktMTguNTMtNi4yN2MtNC42My00LjE4LTYuOS05LjQ1LTYuOS0xNS44OSwwLTkuNTMsNS4wOS0xNy40NCwxNS4yNi0yMy42MSwxMC4xNy02LjE3LDI0LjQzLTExLjUzLDQyLjc3LTE1Ljk4bC4xOC0xNi4xNmMwLTMuMDktLjczLTUuODEtMi4xOC04LjA4LTEuNDUtMi4yNy0zLjgyLTMuNDUtNi45OS0zLjQ1LTQuODEsMC04LjcyLDMuMTgtMTEuNzEsOS41My0zLDYuMzYtNS4wOSwxMy44MS02LjI3LDIyLjI1bC0xLjA5LjE4LTIyLjctMTIuNTNjMy4wOS02LjQ1LDguNTQtMTIuMDgsMTYuMzUtMTYuOTgsNy44MS00LjksMTguMDctNy4zNiwzMC43LTcuMzYsNi42MywwLDEyLjM1LjgyLDE3LjE2LDIuNDUsNC44MiwxLjYzLDguNDUsMy42MywxMC45OSw1Ljk5LDIuNTQsMi4zNiw0LjU0LDUuMjcsNS45OSw4LjcyLDEuNDUsMy40NSwyLjM2LDYuNTQsMi42Myw5LjI2LjI3LDIuNzIuMzYsNS44MS4yNyw5LjI2bC0uOTEsMzkuODdjMCw0LjA5LDEuNDUsNi4wOSw0LjQ1LDUuOTksMy4wOSwwLDUuNzItMi4zNiw3LjgxLTcuMDhsMS40NS44MmMtMS43Miw1LjE4LTQuODEsOS42My05LjE3LDEzLjM1LTQuMzYsMy43Mi0xMC4wOCw1LjYzLTE3LjE2LDUuNjNsLS4yNy4wOVpNNDA2Ljc0LDU3MC45NWM0LjYzLDAsOC43Mi0yLjQ1LDEyLjI2LTcuMjdsLjczLTMxLjI0Yy0xNC45OCw0LjI3LTIyLjUyLDEyLjUzLTIyLjUyLDI0Ljc5LDAsNC40NS45MSw3LjksMi42MywxMC4yNiwxLjcyLDIuMzYsMy45OSwzLjU0LDYuODEsMy41NGwuMDktLjA5WiIvPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTUzNC45MSw0OTUuNjdjOS43MiwwLDE4LjE2LDMuNzIsMjUuNDMsMTEuMTcsNy4yNyw3LjQ1LDEwLjksMTguOTgsMTAuOSwzNC42cy0zLjk5LDI4LjUxLTExLjk5LDM2LjZjLTcuOTksOC4wOC0xNy4xNiwxMi4wOC0yNy42MSwxMi4wOC04LjgxLDAtMTYuOC0yLjU0LTIzLjk3LTcuNTRoLS4zN3YzMC41NmMwLDYuNjMuODIsMTEuMDgsMi40NSwxMy4zNSwxLjYzLDIuMjcsNS4yNyw0LjYzLDEwLjgxLDcuMDh2MS4zNmgtNTcuMzF2LTEuMzZjNC0yLjYzLDYuNTQtNS4wOSw3LjcyLTcuMjcsMS4xOC0yLjE4LDEuNzMtNi42MywxLjczLTEzLjI2di05NS4zMWMwLTMuNDUtLjY0LTYuMDktMS45MS03LjgxLTEuMjctMS43Mi0zLjgxLTMuNzItNy42My01Ljk5di0xLjA5YzE1LjI2LTEsMjkuNy0zLjU0LDQzLjMyLTcuNjNsLS4xOCwxNS45OC4zNi4xOGM3LjU0LTEwLjUzLDE2Ljg5LTE1LjgsMjguMDYtMTUuOGwuMTguMDlaTTUzNS4zNiw1NDkuNDNjMC0yNy4xNS01LTQwLjc4LTE1LjA4LTQwLjc4LTQuMzYsMC04LjYzLDIuOTEtMTIuOSw4LjYzdjM5LjU5YzEuMzYsNy4wOCwzLjQ1LDEzLjE3LDYuMTgsMTguMzUsMi43Miw1LjE4LDYuMTcsNy43MiwxMC4yNiw3LjcyLDcuNzIsMCwxMS41My0xMS4xNywxMS41My0zMy41MVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02MTcuOTMsNTkwLjc1Yy04LjksMC0yMC4zNC0xLjkxLTM0LjQyLTUuODFsLTMuNTQtMzEuMDYsMS4zNi0uMThjMTQuNTMsMjEuMzQsMjYuNywzMS45NywzNi40MiwzMS45NywyLjgyLDAsNS4xNy0uODIsNi45OS0yLjQ1LDEuODItMS42NCwyLjcyLTMuOTEsMi43Mi02LjcyLDAtMy41NC0xLjU1LTYuODEtNC43Mi05LjcyLTMuMTgtMi45MS04LjYzLTYuNTQtMTYuMzUtMTAuODEtMy0xLjcyLTUuMDgtMy02LjM2LTMuNzItMS4yNy0uNzMtMy4yNy0yLTYtMy44MS0yLjcyLTEuODItNC43Mi0zLjQ1LTUuOTktNC45MS0xLjI3LTEuNDUtMi43Mi0zLjI3LTQuMzYtNS40NS0xLjYzLTIuMTgtMi44Mi00LjU0LTMuNTQtNy4wOC0uNzMtMi41NC0xLjA5LTUuMjctMS4wOS04LjA4LDAtOC42MywzLjE4LTE1LjM1LDkuNDUtMjAuMTYsNi4yNy00LjgxLDE0LjM1LTcuMTcsMjQuMTYtNy4xNyw3LjgxLDAsMTguMjUsMS42MywzMS40Miw0LjgybDIuODIsMjguODgtMS4zNi4zN2MtMTMuNjItMTkuMTYtMjQuNzktMjguNzktMzMuNDItMjguODgtMi42MywwLTQuNzIuODItNi4zNiwyLjM2LTEuNjQsMS41NC0yLjQ1LDMuNjMtMi40NSw2LjI3LDAsMy45OSwxLjgyLDcuMzYsNS4zNiwxMC4wOCwzLjU0LDIuNzIsOS4yNiw1Ljk5LDE3LjA3LDkuOSw4LjU0LDQuMzYsMTUuMTcsOC45OSwxOS44OSwxMy45OCw0LjcyLDUsNy4wOCwxMS4zNSw3LjA4LDE5LjA3LDAsOC41NC0zLjA5LDE1LjM1LTkuMjYsMjAuNTItNi4xNyw1LjE4LTE0LjcxLDcuNzItMjUuNyw3LjcybC4xOC4wOVoiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02ODkuMzgsNTg5LjkzYy03LjU0LDAtMTMuNzEtMi4xOC0xOC42Mi02LjU0LTQuOS00LjM2LTcuMzYtMTAuOS03LjM2LTE5LjUzdi01OS41N2gtOC40NXYtOC43MmMyMC44LTExLjUzLDM0LjI0LTIxLjUyLDQwLjMyLTMxLjIxaDIuMTh2MzAuOTRoMjAuODlsLS45MSw4Ljk5aC0xOS41MmwtLjY0LDUzLjk0Yy0uMDksMTAuNjMsMy44MiwxNS45OCwxMS43MSwxNS45OCw0LjI3LDAsOC4yNy0xLjkxLDExLjk5LTUuNzJsMS4wOSwxLjA5Yy04LjA4LDEzLjYyLTE4Ljk4LDIwLjQzLTMyLjY5LDIwLjQzdi0uMDlaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNNzcwLjgxLDU5MC4xMmMtMTQuOTgsMC0yNi45Ny0zLjktMzYuMDUtMTEuODEtOS4wOC03LjktMTMuNjItMTkuMzQtMTMuNjItMzQuNDJzNC42My0yNy4xNSwxMy44OS0zNS42YzkuMjYtOC40NSwyMS43LTEyLjcxLDM3LjMzLTEyLjcxczI2Ljk3LDMuOTEsMzUuOTYsMTEuODFjOC45OSw3LjksMTMuNTMsMTkuNDQsMTMuNTMsMzQuNjlzLTQuNTQsMjcuMDYtMTMuNzEsMzUuNDJjLTkuMTcsOC4zNS0yMS41MiwxMi41My0zNy4xNCwxMi41M2wtLjE4LjA5Wk03NzYuMTcsNTg0Ljg1YzMuMDksMCw1LjYzLTEuODIsNy41NC01LjM2LDEuOTEtMy41NCwyLjkxLTguOTksMi45MS0xNi4yNiwwLTYuNDUtLjQ2LTEzLjk5LTEuNDUtMjIuNy0xLTguNzItMy4wOS0xNy41My02LjI3LTI2LjM0LTMuMTgtOC44MS03LjE3LTEzLjI2LTExLjktMTMuMjYtMy4wOSwwLTUuNjMsMS44Mi03LjYzLDUuNDUtMiwzLjYzLTMsOS4xNy0zLDE2LjYyLDAsNi40NS41NCwxMy45OSwxLjU0LDIyLjYxLDEsOC42MywzLjA5LDE3LjM1LDYuMjcsMjYuMDYsMy4xOCw4LjcyLDcuMTcsMTMuMDgsMTEuOTksMTMuMDh2LjA5WiIvPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTkyOS4wNiw1NjYuNDFjMCw2LjYzLjU0LDExLjA4LDEuNjMsMTMuMzUsMS4wOSwyLjI3LDMuNzIsNC42Myw3LjgxLDcuMDh2MS4yN2gtNTMuNTh2LTEuMjdjNC4yNy0yLjcyLDYuOS01LjE3LDcuOS03LjM2LDEtMi4xOCwxLjYzLTYuNTQsMS45MS0xMy4xNy4wOS01LjQ1LjE4LTE4LjI1LjE4LTM4LjUxLDAtNS4zNi0xLjA5LTkuMzUtMy4zNi0xMS45OS0yLjI3LTIuNjMtNS4xOC0zLjktOC43Mi0zLjktNC44MSwwLTkuNTQsMy4wOS0xNC4wOCw5LjE3djQ1LjEzYzAsNi42My42NCwxMS4wOCwxLjgyLDEzLjM1LDEuMTgsMi4yNywzLjcyLDQuNzIsNy42Myw3LjM2djEuMjdoLTUzLjU4di0xLjI3YzQuMDktMi40NSw2LjcyLTQuODEsNy44MS03LjA4LDEuMDktMi4yNywxLjYzLTYuNzIsMS42My0xMy4zNXYtMzYuOTZjMC04LjE3LS41NC0xMy42Mi0xLjYzLTE2LjM1LTEuMDktMi43Mi0zLjYzLTUuNzItNy42My04Ljk5di0xLjI3YzE0LjA4LS43MywyOC41Mi0zLjI3LDQzLjMyLTcuNjN2MTkuMzRjMy4xOC00LjgxLDcuNTQtOS4xNywxMi45OS0xMy4wOCw1LjQ1LTMuOSwxMS44MS01LjksMTkuMTYtNS45LDIuODIsMCw1LjYzLjM3LDguNDUsMS4wOSwyLjgyLjczLDUuOSwyLDkuMTcsMy44MiwzLjI3LDEuODIsNS45LDQuODEsNy45LDguOTksMiw0LjE4LDMsOS4xNywzLDE1LjA3djQxLjc4aC4yN1oiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMDMwLjQ0LDU1NC40M2MtNS4wOCwyMy43LTE4Ljk4LDM1LjUxLTQxLjY4LDM1LjUxLTEzLjcxLDAtMjUuMTYtNC4yNy0zNC4yNC0xMi43MS05LjA4LTguNDQtMTMuNjItMjAuMTYtMTMuNjItMzUuMTRzNC41NC0yNi40MywxMy42Mi0zNC41MWM5LjA4LTguMDgsMjAuNjEtMTIuMTcsMzQuNTEtMTIuMTdzMjMuNzksMy42MywzMC43OSwxMC45YzYuOTksNy4yNywxMC41MywxNS42MiwxMC41MywyNC45N3YyLjA5aC01OC4wM3YxLjYzYzAsMTEuMzUsMy4wOSwxOS42Miw5LjI2LDI0Ljg4LDYuMTcsNS4yNywxMy42Miw3LjksMjIuNDMsNy45LDExLjUzLDAsMjAuMDctNC42MywyNS41Mi0xMy45OWwuOTEuNjRaTTk4NS43Niw1MDAuNjZjLTguMDgsMC0xMi41Myw5LjE3LTEzLjM1LDI3LjYxaDI3LjE1Yy0uNDUtMTguNDQtNS4wOC0yNy42MS0xMy44OS0yNy42MWguMDlaIi8+CiAgPC9nPgogIDxnPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTEyMy40Nyw2MzEuODlsLS4wNy0uMTEtLjY0LDMuMTUtMS44My0uMzhjLTMuNC05LjE2LTEyLjkyLTE5Ljg1LTI4LjMtMzMuMTJsMS41MS03LjI5LDExLjM5LTU0Ljc3czAtLjAyLjAxLS4wNWwzMS42NS0xNTIuMjEuMDItLjExLDEuODEuMzhjMy40LDkuMTYsMTIuOTIsMTkuODYsMjguMzIsMzMuMTNsLTEuNTEsNy4yOS0uNDcsMi4yNi4wNi4wOS00MS45NCwyMDEuNzVaIi8+CiAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAwLjU3LDUxNC40NWwtNi41MiwzMS42Ni0xLjI0LS4yNmMtLjU3LTEuNTQtMS40MS0zLjE2LTIuNS00Ljg0LS4yNy0uNDEtLjU1LS44NS0uODctMS4yOS0uOTEtMS4yOS0xLjk1LTIuNjMtMy4xNS00LjAzLTMuMi0zLjctNy40Mi03Ljc1LTEyLjYxLTEyLjI0bDguMzctNDAuMjFzLjA2LS4xNy4xNi0uNTFsMTQuMTItNjcuOTYuNjQtMy4wMiw0LjA1LTE5Ljg0LDEuMjUuMjZjLjQzLDEuMTYsMSwyLjM2LDEuNzEsMy41OSwzLjEyLDUuMzcsOC45MywxMS41LDE3LjQsMTguOGwtMi4xOCwxMC40OC0zLjczLDE4cy0uMDcuMjUtLjIxLjYzbC0xNC4xOSw2OC4xOHYuMDJzLS41MiwyLjU2LS41MiwyLjU2WiIvPgogICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTgyLjE0LDU0Mi45MmwtNi4wMiwyOC45NC0yNi41Ni00MC41LDEzLjQ2LTY0LjcxLDkuODcsMTUuMDUsMS4zOCwxLjk2LTguOTYsNDMuMTEsMy45MywzLjQzYzUuNzMsNC45MiwxMC4wNCw5LjE3LDEyLjksMTIuNzMiLz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNjEuNzMsNjE5LjQ2bC0xLjI0LS4yNmMtMi4zNS02LjMzLTguOTEtMTMuNy0xOS41Mi0yMi44NWwuNjYtMy4yNS43LTMuMzIsNy4xNi0zNC40NXMwLS4wMiwwLS4wNGwxOC45OC05MS4zLDEuMjYuMjZjMi4zNSw2LjMzLDguOTEsMTMuNywxOS41MiwyMi44NWwtMS4wNiw1LjAyLTQuOTksMjQuMDVzLS4xMi4zOC0uMzQuOTh2LjA1cy0xMC4wOCw0OC40MS0xMC4wOCw0OC40MWMwLDAsMCwuMDIsMCwuMDQtLjEuNTUtLjE4LDEuMDMtLjI1LDEuNGwtMTAuOCw1Mi40MVoiLz4KICA8L2c+Cjwvc3ZnPg==";
+const LOGO_AR = 984/268;
+const C = {navy:"#003850", teal:"#45828C", ink:"#212721", gray:"#C0C2CB", white:"#FFFFFF"};
+const F = {sans:'"Figtree", system-ui, sans-serif', serif:'"Playfair Display", Georgia, serif', ar:'"Tajawal", "Geeza Pro", sans-serif'};
+const MAX_SLIDES = 10;
+
+/* ---------- state ---------- */
+const form = document.getElementById("f");
+const S = { photos: [], sel: -1 };
+let uid = 0;
+const KEEP = ["tpl","size","phone","fmt","disclaimer"];
+function read() {
+  const fd = new FormData(form), o = {};
+  for (const [k, v] of fd.entries()) o[k] = typeof v === "string" ? v.trim() : v;
+  o.from = form.from.checked; o.cta = form.cta.checked;
+  return o;
+}
+try {
+  const saved = JSON.parse(localStorage.getItem("cp-post-studio") || "{}");
+  for (const k of KEEP) if (saved[k] != null) {
+    const el = form.elements[k];
+    if (el instanceof RadioNodeList) { for (const r of el) r.checked = r.value === saved[k]; }
+    else if (el) el.value = saved[k];
+  }
+} catch (e) {}
+function persist(v) { try { const o = {}; for (const k of KEEP) o[k] = v[k]; localStorage.setItem("cp-post-studio", JSON.stringify(o)); } catch (e) {} }
+
+/* ---------- copy helpers ---------- */
+function num(v) { const n = parseFloat(String(v || "").replace(/[^0-9.]/g, "")); return isFinite(n) && n > 0 ? n : 0; }
+function money(v) {
+  const n = num(v); if (!n) return "";
+  if (n >= 1e6) return (Math.round(n / 1e4) / 100).toString() + "M";
+  return n.toLocaleString("en-US", {maximumFractionDigits: 0});
+}
+function derive(v) {
+  const bedsTxt = v.beds === "studio" ? "Studio" : v.beds ? v.beds + " Bedroom" : "";
+  let head = v.headline;
+  if (!head) head = [bedsTxt, v.type].filter(Boolean).join(" ") || "New listing";
+  const tag = {rent: "For rent", sale: "For sale", offplan: "Off-plan"}[v.listing] || "For rent";
+  const amount = money(v.price);
+  const per = v.period === "month" ? "/month" : v.period === "year" ? "/year" : "";
+  const fromWord = v.listing === "rent" ? "From" : "Starting price";
+  const price = amount ? "QR " + amount + per : "";
+  const priceFull = amount ? (v.from ? fromWord + " " : "") + price : "";
+  const specs = [];
+  if (v.beds) specs.push(["bed", v.beds === "studio" ? "Studio" : v.beds + (v.beds === "1" ? " Bed" : " Beds")]);
+  if (v.baths) specs.push(["bath", v.baths + (v.baths === "1" ? " Bath" : " Baths")]);
+  if (num(v.area)) specs.push(["area", num(v.area).toLocaleString("en-US") + " sqm"]);
+  return {head, tag, price, priceFull, amount, per, fromWord, specs};
+}
+
+/* ---------- images ---------- */
+function loadImg(src) { return new Promise((res, rej) => { const i = new Image(); i.decoding = "async"; i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+let logoW, logoN, placeholder;
+function makePlaceholder() {
+  const c = document.createElement("canvas"); c.width = 1200; c.height = 1500;
+  const x = c.getContext("2d");
+  const g = x.createLinearGradient(0, 0, 1200, 1500); g.addColorStop(0, "#0B4A66"); g.addColorStop(1, "#45828C");
+  x.fillStyle = g; x.fillRect(0, 0, 1200, 1500);
+  x.fillStyle = "rgba(255,255,255,.75)"; x.font = `600 64px ${F.sans}`; x.textAlign = "center";
+  x.fillText("Add photos", 600, 760);
+  return c;
+}
+const W_ = el => el.naturalWidth || el.width, H_ = el => el.naturalHeight || el.height;
+function drawCover(ctx, ph, x, y, w, h) {
+  const img = ph.img, iw = W_(img), ih = H_(img), s = Math.max(w / iw, h / ih);
+  const dw = iw * s, dh = ih * s;
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  ctx.drawImage(img, x - (dw - w) * ph.fx, y - (dh - h) * ph.fy, dw, dh);
+  ctx.restore();
+}
+const bgCache = new Map();
+function blurred(ph, W, H) {
+  const key = ph.id + ":" + ph.fx + ":" + ph.fy + ":" + W + "x" + H;
+  if (bgCache.has(key)) return bgCache.get(key);
+  const t = document.createElement("canvas"); t.width = Math.ceil(W / 28); t.height = Math.ceil(H / 28);
+  const tc = t.getContext("2d"); tc.imageSmoothingQuality = "high"; drawCover(tc, ph, 0, 0, t.width, t.height);
+  const m = document.createElement("canvas"); m.width = Math.ceil(W / 7); m.height = Math.ceil(H / 7);
+  const mc = m.getContext("2d"); mc.imageSmoothingQuality = "high"; mc.drawImage(t, 0, 0, m.width, m.height);
+  const o = document.createElement("canvas"); o.width = W; o.height = H;
+  const oc = o.getContext("2d"); oc.imageSmoothingQuality = "high"; oc.drawImage(m, 0, 0, W, H);
+  bgCache.set(key, o);
+  return o;
+}
+
+/* ---------- drawing helpers ---------- */
+function rr(ctx, x, y, w, h, r) {
+  const [a, b, c, d] = Array.isArray(r) ? r : [r, r, r, r];
+  ctx.beginPath(); ctx.moveTo(x + a, y);
+  ctx.arcTo(x + w, y, x + w, y + h, b); ctx.arcTo(x + w, y + h, x, y + h, c);
+  ctx.arcTo(x, y + h, x, y, d); ctx.arcTo(x, y, x + w, y, a); ctx.closePath();
+}
+function font(ctx, w, px, fam) { ctx.font = `${w} ${px}px ${fam}`; }
+function fit(ctx, text, w, fam, max, min, maxW) {
+  let px = max; font(ctx, w, px, fam);
+  while (px > min && ctx.measureText(text).width > maxW) { px -= 2; font(ctx, w, px, fam); }
+  return px;
+}
+function wrap(ctx, text, maxW) {
+  const words = text.split(/\s+/), lines = []; let cur = "";
+  for (const wd of words) { const t = cur ? cur + " " + wd : wd; if (ctx.measureText(t).width <= maxW || !cur) cur = t; else { lines.push(cur); cur = wd; } }
+  if (cur) lines.push(cur); return lines;
+}
+function fitLines(ctx, text, w, fam, max, maxW, maxLines) {
+  let px = max, lines;
+  for (; px >= max * 0.45; px -= 2) {
+    font(ctx, w, px, fam); lines = wrap(ctx, text, maxW);
+    const ok = lines.every(l => ctx.measureText(l).width <= maxW);
+    if (ok && lines.length === 1) return {px, lines};
+    if (ok && lines.length <= maxLines && px <= max * 0.78) return {px, lines};
+  }
+  return {px, lines};
+}
+const circ = (cx, cy, r) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0`;
+const ICONS = {
+  pin: ["M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0", circ(12, 10, 3)],
+  tag: ["M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.42l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42z", circ(7.5, 7.5, .6)],
+  bed: ["M2 4v16", "M2 8h18a2 2 0 0 1 2 2v10", "M2 17h20", "M6 8v9"],
+  bath: ["M10 4 8 6", "M17 19v2", "M2 12h20", "M7 19v2", "M9 5 7.62 3.62A2.12 2.12 0 0 0 4 5v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"],
+  area: ["M8 3H5a2 2 0 0 0-2 2v3", "M21 8V5a2 2 0 0 0-2-2h-3", "M3 16v3a2 2 0 0 0 2 2h3", "M16 21h3a2 2 0 0 0 2-2v-3"],
+  check: ["M20 6 9 17l-5-5"],
+  chev: ["m9 18 6-6-6-6"],
+  bubble: ["M7.9 20A9 9 0 1 0 4 16.1L2 22Z"]
+};
+const PHONE = "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z";
+function icon(ctx, name, x, y, size, color, lw) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(size / 24, size / 24);
+  ctx.strokeStyle = color; ctx.lineWidth = lw || 2; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for (const d of ICONS[name]) ctx.stroke(new Path2D(d));
+  if (name === "bubble") { ctx.translate(6.6, 6.6); ctx.scale(.45, .45); ctx.fillStyle = color; ctx.fill(new Path2D(PHONE)); }
+  ctx.restore();
+}
+/* icon + text on a baseline; returns width */
+function iconText(ctx, ic, text, x, base, px, w, fam, col, icol, gap) {
+  const s = px * 1.02; let dx = 0;
+  if (ic) { icon(ctx, ic, x, base - px * .80, s, icol || col, ic === "bubble" ? 2.1 : 1.9); dx = s + (gap ?? px * .32); }
+  font(ctx, w, px, fam); ctx.fillStyle = col; ctx.textAlign = "left"; ctx.fillText(text, x + dx, base);
+  return dx + ctx.measureText(text).width;
+}
+function iconTextWidth(ctx, ic, text, px, w, fam, gap) { font(ctx, w, px, fam); return (ic ? px * 1.02 + (gap ?? px * .32) : 0) + ctx.measureText(text).width; }
+function arabic(ctx, text, x, base, px, col, align) {
+  ctx.save(); ctx.direction = "rtl"; font(ctx, 700, px, F.ar); ctx.fillStyle = col; ctx.textAlign = align || "right"; ctx.fillText(text, x, base); ctx.restore();
+}
+function logo(ctx, img, x, y, w) { ctx.drawImage(img, x, y, w, w / LOGO_AR); return w / LOGO_AR; }
+function arrowBtn(ctx, cx, cy, r, fill) {
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill();
+  icon(ctx, "chev", cx - r * .52, cy - r * .52, r * 1.04, "#fff", 3);
+}
+
+/* ---------- Signature template ---------- */
+function sigTop(ctx, W, isStory, d, showTag) {
+  const g = ctx.createLinearGradient(0, 0, 0, isStory ? 520 : 340);
+  g.addColorStop(0, "rgba(0,40,58,.72)"); g.addColorStop(1, "rgba(0,40,58,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, isStory ? 520 : 340);
+  const ly = isStory ? 150 : 70, lw = isStory ? 250 : 290;
+  const lh = logo(ctx, logoW, 72, ly, lw);
+  if (showTag) {
+    const px = isStory ? 34 : 31; font(ctx, 700, px, F.sans);
+    const tw = ctx.measureText(d.tag).width, ph = px * 2, pw = tw + px * 1.5;
+    const py = ly + lh / 2 - ph / 2;
+    rr(ctx, W - 72 - pw, py, pw, ph, ph / 2); ctx.fillStyle = C.teal; ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.fillText(d.tag, W - 72 - pw / 2, py + ph * .66); ctx.textAlign = "left";
+  }
+}
+function sigCover(ctx, W, H, ph, v, d, isStory) {
+  const k = isStory ? 1.3 : (H === W ? .9 : 1), pad = 72, innerW = W - pad * 2;
+  const blocks = [];
+  if (v.arabic) blocks.push({h: 60 * k, draw: y => arabic(ctx, v.arabic, W - pad, y + 42 * k, 40 * k, C.gray)});
+  const hl = fitLines(ctx, d.head, 600, F.serif, (isStory ? 76 : 86) * k, innerW, 2);
+  blocks.push({h: hl.lines.length * hl.px * 1.1 + 8, draw: y => { font(ctx, 600, hl.px, F.serif); ctx.fillStyle = "#fff"; ctx.textAlign = "left"; hl.lines.forEach((l, i) => ctx.fillText(l, pad, y + hl.px * .9 + i * hl.px * 1.1)); }});
+  if (v.location) blocks.push({h: 58 * k, draw: y => iconText(ctx, "pin", v.location, pad, y + 44 * k, 34 * k, 500, F.sans, C.gray)});
+  blocks.push({h: 46 * k, draw: y => { ctx.fillStyle = "rgba(255,255,255,.16)"; ctx.fillRect(pad, y + 22 * k, innerW, 2); }});
+  const items = d.specs.slice(); if (v.extra) items.push(["check", v.extra]);
+  if (items.length) blocks.push({h: 62 * k, draw: y => {
+    let x = pad; const px = (isStory ? 27 : 32) * k;
+    for (const [ic, t] of items) { const w = iconTextWidth(ctx, ic, t, px, 600, F.sans); if (x + w > W - pad) break; iconText(ctx, ic, t, x, y + 42 * k, px, 600, F.sans, "#fff", C.gray); x += w + 40 * k; }
+  }});
+  if (d.amount) {
+    const pp = 66 * k;
+    blocks.push({h: (v.from ? 128 : 96) * k, draw: y => {
+      let base = y + 74 * k;
+      if (v.from) { font(ctx, 600, 26 * k, F.sans); ctx.fillStyle = C.gray; ctx.fillText(d.fromWord, pad, y + 30 * k); base += 32 * k; }
+      font(ctx, 700, pp * .92, F.sans); ctx.fillStyle = "#fff"; const t = "QR " + d.amount; ctx.fillText(t, pad, base);
+      if (d.per) { const tw = ctx.measureText(t).width; font(ctx, 500, 32 * k, F.sans); ctx.fillStyle = C.gray; ctx.fillText(d.per, pad + tw + 10, base); }
+    }});
+  }
+  blocks.push({h: 74 * k, draw: y => {
+    const base = y + 56 * k;
+    if (v.ref) { font(ctx, 500, 27 * k, F.sans); ctx.fillStyle = C.gray; ctx.fillText(v.ref, pad, base); }
+    if (v.phone) { const px = 40 * k, w = iconTextWidth(ctx, "bubble", v.phone, px, 700, F.sans); iconText(ctx, "bubble", v.phone, W - pad - w, base, px, 700, F.sans, "#fff"); }
+  }});
+  const padTop = 58 * k, padBot = isStory ? 190 : 46 * k;
+  const content = blocks.reduce((a, b) => a + b.h, 0);
+  const panelY = Math.round(H - padBot - content - padTop);
+  drawCover(ctx, ph, 0, 0, W, panelY + 2);
+  sigTop(ctx, W, isStory, d, true);
+  ctx.fillStyle = C.navy; ctx.fillRect(0, panelY, W, H - panelY);
+  ctx.fillStyle = C.teal; ctx.fillRect(pad, panelY, 150, 10);
+  let y = panelY + padTop; for (const b of blocks) { b.draw(y); y += b.h; }
+}
+function sigPhoto(ctx, W, H, ph, v, d, i, n, last) {
+  drawCover(ctx, ph, 0, 0, W, H);
+  sigTop(ctx, W, false, d, false);
+  const bh = 120, y = H - bh;
+  ctx.fillStyle = C.navy; ctx.fillRect(0, y, W, bh);
+  ctx.fillStyle = C.teal; ctx.fillRect(72, y, 150, 8);
+  const cnt = `${i + 1}/${n}`; font(ctx, 600, 28, F.sans); const cw = ctx.measureText(cnt).width;
+  const right = last ? W - 72 : W - 72 - 70;
+  const label = v.location ? d.head + ", " + v.location : d.head;
+  fit(ctx, label, 600, F.sans, 34, 24, right - 72 - cw - 40);
+  ctx.fillStyle = "#fff"; ctx.textAlign = "left"; ctx.fillText(label, 72, y + 74);
+  font(ctx, 600, 28, F.sans); ctx.fillStyle = C.gray; ctx.fillText(cnt, right - cw, y + 74);
+  if (!last) arrowBtn(ctx, W - 72 - 22, y + 63, 30, C.teal);
+}
+function sigCTA(ctx, W, H, ph, v, d) {
+  const sq = H === W, k = sq ? .9 : 1, top = Math.round(H * (sq ? .3 : .36));
+  ctx.fillStyle = C.navy; ctx.fillRect(0, 0, W, H);
+  drawCover(ctx, ph, 0, 0, W, top);
+  const g = ctx.createLinearGradient(0, top * .45, 0, top); g.addColorStop(0, "rgba(0,56,80,0)"); g.addColorStop(1, C.navy);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, top + 1);
+  sigTop(ctx, W, false, d, false);
+  const cx = W / 2; let y = top + 40 * k;
+  ctx.textAlign = "center";
+  font(ctx, 600, 84 * k, F.serif); ctx.fillStyle = "#fff"; ctx.fillText("Book your viewing", cx, y + 70 * k); y += 104 * k;
+  arabic(ctx, "احجز معاينتك", cx, y + 46 * k, 46 * k, C.gray, "center"); y += 82 * k;
+  ctx.fillStyle = C.teal; ctx.fillRect(cx - 60, y, 120, 6); y += 40 * k;
+  const line = v.location ? d.head + " in " + v.location : d.head;
+  fit(ctx, line, 500, F.sans, 34 * k, 24, W - 160); ctx.fillStyle = C.gray; ctx.textAlign = "center"; ctx.fillText(line, cx, y + 34 * k); y += 58 * k;
+  if (d.priceFull) { fit(ctx, d.priceFull, 700, F.sans, 50 * k, 30, W - 160); ctx.fillStyle = "#fff"; ctx.fillText(d.priceFull, cx, y + 54 * k); y += 92 * k; }
+  if (v.phone) {
+    const px = 46 * k, w = iconTextWidth(ctx, "bubble", v.phone, px, 700, F.sans), bw = w + 90 * k, bh = 104 * k;
+    rr(ctx, cx - bw / 2, y, bw, bh, bh / 2); ctx.fillStyle = C.teal; ctx.fill();
+    iconText(ctx, "bubble", v.phone, cx - w / 2, y + bh / 2 + px * .36, px, 700, F.sans, "#fff"); y += bh + 46 * k;
+  }
+  ctx.textAlign = "center";
+  if (v.ref) { font(ctx, 500, 27 * k, F.sans); ctx.fillStyle = C.gray; ctx.fillText(v.ref, cx, y + 20 * k); }
+  if (v.disclaimer) { font(ctx, 400, 23 * k, F.sans); ctx.fillStyle = "rgba(192,194,203,.75)"; ctx.fillText(v.disclaimer, cx, H - 50 * k); }
+  ctx.textAlign = "left";
+}
+
+/* ---------- Frosted template ---------- */
+function frostFrame(ctx, W, H, ph, isStory) {
+  const bg = blurred(ph, W, H); ctx.drawImage(bg, 0, 0);
+  const g = ctx.createLinearGradient(0, 0, 0, isStory ? 440 : 220);
+  g.addColorStop(0, "rgba(0,40,58,.55)"); g.addColorStop(1, "rgba(0,40,58,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, isStory ? 440 : 220);
+  const lw = isStory ? 250 : 250, ly = isStory ? 150 : (H === W ? 24 : 32);
+  const lh = logo(ctx, logoW, (W - lw) / 2, ly, lw);
+  const mx = isStory ? 84 : 104, cy = ly + lh + (isStory ? 46 : 36);
+  const cb = H - (isStory ? 200 : (H === W ? 36 : 50));
+  const card = {x: mx, y: cy, w: W - mx * 2, h: cb - cy, r: 46};
+  frost(ctx, bg, () => rr(ctx, card.x, card.y, card.w, card.h, card.r));
+  return card;
+}
+function frost(ctx, bg, pathFn) {
+  ctx.save(); pathFn(); ctx.clip();
+  ctx.drawImage(bg, 0, 0);
+  ctx.fillStyle = "rgba(255,255,255,.68)"; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.restore();
+  ctx.save(); pathFn(); ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+}
+function frostPhoto(ctx, ph, card, pad, photoH, chipText, bg, k) {
+  const px = card.x + pad, py = card.y + pad, pw = card.w - pad * 2;
+  ctx.save(); rr(ctx, px, py, pw, photoH, 36); ctx.clip(); drawCover(ctx, ph, px, py, pw, photoH); ctx.restore();
+  if (chipText) {
+    const fpx = 44 * k; font(ctx, 800, fpx, F.sans);
+    const cw = ctx.measureText(chipText).width + 44 * k * 1.1, chH = pad + 70 * k;
+    ctx.save(); rr(ctx, card.x, card.y, card.w, card.h, card.r); ctx.clip();
+    ctx.save(); rr(ctx, card.x - 2, card.y - 2, cw + 2, chH + 2, [0, 0, 34, 0]); ctx.clip();
+    ctx.drawImage(bg, 0, 0); ctx.fillStyle = "rgba(255,255,255,.68)"; ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore(); ctx.restore();
+    font(ctx, 800, fpx, F.sans); ctx.fillStyle = C.ink; ctx.textAlign = "left";
+    ctx.fillText(chipText, card.x + 24 * k + 8, card.y + chH / 2 + fpx * .36);
+  }
+  return {px, py, pw, bottom: py + photoH};
+}
+function frostCover(ctx, W, H, ph, v, d, isStory) {
+  const k = isStory ? 1.3 : (H === W ? .9 : 1);
+  const card = frostFrame(ctx, W, H, ph, isStory), bg = blurred(ph, W, H), pad = 28;
+  const innerW = card.w - pad * 2, x0 = card.x + pad;
+  const rows = [];
+  rows.push({h: 112 * k, draw: y => { const t = d.head.toUpperCase(); fit(ctx, t, 800, F.sans, 72 * k, 40, innerW); ctx.fillStyle = C.navy; ctx.textAlign = "left"; ctx.fillText(t, x0, y + 96 * k); }});
+  if (v.arabic) rows.push({h: 54 * k, draw: y => arabic(ctx, v.arabic, x0 + innerW, y + 40 * k, 36 * k, C.navy)});
+  if (v.location) rows.push({h: 54 * k, draw: y => { fit(ctx, v.location, 500, F.sans, 36 * k, 26, innerW - 50); iconText(ctx, "pin", v.location, x0, y + 40 * k, 36 * k, 500, F.sans, C.ink); }});
+  if (d.specs.length) rows.push({h: 52 * k, draw: y => { let x = x0; for (const [ic, t] of d.specs) { const w = iconText(ctx, ic, t, x, y + 38 * k, 32 * k, 600, F.sans, C.ink, C.teal); x += w + 36 * k; } }});
+  if (d.priceFull || v.extra) rows.push({h: 52 * k, draw: y => {
+    let x = x0; const base = y + 38 * k, px = 32 * k;
+    if (d.priceFull) x += iconText(ctx, "tag", d.priceFull, x, base, px, 600, F.sans, C.ink, C.teal);
+    if (d.priceFull && v.extra) { ctx.fillStyle = C.ink; ctx.fillRect(x + 18 * k, base - px * .78, 2, px * .95); x += 38 * k; }
+    if (v.extra) { font(ctx, 500, px, F.sans); ctx.fillStyle = C.ink; ctx.fillText(v.extra, x, base); }
+  }});
+  rows.push({h: 62 * k, draw: y => {
+    const base = y + 46 * k;
+    if (v.ref) { font(ctx, 500, 30 * k, F.sans); ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.fillText("ID: " + v.ref, x0, base); }
+    if (v.phone) { const px = 44 * k, w = iconTextWidth(ctx, "bubble", v.phone, px, 800, F.sans); iconText(ctx, "bubble", v.phone, x0 + innerW - w, base, px, 800, F.sans, C.ink); }
+  }});
+  const tb = rows.reduce((a, r) => a + r.h, 0) + 26 * k;
+  const photoH = card.h - pad - tb;
+  const p = frostPhoto(ctx, ph, card, pad, photoH, d.tag.toUpperCase(), bg, k);
+  arrowBtn(ctx, p.px + p.pw - 150 * k, p.bottom, 43 * k, C.teal);
+  let y = p.bottom; for (const r of rows) { r.draw(y); y += r.h; }
+}
+function frostPhotoSlide(ctx, W, H, ph, v, d, i, n, last) {
+  const card = frostFrame(ctx, W, H, ph, false), bg = blurred(ph, W, H), pad = 28;
+  const p = frostPhoto(ctx, ph, card, pad, card.h - pad - 104, null, bg, 1);
+  if (!last) arrowBtn(ctx, p.px + p.pw - 150, p.bottom, 43, C.teal);
+  const cnt = `${i + 1}/${n}`; font(ctx, 600, 30, F.sans); const cw = ctx.measureText(cnt).width;
+  ctx.fillStyle = C.ink; ctx.fillText(cnt, p.px + p.pw - cw, p.bottom + 70);
+  const label = v.location || d.head;
+  const lpx = fit(ctx, label, 600, F.sans, 34, 22, p.pw - cw - 90 - (last ? 0 : 150));
+  iconText(ctx, v.location ? "pin" : null, label, p.px, p.bottom + 70, lpx, 600, F.sans, C.ink);
+}
+function frostCTA(ctx, W, H, ph, v, d) {
+  const sq = H === W, k = sq ? .86 : 1;
+  const card = frostFrame(ctx, W, H, ph, false), bg = blurred(ph, W, H), pad = 28;
+  const p = frostPhoto(ctx, ph, card, pad, Math.round(card.h * (sq ? .3 : .36)), null, bg, 1);
+  const cx = W / 2; let y = p.bottom + 26 * k; ctx.textAlign = "center";
+  font(ctx, 800, 64 * k, F.sans); ctx.fillStyle = C.navy; ctx.fillText("BOOK YOUR VIEWING", cx, y + 64 * k); y += 90 * k;
+  arabic(ctx, "احجز معاينتك", cx, y + 44 * k, 44 * k, C.navy, "center"); y += 68 * k;
+  const line = v.location ? d.head + " in " + v.location : d.head;
+  ctx.textAlign = "center"; fit(ctx, line, 500, F.sans, 32 * k, 22, card.w - 100); ctx.fillStyle = C.ink; ctx.fillText(line, cx, y + 32 * k); y += 50 * k;
+  if (d.priceFull) { fit(ctx, d.priceFull, 700, F.sans, 36 * k, 24, card.w - 100); ctx.fillText(d.priceFull, cx, y + 36 * k); y += 64 * k; }
+  if (v.phone) {
+    const px = 46 * k, w = iconTextWidth(ctx, "bubble", v.phone, px, 800, F.sans), bw = w + 84 * k, bh = 98 * k;
+    rr(ctx, cx - bw / 2, y, bw, bh, bh / 2); ctx.fillStyle = C.teal; ctx.fill();
+    iconText(ctx, "bubble", v.phone, cx - w / 2, y + bh / 2 + px * .36, px, 800, F.sans, "#fff"); y += bh + 40 * k;
+  }
+  ctx.textAlign = "center";
+  if (v.ref) { font(ctx, 500, 28 * k, F.sans); ctx.fillStyle = C.ink; ctx.fillText("ID: " + v.ref, cx, y + 16 * k); }
+  if (v.disclaimer) { font(ctx, 500, 22 * k, F.sans); ctx.fillStyle = "rgba(33,39,33,.7)"; ctx.fillText(v.disclaimer, cx, card.y + card.h - 30 * k); }
+  ctx.textAlign = "left";
+}
+
+/* ---------- build outputs ---------- */
+function plan(v) {
+  const photos = S.photos.length ? S.photos : [{id: "ph", img: placeholder, fx: .5, fy: .5}];
+  const cover = photos[0];
+  const room = v.cta ? MAX_SLIDES - 1 : MAX_SLIDES;
+  const inner = photos.slice(1, room);
+  const n = 1 + inner.length + (v.cta ? 1 : 0);
+  const slides = [{kind: "cover", ph: cover}];
+  inner.forEach((ph, j) => slides.push({kind: "photo", ph, i: j + 1}));
+  if (v.cta) slides.push({kind: "cta", ph: cover});
+  slides.forEach(s => s.n = n);
+  return {slides, cover, dropped: Math.max(0, photos.length - 1 - inner.length)};
+}
+function paint(canvas, W, H, s, v, d) {
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d"); ctx.imageSmoothingQuality = "high"; ctx.textBaseline = "alphabetic";
+  ctx.clearRect(0, 0, W, H);
+  const sig = v.tpl !== "frosted", story = H > W * 1.6;
+  const last = s.i === s.n - 1 && s.kind === "photo";
+  if (s.kind === "cover" || story) (sig ? sigCover : frostCover)(ctx, W, H, s.ph, v, d, story);
+  else if (s.kind === "photo") (sig ? sigPhoto : frostPhotoSlide)(ctx, W, H, s.ph, v, d, s.i, s.n, last);
+  else (sig ? sigCTA : frostCTA)(ctx, W, H, s.ph, v, d);
+}
+const car = document.getElementById("car"), storyEl = document.getElementById("story");
+let current = {slides: [], story: null, v: null};
+function slideEl(parent, idx) {
+  let el = parent.children[idx];
+  if (!el) {
+    el = document.createElement("div"); el.className = "slide";
+    el.innerHTML = '<canvas role="img"></canvas><div class="cap"><span></span><button type="button">Save</button></div>';
+    parent.appendChild(el);
+  }
+  return el;
+}
+function render() {
+  const v = read(); persist(v);
+  const d = derive(v), H = v.size === "square" ? 1080 : 1350;
+  const {slides, cover, dropped} = plan(v);
+  slides.forEach((s, idx) => {
+    const el = slideEl(car, idx), cv = el.querySelector("canvas");
+    paint(cv, 1080, H, s, v, d);
+    const name = s.kind === "cover" ? "Cover" : s.kind === "cta" ? "Contact" : "Photo";
+    cv.setAttribute("aria-label", `Slide ${idx + 1}: ${name}`);
+    el.querySelector("span").textContent = `${idx + 1}. ${name}`;
+    el.querySelector("button").onclick = () => saveOne(cv, fileBase(v) + "_" + (v.size === "square" ? "square" : "post") + "_" + String(idx + 1).padStart(2, "0"));
+  });
+  while (car.children.length > slides.length) car.lastChild.remove();
+  const sEl = slideEl(storyEl, 0), scv = sEl.querySelector("canvas");
+  paint(scv, 1080, 1920, {kind: "cover", ph: cover, i: 0, n: 1}, v, d);
+  scv.setAttribute("aria-label", "Story");
+  sEl.querySelector("span").textContent = "1080 × 1920";
+  sEl.querySelector("button").onclick = () => saveOne(scv, fileBase(v) + "_story");
+  document.getElementById("carInfo").textContent = slides.length === 1
+    ? "Add more photos to make a carousel."
+    : `${slides.length} slides. Slide 1 also works as a single post.` + (dropped ? ` ${dropped} photo${dropped > 1 ? "s" : ""} left out (10 slides max).` : "");
+  current = {slides: [...car.querySelectorAll("canvas")], story: scv, v};
+}
+let t = 0; function schedule() { clearTimeout(t); t = setTimeout(render, 120); }
+form.addEventListener("input", schedule); form.addEventListener("change", schedule);
+document.getElementById("headline").placeholder = "Built from bedrooms and type";
+
+/* ---------- photos UI ---------- */
+const fileIn = document.getElementById("file"), drop = document.getElementById("drop");
+const thumbs = document.getElementById("thumbs"), focusBox = document.getElementById("focus");
+drop.onclick = () => fileIn.click();
+drop.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } };
+["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+fileIn.onchange = () => { addFiles(fileIn.files); fileIn.value = ""; };
+async function addFiles(list) {
+  const files = [...list].filter(f => f.type.startsWith("image/"));
+  if (!files.length) { toast("Those files aren't images. Choose JPG, PNG or WebP photos."); return; }
+  for (const f of files) {
+    const url = URL.createObjectURL(f);
+    try { const img = await loadImg(url); S.photos.push({id: ++uid, img, url, name: f.name, fx: .5, fy: .5}); }
+    catch (e) { toast(`Couldn't open ${f.name}. Try saving it as JPG first.`); URL.revokeObjectURL(url); }
+  }
+  if (S.sel < 0 && S.photos.length) S.sel = 0;
+  drawThumbs(); render();
+}
+function drawThumbs() {
+  thumbs.innerHTML = "";
+  S.photos.forEach((p, i) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "thumb" + (i === S.sel ? " sel" : "");
+    b.setAttribute("aria-label", `Photo ${i + 1}${i === 0 ? ", cover" : ""}. Select to adjust`);
+    b.innerHTML = `<img alt="" src="${p.url}"><b>${i === 0 ? "Cover" : i + 1}</b>`;
+    b.onclick = () => { S.sel = i; drawThumbs(); };
+    thumbs.appendChild(b);
+  });
+  const p = S.photos[S.sel];
+  focusBox.classList.toggle("on", !!p);
+  if (p) { document.getElementById("focusimg").src = p.url; placeDot(p); }
+}
+function placeDot(p) { const dot = document.getElementById("dot"); dot.style.left = p.fx * 100 + "%"; dot.style.top = p.fy * 100 + "%"; }
+document.getElementById("focuswrap").addEventListener("click", e => {
+  const p = S.photos[S.sel]; if (!p) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  p.fx = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)); p.fy = Math.min(1, Math.max(0, (e.clientY - r.top) / r.height));
+  placeDot(p); render();
+});
+function move(to) { const i = S.sel; if (i < 0 || to < 0 || to >= S.photos.length) return; const [p] = S.photos.splice(i, 1); S.photos.splice(to, 0, p); S.sel = to; drawThumbs(); render(); }
+document.getElementById("mvL").onclick = () => move(S.sel - 1);
+document.getElementById("mvR").onclick = () => move(S.sel + 1);
+document.getElementById("mkCover").onclick = () => move(0);
+document.getElementById("rm").onclick = () => {
+  const i = S.sel; if (i < 0) return; URL.revokeObjectURL(S.photos[i].url); S.photos.splice(i, 1);
+  S.sel = S.photos.length ? Math.min(i, S.photos.length - 1) : -1; drawThumbs(); render();
+};
+
+/* ---------- saving ---------- */
+let dl = null;
+const toastEl = document.getElementById("toast"); let tt = 0;
+function toast(m) { toastEl.textContent = m; toastEl.classList.add("on"); clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove("on"), 3200); }
+function fileBase(v) { return ((v.ref || "Capstone") + "_" + (v.tpl === "frosted" ? "frosted" : "signature")).replace(/[^\w-]+/g, "-"); }
+function blobOf(cv, fmt) { return new Promise(res => cv.toBlob(res, fmt === "png" ? "image/png" : "image/jpeg", .95)); }
+async function deliver(filename, blob) {
+  if (dl) {
+    try { await dl.save({filename, data: blob}); toast("Saved " + filename); }
+    catch (e) {
+      if (e && e.code === "declined") return;
+      if (e && e.code === "rate_limited") { toast("Finish the open save prompt first, then try again."); return; }
+      toast("Saving isn't available here. Right-click or long-press a preview to save it.");
+    }
+    return;
+  }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+async function saveOne(cv, base) { const v = read(); await deliver(base + "." + v.fmt, await blobOf(cv, v.fmt)); }
+async function saveZip(which, btn) {
+  if (!window.JSZip) { toast("The ZIP tool didn't load. Save the images one by one."); return; }
+  const v = read(), zip = new JSZip(), base = fileBase(v), size = v.size === "square" ? "square" : "post";
+  btn.disabled = true;
+  try {
+    if (which !== "story") for (const [i, cv] of current.slides.entries()) zip.file(`${base}_${size}_${String(i + 1).padStart(2, "0")}.${v.fmt}`, await blobOf(cv, v.fmt));
+    if (which !== "carousel") zip.file(`${base}_story.${v.fmt}`, await blobOf(current.story, v.fmt));
+    const blob = await zip.generateAsync({type: "blob", compression: "STORE"});
+    await deliver(`${base}_${which === "all" ? "all" : "carousel"}.zip`, blob);
+  } finally { btn.disabled = false; }
+}
+document.getElementById("savePost").onclick = () => current.slides[0] && saveOne(current.slides[0], fileBase(read()) + "_" + (read().size === "square" ? "square" : "post"));
+document.getElementById("saveStory").onclick = () => current.story && saveOne(current.story, fileBase(read()) + "_story");
+document.getElementById("saveCar").onclick = e => saveZip("carousel", e.currentTarget);
+document.getElementById("saveAll").onclick = e => saveZip("all", e.currentTarget);
+
+/* ---------- boot ---------- */
+(async () => {
+  placeholder = makePlaceholder();
+  try {
+    [logoW, logoN] = await Promise.all([loadImg(LOGO_W), loadImg(LOGO_N)]);
+    await Promise.all([
+      "800 40px Figtree", "700 40px Figtree", "600 40px Figtree", "500 40px Figtree", "400 40px Figtree",
+      "600 40px 'Playfair Display'", "700 40px Tajawal"
+    ].map(s => document.fonts.load(s, s.includes("Tajawal") ? "احجز" : "Aa")));
+  } catch (e) {}
+  placeholder = makePlaceholder();
+  render();
+})();
+if (window.claude && window.claude.use) window.claude.use("downloads").then(x => { dl = x; }).catch(() => {});
+})();
+</script>
+</body>
+</html>
