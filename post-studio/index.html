@@ -92,6 +92,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .note{font-size:12.5px;color:var(--muted);margin:14px 0 0}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 .langblock{margin-top:8px}
+.hbtn{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;padding:7px 14px;font-weight:600;font-size:13px;cursor:pointer;min-height:36px}
+.hbtn:hover{background:rgba(255,255,255,.1)}
+.hbtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
 .langblock+.langblock{margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
 .langh{margin:0;font:600 19px/1.3 "Playfair Display",Georgia,serif}
 .langh[lang=ar]{font-family:"Tajawal",sans-serif;font-weight:700}
@@ -99,10 +102,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 </style>
 </head>
 <body>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("cp-post-studio-ui")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
 <header>
   <a href="../app/" aria-label="Back to the Capstone App" style="display:block"><img src="data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjQ4IDM4NSA5ODQgMjY4Ij4KICAKICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzAwMzg0ZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgCiAgPGc+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTY4OS40Niw2NTAuNDR2LTMxLjA1aDEzLjY0YzYuNTIsMCwxMC4xNSw0LjQ3LDEwLjE1LDkuNzNzLTMuNjgsOS43My0xMC4xNSw5LjczaC04LjE5djExLjU5aC01LjQ1Wk03MDIuMzUsNjI0LjE5aC03LjQ1djkuODdoNy40NWMzLjA3LDAsNS4zMS0xLjk1LDUuMzEtNC45M3MtMi4yMy00LjkzLTUuMzEtNC45M1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTc0Ni45LDY1MC40NGwtNi44OS0xMS41OWgtNS40djExLjU5aC01LjQ1di0zMS4wNWgxMy42NGM2LjE0LDAsMTAuMTUsNCwxMC4xNSw5Ljczcy0zLjYzLDguNTItNy4zNSw5LjEybDcuNTksMTIuMmgtNi4yOFpNNzQyLjA2LDYyNC4xOWgtNy40NXY5Ljg3aDcuNDVjMy4wNywwLDUuMzEtMS45NSw1LjMxLTQuOTNzLTIuMjMtNC45My01LjMxLTQuOTNaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03ODQuMjgsNjE4Ljg4YzkuMzEsMCwxNS44Nyw2LjgsMTUuODcsMTYuMDZzLTYuNTYsMTYuMDYtMTUuODcsMTYuMDYtMTUuODctNi44LTE1Ljg3LTE2LjA2LDYuNTYtMTYuMDYsMTUuODctMTYuMDZaTTc4NC4yOCw2MjMuNzJjLTYuMjgsMC0xMC4yOSw0Ljc5LTEwLjI5LDExLjIyczQsMTEuMjIsMTAuMjksMTEuMjIsMTAuMjktNC44NCwxMC4yOS0xMS4yMi00LjA1LTExLjIyLTEwLjI5LTExLjIyWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODE2LjgyLDY1MC40NHYtMzEuMDVoMTMuNjRjNi41MiwwLDEwLjE1LDQuNDcsMTAuMTUsOS43M3MtMy42OCw5LjczLTEwLjE1LDkuNzNoLTguMTl2MTEuNTloLTUuNDVaTTgyOS43MSw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODU2LjUyLDY1MC40NHYtMzEuMDVoMjEuMjd2NC43OWgtMTUuODN2OC4wNWgxNS41djQuNzloLTE1LjV2OC42MWgxNS44M3Y0Ljc5aC0yMS4yN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTkxMi41Miw2NTAuNDRsLTYuODktMTEuNTloLTUuNHYxMS41OWgtNS40NXYtMzEuMDVoMTMuNjRjNi4xNCwwLDEwLjE1LDQsMTAuMTUsOS43M3MtMy42Myw4LjUyLTcuMzUsOS4xMmw3LjU5LDEyLjJoLTYuMjhaTTkwNy42OCw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTQyLjM2LDY1MC40NHYtMjYuMjVoLTkuNHYtNC43OWgyNC4yNXY0Ljc5aC05LjR2MjYuMjVoLTUuNDVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05ODIuMDIsNjUwLjQ0di0xMi44OWwtMTIuMDYtMTguMTVoNi4yNGw4LjU2LDEzLjMxLDguNDctMTMuMzFoNi4yNGwtMTIuMDEsMTguMTV2MTIuODloLTUuNDVaIi8+CiAgICA8L2c+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTMwNy45Niw0NTUuMDljLTcuMjgsMC0xMy45MSw1LjEzLTE5Ljc5LDE1LjUtNS44OCwxMC4zNi04Ljg3LDI2LjQyLTguODcsNDguMjdzMi44OSwzOCw4Ljc4LDQ4LjkyYzUuODgsMTAuOTMsMTIuNTEsMTYuNDMsMTkuODksMTYuNDMsNi42MywwLDE0LjE5LTQuMywyMi42LTEyLjk4LDguNC04LjY4LDE2LjI1LTE4LjY4LDIzLjUzLTMwLjA2aDEuMzFsLTMuODMsNDMuNmMtMTUuOTcsMy44My0zMS4wOSw1Ljc5LTQ1LjM4LDUuODgtOS4xNSwwLTE3LjY1LTEuMjEtMjUuNTgtMy42NC03Ljk0LTIuNDMtMTUuMjItNi4yNi0yMS45NC0xMS4zOS02LjcyLTUuMTQtMTIuMDQtMTIuMzMtMTUuOTctMjEuNTctMy45Mi05LjI0LTUuODgtMjAuMTctNS44OC0zMi42OCwwLTIzLjYyLDYuNTQtNDEuNjQsMTkuNjEtNTMuOTcsMTMuMDctMTIuMzIsMjkuODgtMTguNDksNTAuNDItMTguNDksMTEuODYsMCwyNi44LDEuODcsNDQuODIsNS43bDMuODMsNDIuNjdoLTEuMzFjLTE4Ljg2LTI4LjEtMzQuMjctNDIuMi00Ni4zMS00Mi4yaC4wOVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTQzOC45OCw1OTAuMTJjLTcuMTcsMC0xMi4yNi0yLTE1LjI2LTUuOTktMy00LTQuMzYtOC43Mi00LjA5LTE0LjE3aC0uMzZjLTIuNjMsNS40NS02LjgxLDEwLjE3LTEyLjUzLDE0LjE3LTUuNzIsNC0xMi4zNSw1Ljk5LTE5Ljg5LDUuOTlzLTEzLjktMi4wOS0xOC41My02LjI3Yy00LjYzLTQuMTgtNi45LTkuNDUtNi45LTE1Ljg5LDAtOS41Myw1LjA5LTE3LjQ0LDE1LjI2LTIzLjYxLDEwLjE3LTYuMTcsMjQuNDMtMTEuNTMsNDIuNzctMTUuOThsLjE4LTE2LjE2YzAtMy4wOS0uNzMtNS44MS0yLjE4LTguMDgtMS40NS0yLjI3LTMuODItMy40NS02Ljk5LTMuNDUtNC44MSwwLTguNzIsMy4xOC0xMS43MSw5LjUzLTMsNi4zNi01LjA5LDEzLjgxLTYuMjcsMjIuMjVsLTEuMDkuMTgtMjIuNy0xMi41M2MzLjA5LTYuNDUsOC41NC0xMi4wOCwxNi4zNS0xNi45OCw3LjgxLTQuOSwxOC4wNy03LjM2LDMwLjctNy4zNiw2LjYzLDAsMTIuMzUuODIsMTcuMTYsMi40NSw0LjgyLDEuNjMsOC40NSwzLjYzLDEwLjk5LDUuOTksMi41NCwyLjM2LDQuNTQsNS4yNyw1Ljk5LDguNzIsMS40NSwzLjQ1LDIuMzYsNi41NCwyLjYzLDkuMjYuMjcsMi43Mi4zNiw1LjgxLjI3LDkuMjZsLS45MSwzOS44N2MwLDQuMDksMS40NSw2LjA5LDQuNDUsNS45OSwzLjA5LDAsNS43Mi0yLjM2LDcuODEtNy4wOGwxLjQ1LjgyYy0xLjcyLDUuMTgtNC44MSw5LjYzLTkuMTcsMTMuMzUtNC4zNiwzLjcyLTEwLjA4LDUuNjMtMTcuMTYsNS42M2wtLjI3LjA5Wk00MDYuNzQsNTcwLjk1YzQuNjMsMCw4LjcyLTIuNDUsMTIuMjYtNy4yN2wuNzMtMzEuMjRjLTE0Ljk4LDQuMjctMjIuNTIsMTIuNTMtMjIuNTIsMjQuNzksMCw0LjQ1LjkxLDcuOSwyLjYzLDEwLjI2LDEuNzIsMi4zNiwzLjk5LDMuNTQsNi44MSwzLjU0bC4wOS0uMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01MzQuOTEsNDk1LjY3YzkuNzIsMCwxOC4xNiwzLjcyLDI1LjQzLDExLjE3LDcuMjcsNy40NSwxMC45LDE4Ljk4LDEwLjksMzQuNnMtMy45OSwyOC41MS0xMS45OSwzNi42Yy03Ljk5LDguMDgtMTcuMTYsMTIuMDgtMjcuNjEsMTIuMDgtOC44MSwwLTE2LjgtMi41NC0yMy45Ny03LjU0aC0uMzd2MzAuNTZjMCw2LjYzLjgyLDExLjA4LDIuNDUsMTMuMzUsMS42MywyLjI3LDUuMjcsNC42MywxMC44MSw3LjA4djEuMzZoLTU3LjMxdi0xLjM2YzQtMi42Myw2LjU0LTUuMDksNy43Mi03LjI3LDEuMTgtMi4xOCwxLjczLTYuNjMsMS43My0xMy4yNnYtOTUuMzFjMC0zLjQ1LS42NC02LjA5LTEuOTEtNy44MS0xLjI3LTEuNzItMy44MS0zLjcyLTcuNjMtNS45OXYtMS4wOWMxNS4yNi0xLDI5LjctMy41NCw0My4zMi03LjYzbC0uMTgsMTUuOTguMzYuMThjNy41NC0xMC41MywxNi44OS0xNS44LDI4LjA2LTE1LjhsLjE4LjA5Wk01MzUuMzYsNTQ5LjQzYzAtMjcuMTUtNS00MC43OC0xNS4wOC00MC43OC00LjM2LDAtOC42MywyLjkxLTEyLjksOC42M3YzOS41OWMxLjM2LDcuMDgsMy40NSwxMy4xNyw2LjE4LDE4LjM1LDIuNzIsNS4xOCw2LjE3LDcuNzIsMTAuMjYsNy43Miw3LjcyLDAsMTEuNTMtMTEuMTcsMTEuNTMtMzMuNTFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02MTcuOTMsNTkwLjc1Yy04LjksMC0yMC4zNC0xLjkxLTM0LjQyLTUuODFsLTMuNTQtMzEuMDYsMS4zNi0uMThjMTQuNTMsMjEuMzQsMjYuNywzMS45NywzNi40MiwzMS45NywyLjgyLDAsNS4xNy0uODIsNi45OS0yLjQ1LDEuODItMS42NCwyLjcyLTMuOTEsMi43Mi02LjcyLDAtMy41NC0xLjU1LTYuODEtNC43Mi05Ljcycy04LjYzLTYuNTQtMTYuMzUtMTAuODFjLTMtMS43Mi01LjA4LTMtNi4zNi0zLjcyLTEuMjctLjczLTMuMjctMi02LTMuODEtMi43Mi0xLjgyLTQuNzItMy40NS01Ljk5LTQuOTEtMS4yNy0xLjQ1LTIuNzItMy4yNy00LjM2LTUuNDUtMS42My0yLjE4LTIuODItNC41NC0zLjU0LTcuMDgtLjczLTIuNTQtMS4wOS01LjI3LTEuMDktOC4wOCwwLTguNjMsMy4xOC0xNS4zNSw5LjQ1LTIwLjE2LDYuMjctNC44MSwxNC4zNS03LjE3LDI0LjE2LTcuMTcsNy44MSwwLDE4LjI1LDEuNjMsMzEuNDIsNC44MmwyLjgyLDI4Ljg4LTEuMzYuMzdjLTEzLjYyLTE5LjE2LTI0Ljc5LTI4Ljc5LTMzLjQyLTI4Ljg4LTIuNjMsMC00LjcyLjgyLTYuMzYsMi4zNi0xLjY0LDEuNTQtMi40NSwzLjYzLTIuNDUsNi4yNywwLDMuOTksMS44Miw3LjM2LDUuMzYsMTAuMDgsMy41NCwyLjcyLDkuMjYsNS45OSwxNy4wNyw5LjksOC41NCw0LjM2LDE1LjE3LDguOTksMTkuODksMTMuOTgsNC43Miw1LDcuMDgsMTEuMzUsNy4wOCwxOS4wNywwLDguNTQtMy4wOSwxNS4zNS05LjI2LDIwLjUyLTYuMTcsNS4xOC0xNC43MSw3LjcyLTI1LjcsNy43MmwuMTguMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02ODkuMzgsNTg5LjkzYy03LjU0LDAtMTMuNzEtMi4xOC0xOC42Mi02LjU0LTQuOS00LjM2LTcuMzYtMTAuOS03LjM2LTE5LjUzdi01OS41N2gtOC40NXYtOC43MmMyMC44LTExLjUzLDM0LjI0LTIxLjUyLDQwLjMyLTMxLjIxaDIuMTh2MzAuOTRoMjAuODlsLS45MSw4Ljk5aC0xOS41MmwtLjY0LDUzLjk0Yy0uMDksMTAuNjMsMy44MiwxNS45OCwxMS43MSwxNS45OCw0LjI3LDAsOC4yNy0xLjkxLDExLjk5LTUuNzJsMS4wOSwxLjA5Yy04LjA4LDEzLjYyLTE4Ljk4LDIwLjQzLTMyLjY5LDIwLjQzdi0uMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03NzAuODEsNTkwLjEyYy0xNC45OCwwLTI2Ljk3LTMuOS0zNi4wNS0xMS44MS05LjA4LTcuOS0xMy42Mi0xOS4zNC0xMy42Mi0zNC40MnM0LjYzLTI3LjE1LDEzLjg5LTM1LjZjOS4yNi04LjQ1LDIxLjctMTIuNzEsMzcuMzMtMTIuNzFzMjYuOTcsMy45MSwzNS45NiwxMS44MWM4Ljk5LDcuOSwxMy41MywxOS40NCwxMy41MywzNC42OXMtNC41NCwyNy4wNi0xMy43MSwzNS40MmMtOS4xNyw4LjM1LTIxLjUyLDEyLjUzLTM3LjE0LDEyLjUzbC0uMTguMDlaTTc3Ni4xNyw1ODQuODVjMy4wOSwwLDUuNjMtMS44Miw3LjU0LTUuMzYsMS45MS0zLjU0LDIuOTEtOC45OSwyLjkxLTE2LjI2LDAtNi40NS0uNDYtMTMuOTktMS40NS0yMi43LTEtOC43Mi0zLjA5LTE3LjUzLTYuMjctMjYuMzQtMy4xOC04LjgxLTcuMTctMTMuMjYtMTEuOS0xMy4yNi0zLjA5LDAtNS42MywxLjgyLTcuNjMsNS40NS0yLDMuNjMtMyw5LjE3LTMsMTYuNjIsMCw2LjQ1LjU0LDEzLjk5LDEuNTQsMjIuNjEsMSw4LjYzLDMuMDksMTcuMzUsNi4yNywyNi4wNiwzLjE4LDguNzIsNy4xNywxMy4wOCwxMS45OSwxMy4wOHYuMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05MjkuMDYsNTY2LjQxYzAsNi42My41NCwxMS4wOCwxLjYzLDEzLjM1LDEuMDksMi4yNywzLjcyLDQuNjMsNy44MSw3LjA4djEuMjdoLTUzLjU4di0xLjI3YzQuMjctMi43Miw2LjktNS4xNyw3LjktNy4zNiwxLTIuMTgsMS42My02LjU0LDEuOTEtMTMuMTcuMDktNS40NS4xOC0xOC4yNS4xOC0zOC41MSwwLTUuMzYtMS4wOS05LjM1LTMuMzYtMTEuOTlzLTUuMTgtMy45LTguNzItMy45Yy00LjgxLDAtOS41NCwzLjA5LTE0LjA4LDkuMTd2NDUuMTNjMCw2LjYzLjY0LDExLjA4LDEuODIsMTMuMzUsMS4xOCwyLjI3LDMuNzIsNC43Miw3LjYzLDcuMzZ2MS4yN2gtNTMuNTh2LTEuMjdjNC4wOS0yLjQ1LDYuNzItNC44MSw3LjgxLTcuMDgsMS4wOS0yLjI3LDEuNjMtNi43MiwxLjYzLTEzLjM1di0zNi45NmMwLTguMTctLjU0LTEzLjYyLTEuNjMtMTYuMzUtMS4wOS0yLjcyLTMuNjMtNS43Mi03LjYzLTguOTl2LTEuMjdjMTQuMDgtLjczLDI4LjUyLTMuMjcsNDMuMzItNy42M3YxOS4zNGMzLjE4LTQuODEsNy41NC05LjE3LDEyLjk5LTEzLjA4LDUuNDUtMy45LDExLjgxLTUuOSwxOS4xNi01LjksMi44MiwwLDUuNjMuMzcsOC40NSwxLjA5LDIuODIuNzMsNS45LDIsOS4xNywzLjgyLDMuMjcsMS44Miw1LjksNC44MSw3LjksOC45OSwyLDQuMTgsMyw5LjE3LDMsMTUuMDd2NDEuNzhoLjI3WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAzMC40NCw1NTQuNDNjLTUuMDgsMjMuNy0xOC45OCwzNS41MS00MS42OCwzNS41MS0xMy43MSwwLTI1LjE2LTQuMjctMzQuMjQtMTIuNzEtOS4wOC04LjQ0LTEzLjYyLTIwLjE2LTEzLjYyLTM1LjE0czQuNTQtMjYuNDMsMTMuNjItMzQuNTFjOS4wOC04LjA4LDIwLjYxLTEyLjE3LDM0LjUxLTEyLjE3czIzLjc5LDMuNjMsMzAuNzksMTAuOWM2Ljk5LDcuMjcsMTAuNTMsMTUuNjIsMTAuNTMsMjQuOTd2Mi4wOWgtNTguMDN2MS42M2MwLDExLjM1LDMuMDksMTkuNjIsOS4yNiwyNC44OCw2LjE3LDUuMjcsMTMuNjIsNy45LDIyLjQzLDcuOSwxMS41MywwLDIwLjA3LTQuNjMsMjUuNTItMTMuOTlsLjkxLjY0Wk05ODUuNzYsNTAwLjY2Yy04LjA4LDAtMTIuNTMsOS4xNy0xMy4zNSwyNy42MWgyNy4xNWMtLjQ1LTE4LjQ0LTUuMDgtMjcuNjEtMTMuODktMjcuNjFoLjA5WiIvPgogICAgPC9nPgogICAgPGc+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMjMuNDcsNjMxLjg5bC0uMDctLjExLS42NCwzLjE1LTEuODMtLjM4Yy0zLjQtOS4xNi0xMi45Mi0xOS44NS0yOC4zLTMzLjEybDEuNTEtNy4yOSwxMS4zOS01NC43N3MwLS4wMi4wMS0uMDVsMzEuNjUtMTUyLjIxLjAyLS4xMSwxLjgxLjM4YzMuNCw5LjE2LDEyLjkyLDE5Ljg2LDI4LjMyLDMzLjEzbC0xLjUxLDcuMjktLjQ3LDIuMjYuMDYuMDktNDEuOTQsMjAxLjc1WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAwLjU3LDUxNC40NWwtNi41MiwzMS42Ni0xLjI0LS4yNmMtLjU3LTEuNTQtMS40MS0zLjE2LTIuNS00Ljg0LS4yNy0uNDEtLjU1LS44NS0uODctMS4yOS0uOTEtMS4yOS0xLjk1LTIuNjMtMy4xNS00LjAzLTMuMi0zLjctNy40Mi03Ljc1LTEyLjYxLTEyLjI0bDguMzctNDAuMjFzLjA2LS4xNy4xNi0uNTFsMTQuMTItNjcuOTYuNjQtMy4wMiw0LjA1LTE5Ljg0LDEuMjUuMjZjLjQzLDEuMTYsMSwyLjM2LDEuNzEsMy41OSwzLjEyLDUuMzcsOC45MywxMS41LDE3LjQsMTguOGwtMi4xOCwxMC40OC0zLjczLDE4cy0uMDcuMjUtLjIxLjYzbC0xNC4xOSw2OC4xOHYuMDJzLS41MiwyLjU2LS41MiwyLjU2WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODIuMTQsNTQyLjkybC02LjAyLDI4Ljk0LTI2LjU2LTQwLjUsMTMuNDYtNjQuNzEsOS44NywxNS4wNSwxLjM4LDEuOTYtOC45Niw0My4xMSwzLjkzLDMuNDNjNS43Myw0LjkyLDEwLjA0LDkuMTcsMTIuOSwxMi43MyIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTYxLjczLDYxOS40NmwtMS4yNC0uMjZjLTIuMzUtNi4zMy04LjkxLTEzLjctMTkuNTItMjIuODVsLjY2LTMuMjUuNy0zLjMyLDcuMTYtMzQuNDVzMC0uMDIsMC0uMDRsMTguOTgtOTEuMywxLjI2LjI2YzIuMzUsNi4zMyw4LjkxLDEzLjcsMTkuNTIsMjIuODVsLTEuMDYsNS4wMi00Ljk5LDI0LjA1cy0uMTIuMzgtLjM0Ljk4di4wNXMtMTAuMDgsNDguNDEtMTAuMDgsNDguNDFjMCwwLDAsLjAyLDAsLjA0LS4xLjU1LS4xOCwxLjAzLS4yNSwxLjRsLTEwLjgsNTIuNDFaIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4=" alt="Capstone Property"></a>
   <h1>Listing post studio</h1>
   <p>Post, carousel and story in English and Arabic</p>
+  <button type="button" id="uiTheme" class="hbtn"></button>
 </header>
 <main>
 <form class="panel" id="f" autocomplete="off" onsubmit="return false">
@@ -113,6 +118,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         <label><input type="radio" name="tpl" value="signature" checked><span>Signature<small>New, brand-led</small></span></label>
         <label><input type="radio" name="tpl" value="frosted"><span>Frosted<small>Current style</small></span></label>
       </div></div>
+    <div class="f"><label>Colour</label>
+      <div class="seg">
+        <label><input type="radio" name="theme" value="navy" checked><span>Navy</span></label>
+        <label><input type="radio" name="theme" value="white"><span>White</span></label>
+      </div>
+      <p class="hint">Sets the panel colour on Signature posts. Frosted keeps its glass card.</p></div>
     <div class="f"><label>Language</label>
       <div class="seg">
         <label><input type="radio" name="lang" value="en"><span>English</span></label>
@@ -244,7 +255,7 @@ document.getElementById("locs").innerHTML = LOCS.map(l => `<option value="${l[0]
 const form = document.getElementById("f");
 const S = {photos: [], sel: -1};
 let uid = 0;
-const KEEP = ["tpl", "size", "lang", "phone", "fmt", "disclaimer", "disclaimerAr"];
+const KEEP = ["tpl", "theme", "size", "lang", "phone", "fmt", "disclaimer", "disclaimerAr"];
 function read() {
   const fd = new FormData(form), o = {};
   for (const [k, v] of fd.entries()) o[k] = typeof v === "string" ? v.trim() : v;
@@ -261,6 +272,9 @@ try {
 } catch (e) {}
 function persist(v) { try { const o = {}; for (const k of KEEP) o[k] = v[k]; localStorage.setItem("cp-post-studio", JSON.stringify(o)); } catch (e) {} }
 
+form.querySelectorAll('input[name="listing"]').forEach(r => r.addEventListener("change", () => {
+  if (r.checked) form.period.value = r.value === "rent" ? "month" : "total";
+}));
 const locIn = form.location, locArIn = form.locationAr;
 let locArTouched = false;
 locArIn.addEventListener("input", () => { locArTouched = locArIn.value.trim() !== ""; });
@@ -292,7 +306,7 @@ function derive(v, lang) {
     if (v.baths) specs.push(["bath", v.baths + (v.baths === "1" ? " حمام" : " حمامات")]);
     if (n) specs.push(["area", n.toLocaleString("en-US") + " م²"]);
     const per = {month: "شهرياً", year: "سنوياً", total: ""}[v.period] || "";
-    const big = amount ? amount + " ر.ق" : "";
+    const big = amount ? amount.replace(/M$/, " مليون") + " ر.ق" : "";
     return {ar, head, specs, big, per, fromWord: "ابتداءً من",
       priceFull: amount ? [v.from ? "ابتداءً من" : "", big, per].filter(Boolean).join(" ") : "",
       tag: {rent: "للإيجار", sale: "للبيع", offplan: "على الخارطة"}[v.listing] || "للإيجار",
@@ -445,6 +459,11 @@ function arrowBtn(ctx, cx, cy, r, fill) {
   icon(ctx, "chev", cx - r * .52, cy - r * .52, r * 1.04, "#fff", 3);
 }
 
+const PAL = {
+  navy: {bg: C.navy, head: "#fff", muted: C.gray, icon: C.gray, line: "rgba(255,255,255,.16)", fade: "rgba(0,56,80,0)", disc: "rgba(192,194,203,.75)"},
+  white: {bg: "#FFFFFF", head: C.navy, muted: "#5D6973", icon: C.teal, line: "rgba(0,56,80,.14)", fade: "rgba(255,255,255,0)", disc: "rgba(33,39,33,.6)"}
+};
+let P = PAL.navy;
 /* ---------- Signature ---------- */
 function sigTop(ctx, W, isStory, d, showTag) {
   const gh = isStory ? 520 : 340, g = ctx.createLinearGradient(0, 0, 0, gh);
@@ -463,16 +482,16 @@ function sigTop(ctx, W, isStory, d, showTag) {
 function sigCover(ctx, W, H, ph, v, d, isStory) {
   const k = isStory ? 1.3 : (H === W ? .9 : 1), pad = 72, innerW = W - pad * 2;
   const blocks = [];
-  if (d.sub) blocks.push({h: 60 * k, draw: y => arabicLine(ctx, d.sub, y + 42 * k, 40 * k, C.gray, pad)});
+  if (d.sub) blocks.push({h: 60 * k, draw: y => arabicLine(ctx, d.sub, y + 42 * k, 40 * k, P.muted, pad)});
   const hl = fitLines(ctx, d.head, 600, "serif", (isStory ? 76 : 86) * k, innerW, 2);
-  blocks.push({h: hl.lines.length * hl.px * 1.1 + 8, draw: y => { font(ctx, 600, hl.px, "serif"); ctx.fillStyle = "#fff"; hl.lines.forEach((l, i) => txt(ctx, l, X(pad), y + hl.px * .9 + i * hl.px * 1.1)); }});
-  if (d.loc) blocks.push({h: 58 * k, draw: y => iconText(ctx, "pin", d.loc, X(pad), y + 44 * k, 34 * k, 500, "sans", C.gray)});
-  blocks.push({h: 46 * k, draw: y => { ctx.fillStyle = "rgba(255,255,255,.16)"; ctx.fillRect(pad, y + 22 * k, innerW, 2); }});
+  blocks.push({h: hl.lines.length * hl.px * 1.1 + 8, draw: y => { font(ctx, 600, hl.px, "serif"); ctx.fillStyle = P.head; hl.lines.forEach((l, i) => txt(ctx, l, X(pad), y + hl.px * .9 + i * hl.px * 1.1)); }});
+  if (d.loc) blocks.push({h: 58 * k, draw: y => iconText(ctx, "pin", d.loc, X(pad), y + 44 * k, 34 * k, 500, "sans", P.muted)});
+  blocks.push({h: 46 * k, draw: y => { ctx.fillStyle = P.line; ctx.fillRect(pad, y + 22 * k, innerW, 2); }});
   const items = d.specs.slice(); if (d.extra) items.push(["check", d.extra]);
   if (items.length) blocks.push({h: 62 * k, draw: y => {
     let used = 0; const px = (isStory ? 27 : 32) * k, gap = 40 * k;
     for (const [ic, t] of items) {
-      const part = [{ic, t, px, w: 600, col: "#fff", icol: C.gray}], w = seqW(ctx, part);
+      const part = [{ic, t, px, w: 600, col: P.head, icol: P.icon}], w = seqW(ctx, part);
       if (used + w > innerW) break;
       seq(ctx, X(pad + used), y + 42 * k, part); used += w + gap;
     }
@@ -481,21 +500,21 @@ function sigCover(ctx, W, H, ph, v, d, isStory) {
     const pp = 66 * k;
     blocks.push({h: (v.from ? 128 : 96) * k, draw: y => {
       let base = y + 74 * k;
-      if (v.from) { font(ctx, 600, 26 * k, "sans"); ctx.fillStyle = C.gray; txt(ctx, d.fromWord, X(pad), y + 30 * k); base += 32 * k; }
-      seq(ctx, X(pad), base, [{t: d.big, w: 700, px: pp * .92, col: "#fff"}, d.per ? {t: d.per, w: 500, px: 32 * k, col: C.gray, gap: 12} : {}]);
+      if (v.from) { font(ctx, 600, 26 * k, "sans"); ctx.fillStyle = P.muted; txt(ctx, d.fromWord, X(pad), y + 30 * k); base += 32 * k; }
+      seq(ctx, X(pad), base, [{t: d.big, w: 700, px: pp * .92, col: P.head}, d.per ? {t: d.per, w: 500, px: 32 * k, col: P.muted, gap: 12} : {}]);
     }});
   }
   blocks.push({h: 74 * k, draw: y => {
     const base = y + 56 * k;
-    if (v.ref) seq(ctx, X(pad), base, [{t: v.ref, w: 500, px: 27 * k, col: C.gray, f: "lat"}]);
-    if (v.phone) { const part = [{ic: "bubble", t: v.phone, px: 40 * k, w: 700, col: "#fff", f: "lat"}], w = seqW(ctx, part); seq(ctx, X(W - pad - w), base, part); }
+    if (v.ref) seq(ctx, X(pad), base, [{t: v.ref, w: 500, px: 27 * k, col: P.muted, f: "lat"}]);
+    if (v.phone) { const part = [{ic: "bubble", t: v.phone, px: 40 * k, w: 700, col: P.head, f: "lat"}], w = seqW(ctx, part); seq(ctx, X(W - pad - w), base, part); }
   }});
   const padTop = 58 * k, padBot = isStory ? 190 : 46 * k;
   const content = blocks.reduce((a, b) => a + b.h, 0);
   const panelY = Math.round(H - padBot - content - padTop);
   drawCover(ctx, ph, 0, 0, W, panelY + 2);
   sigTop(ctx, W, isStory, d, true);
-  ctx.fillStyle = C.navy; ctx.fillRect(0, panelY, W, H - panelY);
+  ctx.fillStyle = P.bg; ctx.fillRect(0, panelY, W, H - panelY);
   ctx.fillStyle = C.teal; ctx.fillRect(RTL ? W - pad - 150 : pad, panelY, 150, 10);
   let y = panelY + padTop; for (const b of blocks) { b.draw(y); y += b.h; }
 }
@@ -503,37 +522,37 @@ function sigPhoto(ctx, W, H, ph, v, d, i, n, last) {
   drawCover(ctx, ph, 0, 0, W, H);
   sigTop(ctx, W, false, d, false);
   const bh = 120, y = H - bh;
-  ctx.fillStyle = C.navy; ctx.fillRect(0, y, W, bh);
+  ctx.fillStyle = P.bg; ctx.fillRect(0, y, W, bh);
   ctx.fillStyle = C.teal; ctx.fillRect(RTL ? W - 72 - 150 : 72, y, 150, 8);
   const cnt = `${i + 1}/${n}`; font(ctx, 600, 28, "lat"); const cw = ctx.measureText(cnt).width;
   const right = last ? W - 72 : W - 72 - 70;
   const label = d.loc ? d.head + d.sep + d.loc : d.head;
   fit(ctx, label, 600, "sans", 34, 24, right - 72 - cw - 40);
-  ctx.fillStyle = "#fff"; txt(ctx, label, X(72), y + 74);
-  font(ctx, 600, 28, "lat"); ctx.fillStyle = C.gray; txt(ctx, cnt, X(right - cw), y + 74);
+  ctx.fillStyle = P.head; txt(ctx, label, X(72), y + 74);
+  font(ctx, 600, 28, "lat"); ctx.fillStyle = P.muted; txt(ctx, cnt, X(right - cw), y + 74);
   if (!last) arrowBtn(ctx, RTL ? 72 + 22 : W - 72 - 22, y + 63, 30, C.teal);
 }
 function sigCTA(ctx, W, H, ph, v, d) {
   const sq = H === W, k = sq ? .9 : 1, top = Math.round(H * (sq ? .3 : .36));
-  ctx.fillStyle = C.navy; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = P.bg; ctx.fillRect(0, 0, W, H);
   drawCover(ctx, ph, 0, 0, W, top);
-  const g = ctx.createLinearGradient(0, top * .45, 0, top); g.addColorStop(0, "rgba(0,56,80,0)"); g.addColorStop(1, C.navy);
+  const g = ctx.createLinearGradient(0, top * .45, 0, top); g.addColorStop(0, P.fade); g.addColorStop(1, P.bg);
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, top + 1);
   sigTop(ctx, W, false, d, false);
   const cx = W / 2; let y = top + 40 * k;
-  font(ctx, 600, 84 * k, "serif"); ctx.fillStyle = "#fff"; ctxt(ctx, d.book, cx, y + 70 * k); y += 104 * k;
-  font(ctx, d.ar ? 500 : 700, 44 * k, d.ar ? "lat" : "ar"); ctx.fillStyle = C.gray; ctxt(ctx, d.bookAlt, cx, y + 46 * k); y += 82 * k;
+  font(ctx, 600, 84 * k, "serif"); ctx.fillStyle = P.head; ctxt(ctx, d.book, cx, y + 70 * k); y += 104 * k;
+  font(ctx, d.ar ? 500 : 700, 44 * k, d.ar ? "lat" : "ar"); ctx.fillStyle = P.muted; ctxt(ctx, d.bookAlt, cx, y + 46 * k); y += 82 * k;
   ctx.fillStyle = C.teal; ctx.fillRect(cx - 60, y, 120, 6); y += 40 * k;
   const line = d.loc ? d.head + d.inWord + d.loc : d.head;
-  fit(ctx, line, 500, "sans", 34 * k, 24, W - 160); ctx.fillStyle = C.gray; ctxt(ctx, line, cx, y + 34 * k); y += 58 * k;
-  if (d.priceFull) { fit(ctx, d.priceFull, 700, "sans", 50 * k, 30, W - 160); ctx.fillStyle = "#fff"; ctxt(ctx, d.priceFull, cx, y + 54 * k); y += 92 * k; }
+  fit(ctx, line, 500, "sans", 34 * k, 24, W - 160); ctx.fillStyle = P.muted; ctxt(ctx, line, cx, y + 34 * k); y += 58 * k;
+  if (d.priceFull) { fit(ctx, d.priceFull, 700, "sans", 50 * k, 30, W - 160); ctx.fillStyle = P.head; ctxt(ctx, d.priceFull, cx, y + 54 * k); y += 92 * k; }
   if (v.phone) {
     const part = [{ic: "bubble", t: v.phone, px: 46 * k, w: 700, col: "#fff", f: "lat"}], w = seqW(ctx, part), bw = w + 90 * k, bh = 104 * k;
     rr(ctx, cx - bw / 2, y, bw, bh, bh / 2); ctx.fillStyle = C.teal; ctx.fill();
     seq(ctx, X(cx - w / 2), y + bh / 2 + 46 * k * .36, part); y += bh + 46 * k;
   }
-  if (v.ref) { font(ctx, 500, 27 * k, "lat"); ctx.fillStyle = C.gray; ctxt(ctx, v.ref, cx, y + 20 * k); }
-  if (d.disc) { font(ctx, 400, 23 * k, "sans"); ctx.fillStyle = "rgba(192,194,203,.75)"; ctxt(ctx, d.disc, cx, H - 50 * k); }
+  if (v.ref) { font(ctx, 500, 27 * k, "lat"); ctx.fillStyle = P.muted; ctxt(ctx, v.ref, cx, y + 20 * k); }
+  if (d.disc) { font(ctx, 400, 23 * k, "sans"); ctx.fillStyle = P.disc; ctxt(ctx, d.disc, cx, H - 50 * k); }
 }
 
 /* ---------- Frosted ---------- */
@@ -641,7 +660,7 @@ function plan(v) {
   return {slides, cover, dropped: Math.max(0, photos.length - 1 - inner.length)};
 }
 function paint(canvas, W, H, s, v, d) {
-  canvas.width = W; canvas.height = H; CW = W; RTL = d.ar;
+  canvas.width = W; canvas.height = H; CW = W; RTL = d.ar; P = v.theme === "white" ? PAL.white : PAL.navy;
   const ctx = canvas.getContext("2d"); ctx.imageSmoothingQuality = "high"; ctx.textBaseline = "alphabetic";
   ctx.clearRect(0, 0, W, H);
   const sig = v.tpl !== "frosted", story = H > W * 1.6;
@@ -681,7 +700,7 @@ function slideEl(parent, idx) {
   return el;
 }
 function names(v, lang) {
-  const base = ((v.ref || "Capstone") + "_" + (v.tpl === "frosted" ? "frosted" : "signature") + "_" + lang.toUpperCase()).replace(/[^\w-]+/g, "-");
+  const base = ((v.ref || "Capstone") + "_" + (v.tpl === "frosted" ? "frosted" : "signature" + (v.theme === "white" ? "-white" : "")) + "_" + lang.toUpperCase()).replace(/[^\w-]+/g, "-");
   const size = v.size === "square" ? "square" : "post";
   return {base, slide: i => `${base}_${size}_${String(i + 1).padStart(2, "0")}`, story: `${base}_story`};
 }
@@ -804,6 +823,11 @@ async function saveZip(langs, withStory, btn) {
   } finally { btn.disabled = false; }
 }
 document.getElementById("saveAll").onclick = e => saveZip(langsOf(read()), true, e.currentTarget);
+
+const uiBtn = document.getElementById("uiTheme");
+function uiLabel() { uiBtn.textContent = document.documentElement.dataset.theme === "dark" ? "Light mode" : "Dark mode"; }
+uiBtn.onclick = () => { const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; document.documentElement.dataset.theme = t; try { localStorage.setItem("cp-post-studio-ui", t); } catch (e) {} uiLabel(); };
+uiLabel();
 
 /* ---------- boot ---------- */
 (async () => {
