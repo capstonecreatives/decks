@@ -721,6 +721,7 @@ const rankDocs=a=>a.slice().sort((x,y)=>(x.type==='brochure'&&y.type==='brochure
 const TYPES = {
   photo:    { label:'Photo',    long:'Photo / Static', col:'var(--c-photo)'    },
   carousel: { label:'Carousel', long:'Carousel',       col:'var(--c-carousel)' },
+  wati: { label:'WATI', long:'WATI Campaign', col:'var(--c-story)' },
   reels:    { label:'Reels',    long:'Reels / Video',  col:'var(--c-reels)'    },
   story:    { label:'Story',    long:'Story',          col:'var(--c-story)'    },
   brochure: { label:'Brochure', long:'Brochure',       col:'var(--c-brochure)' },
@@ -730,7 +731,7 @@ const TYPES = {
   walkthrough: { label:'Walkthrough', long:'Unit walkthrough', col:'var(--c-carousel)' },
   flipbook: { label:'Flipbook', long:'Interactive flipbook', col:'var(--c-brochure)' }
 };
-const ORDER  = ['brochure','flipbook','progress','photo','carousel','story','reels','walkthrough','construction','gallery'];
+const ORDER  = ['brochure','flipbook','progress','photo','carousel','story','reels','walkthrough','construction','wati','gallery'];
 /* newest first: creatives are ordered by their most recent date (updated, else added),
    newest at the top; ties keep type order. Used by the overview grid and the slide sequence. */
 const _MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
@@ -848,7 +849,7 @@ function downloadAsset(href, filename){
 
 /* ---------- Download all creatives, zipped into per-type folders ---------- */
 const TYPE_FOLDER = { brochure:'Brochure', photo:'Social - Statics', carousel:'Social - Carousels',
-  reels:'Reels', story:'Stories', walkthrough:'Walkthroughs', construction:'Construction Updates', progress:'Construction Updates', gallery:'Gallery' };
+  reels:'Reels', story:'Stories', walkthrough:'Walkthroughs', construction:'Construction Updates', progress:'Construction Updates', gallery:'Gallery', wati:'WATI Campaign' };
 async function fetchAsBlob(url){ const r = await fetch(url); if(!r.ok) throw new Error(url); return await r.blob(); }
 function dataURLtoBlob(u){ const [h,b]=u.split(','); const mime=(h.match(/data:([^;]+)/)||[])[1]||'application/octet-stream';
   const bin=atob(b); const arr=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
@@ -859,7 +860,7 @@ function _catLabel(k){ try { return (typeof catLabel==='function') ? catLabel(k)
 
 /* ---------- Download picker: choose which content types to include ---------- */
 const TYPE_LABEL = { brochure:'Brochure', photo:'Social statics', carousel:'Carousels',
-  reels:'Reels', story:'Stories', walkthrough:'Walkthroughs', construction:'Construction updates', progress:'Construction updates', gallery:'Gallery' };
+  reels:'Reels', story:'Stories', walkthrough:'Walkthroughs', construction:'Construction updates', progress:'Construction updates', gallery:'Gallery', wati:'WATI Campaign' };
 function _typeCount(t){
   let n=0;
   for(const c of CREATIVES){ if(c.type!==t) continue;
@@ -871,7 +872,7 @@ function _typeCount(t){
   return n;
 }
 function openDownloadPicker(){
-  const order=['brochure','progress','photo','carousel','reels','story','walkthrough','construction','gallery'];
+  const order=['brochure','progress','photo','carousel','reels','story','walkthrough','construction','wati','gallery'];
   const present=order.filter(t=>t!=='flipbook' && _typeCount(t)>0);
   if(!present.length){ toast('Nothing to download'); return; }
   const rows=present.map(t=>`<label class="dl-row"><input type="checkbox" data-t="${t}" checked>
@@ -1235,7 +1236,7 @@ function feedCaption(c){
 /* photo + carousel share the feed frame; carousel adds dots and per-card CTA */
 function feedPreview(c){
   const col = T(c).col;
-  const cards = c.type==='carousel' ? (c.cards&&c.cards.length?c.cards:[{}]) : null;
+  const cards = (c.type==='carousel'||c.type==='wati') ? (c.cards&&c.cards.length?c.cards:[{}]) : null;
   const wrap = el(`<div>
     <div class="ig">
       ${feedHead()}
@@ -1344,7 +1345,7 @@ function creativeSlide(c){
   const wrap = el(`<div class="ad-layout ${tall?'tall':''}"></div>`);
   const preview = (c.type==='reels'||c.type==='story'||c.type==='construction'||c.type==='walkthrough') ? vertPreview(c,s) : feedPreview(c);
 
-  const cards = c.type==='carousel' ? (c.cards&&c.cards.length?c.cards:[]) : [];
+  const cards = (c.type==='carousel'||c.type==='wati') ? (c.cards&&c.cards.length?c.cards:[]) : [];
   const video = c.type==='reels' || c.type==='story' || c.type==='construction' || c.type==='walkthrough';
 
   /* Finished client artwork carries its copy baked into the design, so a
@@ -1627,14 +1628,14 @@ function browseSlide(){
       <div class="bgrid"></div></div>`);
     const grid = g.querySelector('.bgrid');
     kids.forEach(c=>{ const t=c.type;
-      const pic = c.type==='carousel' ? ((c.cards||[]).find(x=>has(x.src))||{}).src
+      const pic = (c.type==='carousel'||c.type==='wati') ? ((c.cards||[]).find(x=>has(x.src))||{}).src
                 : isVid(c) ? (c.poster||'') : c.src;
-      const badge = (c.type==='reels'||c.type==='construction'||c.type==='walkthrough') ? ICONS.film : c.type==='carousel' ? ICONS.cards
+      const badge = (c.type==='reels'||c.type==='construction'||c.type==='walkthrough') ? ICONS.film : (c.type==='carousel'||c.type==='wati') ? ICONS.cards
                   : c.type==='story' ? ICONS.ring : '';
       const t2 = el(`<button class="thumb" data-go="${c.id}" style="--tcol:${TYPES[t].col}">
         <span class="rib"></span><span class="tlab">${esc(TYPES[t].label)}</span>
         <div class="pic">${has(pic)?'':'<div class="blank">Asset pending</div>'}</div>
-        ${badge?`<span class="badge">${badge}${c.type==='carousel'&&c.cards?`<span>${c.cards.length}</span>`:''}</span>`:''}
+        ${badge?`<span class="badge">${badge}${(c.type==='carousel'||c.type==='wati')&&c.cards?`<span>${c.cards.length}</span>`:''}</span>`:''}
         <div class="cap"><b>${esc(c.id)}</b><span dir="auto">${esc(c.name||'Untitled')}</span>${has(c.added)?`<span class="when">${esc(c.added)}</span>`:''}</div>
       </button>`);
       if(has(pic)) t2.querySelector('.pic').appendChild(lazyImg(pic, c.name||c.id));
