@@ -99,6 +99,9 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
 .scrub{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);align-items:start}
 .scrubview canvas{width:100%;height:auto;display:block;border-radius:9px;background:#0B3042}
 @media (max-width:520px){.scrub{grid-template-columns:110px minmax(0,1fr)}}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 4px;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--teal);margin:0}
+.subj .hint.busy{color:var(--teal)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#003850;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;z-index:20}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
@@ -138,9 +141,31 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
       <p class="hint">Drag the large preview to move the photo.</p></div>
     <div class="f"><div class="rowlbl"><label for="dy">Text height</label><output id="dyV">As approved</output></div>
       <input type="range" id="dy" min="-150" max="600" step="2" value="0"></div>
+    <div class="f"><label>Black gradient</label>
+      <div class="seg">
+        <label><input type="radio" name="gfrom" value="top" checked><span>Top</span></label>
+        <label><input type="radio" name="gfrom" value="bottom"><span>Bottom</span></label>
+        <label><input type="radio" name="gfrom" value="both"><span>Both</span></label>
+      </div></div>
+    <div class="f"><div class="rowlbl"><label for="gs">Gradient strength</label><output id="gsV">Off</output></div>
+      <input type="range" id="gs" min="0" max="100" step="1" value="0"></div>
+    <div class="f"><div class="rowlbl"><label for="gl">Gradient length</label><output id="glV">45%</output></div>
+      <input type="range" id="gl" min="10" max="100" step="1" value="45"></div>
+    <div class="f subj"><label class="check"><input type="checkbox" id="behind"> Put the text behind the subject</label>
+      <div id="brushBox" hidden>
+        <div class="seg" style="margin:8px 0 8px">
+          <label><input type="radio" name="tool" value="move" checked><span>Move photo</span></label>
+          <label><input type="radio" name="tool" value="erase"><span>Remove from subject</span></label>
+          <label><input type="radio" name="tool" value="add"><span>Add to subject</span></label>
+        </div>
+        <div class="rowlbl"><label for="brush">Brush size</label><output id="brushV">70 px</output></div>
+        <input type="range" id="brush" min="16" max="240" step="2" value="70">
+        <div class="tools" style="margin:6px 0 4px"><button type="button" class="btn" id="maskReset">Undo brush edits</button></div>
+      </div>
+      <p class="hint" id="subjMsg">Finds the main subject (people, a building) and lays it over the headline. Move the text down with Text height so it overlaps the subject.</p></div>
     <div class="tools">
       <button type="button" class="btn" id="resetPos">Reset photo &amp; text</button>
-      <button type="button" class="btn" id="applyAll">Use this wording on all</button>
+      <button type="button" class="btn" id="applyAll">Use this look on all</button>
       <button type="button" class="btn" id="remove">Remove</button>
     </div>
   </fieldset>
@@ -196,8 +221,21 @@ const RT = {
     if(img){ const s=Math.max(W/img.width,H/img.height)*(v.zoom||1), dw=img.width*s, dh=img.height*s;
       const fx=v.fx??.5, fy=v.fy??.5; let x=W/2-fx*dw, y=H/2-fy*dh;
       x=Math.min(0,Math.max(W-dw,x)); y=Math.min(0,Math.max(H-dh,y));
-      ctx.imageSmoothingQuality="high"; ctx.drawImage(img,x,y,dw,dh); }
-    ctx.restore(); RT.drawText(ctx, v, 1);
+      ctx.imageSmoothingQuality="high"; ctx.drawImage(img,x,y,dw,dh); v._box=[x,y,dw,dh]; }
+    RT.drawGradient(ctx, v); ctx.restore();
+    RT.drawText(ctx, v, 1);
+    if (img && v.behind && v.mask && v._box) { // subject cut-out over the headline, with the same gradient on it
+      const o = RT._off || (RT._off = document.createElement("canvas")); o.width=W; o.height=H; const ox=o.getContext("2d"); const [x,y,dw,dh]=v._box;
+      ox.imageSmoothingQuality="high"; ox.drawImage(img,x,y,dw,dh); ox.globalCompositeOperation="destination-in"; ox.drawImage(v.mask,x,y,dw,dh);
+      ox.globalCompositeOperation="source-atop"; RT.drawGradient(ox, v); ox.globalCompositeOperation="source-over"; ctx.drawImage(o,0,0);
+    }
+  },
+  drawGradient(ctx, v){ // black, eased fall-off; strength 0–1, length as a share of the height
+    const s=v.gs||0; if (s<=0) return; const {W,H}=RT, len=Math.max(.05, v.gl ?? .45)*H;
+    const one = (y0, y1) => { const g=ctx.createLinearGradient(0,y0,0,y1);
+      for (let i=0;i<=8;i++){ const k=i/8, a=s*Math.pow(1-k,1.6); g.addColorStop(k,"rgba(0,0,0,"+a.toFixed(4)+")"); }
+      ctx.fillStyle=g; ctx.fillRect(0,Math.min(y0,y1),W,Math.abs(y1-y0)); };
+    const f=v.gfrom||"top"; if (f!=="bottom") one(0,len); if (f!=="top") one(H,H-len);
   },
   drawText(ctx, v, scale){ // headline only, at the approved position; scale<1 for small previews
     ctx.save(); if (scale !== 1) ctx.scale(scale, scale);
@@ -236,6 +274,10 @@ function makeSample(){ // neutral sky gradient for the empty state
 function paint(){
   const it = sel>=0 ? items[sel] : null;
   RT.draw(bctx, it ? it.img : sample, it || {order:"ar", ar:PRESETS[0].ar, en:PRESETS[0].en});
+  if (it && it.behind && it.mask && tool() !== "move" && it._box) { // show the subject area while brushing
+    const o=document.createElement("canvas"); o.width=1080; o.height=1920; const ox=o.getContext("2d"); const [x,y,dw,dh]=it._box;
+    ox.drawImage(it.mask,x,y,dw,dh); ox.globalCompositeOperation="source-in"; ox.fillStyle="rgba(69,130,140,.5)"; ox.fillRect(0,0,1080,1920); bctx.drawImage(o,0,0);
+  }
   if (it) { RT.draw(it.c.getContext("2d"), it.img, it); it.cap.textContent = it.en || it.ar || "Cover"; }
 }
 function syncForm(){
@@ -247,15 +289,19 @@ function syncForm(){
   $("ar").value = it.ar; $("en").value = it.en; pre.value = matchPreset(it);
   $("zoom").value = Math.round(it.zoom*100); $("zoomV").textContent = Math.round(it.zoom*100)+"%";
   $("dy").value = it.dy; $("dyV").textContent = it.dy ? (it.dy>0?"+":"")+it.dy+" px" : "As approved";
+  document.querySelector(`input[name=gfrom][value=${it.gfrom}]`).checked = true;
+  $("gs").value = Math.round(it.gs*100); $("gsV").textContent = it.gs ? Math.round(it.gs*100)+"%" : "Off";
+  $("gl").value = Math.round(it.gl*100); $("glV").textContent = Math.round(it.gl*100)+"%";
+  $("behind").checked = !!it.behind; subjNote(it); $("brushBox").hidden = !(it.behind && it.mask);
 }
-function select(i){ sel=i; syncForm(); paint(); }
+function select(i){ sel=i; const mv=document.querySelector("input[name=tool][value=move]"); if (mv) { mv.checked=true; big.style.cursor=""; } syncForm(); paint(); }
 
 function addItem(img, name, base){
   const c = document.createElement("canvas"); c.width=1080; c.height=1920;
   const card = document.createElement("button"); card.type="button"; card.className="card";
   const cap = document.createElement("span"); const dl = document.createElement("button"); dl.type="button"; dl.className="link"; dl.textContent="Save";
   const capw = document.createElement("div"); capw.className="cap"; capw.append(cap, dl); card.append(c, capw);
-  const it = {img, name, order:base.order, ar:base.ar, en:base.en, zoom:1, fx:.5, fy:.5, dy:0, c, card, cap};
+  const it = {img, name, order:base.order, ar:base.ar, en:base.en, zoom:1, fx:.5, fy:.5, dy:base.dy||0, gs:base.gs||0, gl:base.gl??.45, gfrom:base.gfrom||"top", behind:false, mask:null, c, card, cap};
   card.onclick = e => { if (e.target===dl) return; select(items.indexOf(it)); };
   dl.onclick = () => saveItem(it);
   items.push(it); $("grid").append(card); RT.draw(c.getContext("2d"), img, it); cap.textContent = it.en || it.ar;
@@ -273,6 +319,43 @@ async function addFiles(files){
   if (added) select(items.length - added);
   if (vids.length) analyzeVideo(vids[0]);
   if (vids.length > 1) toast("One video at a time — scanning " + vids[0].name);
+}
+
+/* ---------- subject cut-out (on-device, silueta / U²-Net) ---------- */
+const SEG = {session:null, loading:null};
+function subjNote(it){ const m=$("subjMsg"); m.classList.remove("busy");
+  if (!it || !it.behind) { m.textContent = "Finds the main subject (people, a building) and lays it over the headline. Move the text down with Text height so it overlaps the subject."; return; }
+  if (it.maskMsg) m.textContent = it.maskMsg; }
+async function segSession(){
+  if (SEG.session) return SEG.session;
+  if (!SEG.loading) SEG.loading = (async () => {
+    if (!window.ort) await new Promise((res, rej) => { const s=document.createElement("script"); s.src="vendor/ort/ort.wasm.min.js"; s.onload=res; s.onerror=()=>rej(new Error("runtime")); document.head.append(s); });
+    ort.env.wasm.wasmPaths = new URL("vendor/ort/", location.href).href; ort.env.wasm.numThreads = 1;
+    return SEG.session = await ort.InferenceSession.create(new URL("models/silueta.onnx", location.href).href, {executionProviders:["wasm"]});
+  })();
+  try { return await SEG.loading; } catch(e) { SEG.loading = null; throw e; }
+}
+async function findSubject(it){
+  const m=$("subjMsg"); m.classList.add("busy"); m.textContent = SEG.session ? "Finding the subject…" : "Loading the subject finder (first time only, about 45 MB)…";
+  try {
+    const sess = await segSession(); m.textContent = "Finding the subject…"; await new Promise(r=>setTimeout(r,30));
+    const S=320, c=document.createElement("canvas"); c.width=S; c.height=S; const x=c.getContext("2d",{willReadFrequently:true});
+    x.imageSmoothingQuality="high"; x.drawImage(it.img,0,0,S,S); const d=x.getImageData(0,0,S,S).data;
+    let mx=1; for (let i=0;i<d.length;i+=4) mx=Math.max(mx,d[i],d[i+1],d[i+2]);
+    const mean=[.485,.456,.406], sd=[.229,.224,.225], inp=new Float32Array(3*S*S);
+    for (let p=0;p<S*S;p++) for (let ch=0;ch<3;ch++) inp[ch*S*S+p]=(d[p*4+ch]/mx-mean[ch])/sd[ch];
+    const out = await sess.run({[sess.inputNames[0]]: new ort.Tensor("float32", inp, [1,3,S,S])});
+    const o = out[sess.outputNames[0]].data; let lo=Infinity, hi=-Infinity; for (const v of o){ if(v<lo)lo=v; if(v>hi)hi=v; }
+    const mk=document.createElement("canvas"); mk.width=S; mk.height=S; const mx2=mk.getContext("2d"); const id=mx2.createImageData(S,S); let cover=0;
+    for (let p=0;p<S*S;p++){ const v=(o[p]-lo)/(hi-lo+1e-6), a=Math.min(1,Math.max(0,(v-.3)/.4)), s=a*a*(3-2*a); id.data[p*4+3]=Math.round(s*255); if (v>.5) cover++; }
+    mx2.putImageData(id,0,0); cover/=S*S;
+    const iw=it.img.width, ih=it.img.height, k=Math.min(1, 1440/Math.max(iw,ih)), hm=document.createElement("canvas"); hm.width=Math.round(iw*k); hm.height=Math.round(ih*k);
+    const hx=hm.getContext("2d"); hx.imageSmoothingQuality="high"; hx.drawImage(mk,0,0,hm.width,hm.height);
+    const keep=document.createElement("canvas"); keep.width=hm.width; keep.height=hm.height; keep.getContext("2d").drawImage(hm,0,0);
+    if (cover < .01 || hi-lo < .2) { it.mask=null; it.behind=false; it.maskMsg="No clear subject found in this photo, so the text stays on top."; $("behind").checked=false; }
+    else { it.mask = hm; it.mask0 = keep; it.maskMsg = `Subject found (${Math.round(cover*100)}% of the photo). If it doesn't overlap the headline yet, move the text down with Text height. Use the brush to remove anything that shouldn't cover the text.`; }
+  } catch(e) { console.error(e); it.behind=false; it.mask=null; $("behind").checked=false; it.maskMsg="The subject finder couldn't load. Check your connection and try again."; }
+  m.classList.remove("busy");
 }
 
 /* ---------- video: find the best cover frames ---------- */
@@ -398,14 +481,29 @@ $("ar").oninput = e => { edit(it=>it.ar=e.target.value.trim()); pre.value = item
 $("en").oninput = e => { const p=e.target.selectionStart; e.target.value=e.target.value.toUpperCase(); e.target.setSelectionRange(p,p); edit(it=>it.en=e.target.value.trim()); pre.value = items[sel] ? matchPreset(items[sel]) : ""; };
 $("zoom").oninput = e => { edit(it=>it.zoom=e.target.value/100); $("zoomV").textContent=e.target.value+"%"; };
 $("dy").oninput = e => { const v=+e.target.value; edit(it=>it.dy=v); $("dyV").textContent = v ? (v>0?"+":"")+v+" px" : "As approved"; };
-$("resetPos").onclick = () => { edit(it=>{it.zoom=1;it.fx=.5;it.fy=.5;it.dy=0;}); syncForm(); };
-$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; RT.draw(it.c.getContext("2d"),it.img,it); it.cap.textContent=it.en||it.ar; }); toast("Wording applied to all " + items.length + " covers"); };
+document.querySelectorAll("input[name=gfrom]").forEach(r => r.onchange = () => edit(it=>it.gfrom=r.value));
+$("gs").oninput = e => { edit(it=>it.gs=e.target.value/100); $("gsV").textContent = +e.target.value ? e.target.value+"%" : "Off"; };
+$("gl").oninput = e => { edit(it=>it.gl=e.target.value/100); $("glV").textContent = e.target.value+"%"; };
+$("behind").onchange = async e => { const it=items[sel]; if(!it) return; it.behind = e.target.checked; if (it.behind && !it.mask) await findSubject(it); paint(); subjNote(it); $("brushBox").hidden = !(it.behind && it.mask); };
+const tool = () => (document.querySelector("input[name=tool]:checked")||{}).value || "move";
+document.querySelectorAll("input[name=tool]").forEach(r => r.onchange = () => { big.style.cursor = tool()==="move" ? "" : "crosshair"; paint(); });
+$("brush").oninput = e => $("brushV").textContent = e.target.value + " px";
+$("maskReset").onclick = () => { const it=items[sel]; if(!it||!it.mask0) return; const x=it.mask.getContext("2d"); x.clearRect(0,0,it.mask.width,it.mask.height); x.drawImage(it.mask0,0,0); paint(); };
+$("resetPos").onclick = () => { edit(it=>{it.zoom=1;it.fx=.5;it.fy=.5;it.dy=0;it.gs=0;it.gl=.45;it.gfrom="top";it.behind=false;}); syncForm(); };
+$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; it.dy=s.dy; it.gs=s.gs; it.gl=s.gl; it.gfrom=s.gfrom; RT.draw(it.c.getContext("2d"),it.img,it); it.cap.textContent=it.en||it.ar; });
+  toast("Wording, text height and gradient applied to all " + items.length + " covers"); };
 $("remove").onclick = () => { const it=items[sel]; if(!it) return; it.card.remove(); items.splice(sel,1); sel = items.length ? Math.min(sel, items.length-1) : -1; syncForm(); paint(); };
 
 // drag to pan
 let drag = null;
-big.addEventListener("pointerdown", e => { const it=items[sel]; if(!it) return; big.setPointerCapture(e.pointerId); big.classList.add("drag"); drag={x:e.clientX,y:e.clientY,fx:it.fx,fy:it.fy}; });
-big.addEventListener("pointermove", e => { if(!drag) return; const it=items[sel]; const r=big.getBoundingClientRect(), k=1080/r.width;
+function brushAt(e){ const it=items[sel]; if(!it||!it.mask||!it._box) return; const r=big.getBoundingClientRect(), X=(e.clientX-r.left)*1080/r.width, Y=(e.clientY-r.top)*1920/r.height;
+  const [x,y,dw,dh]=it._box, m=it.mask, mx=(X-x)/dw*m.width, my=(Y-y)/dh*m.height, rad=(+$("brush").value/2)/dw*m.width, c=m.getContext("2d");
+  const g=c.createRadialGradient(mx,my,0,mx,my,rad); g.addColorStop(0,"rgba(0,0,0,1)"); g.addColorStop(.7,"rgba(0,0,0,1)"); g.addColorStop(1,"rgba(0,0,0,0)");
+  c.globalCompositeOperation = tool()==="erase" ? "destination-out" : "source-over"; c.fillStyle=g; c.beginPath(); c.arc(mx,my,rad,0,Math.PI*2); c.fill(); c.globalCompositeOperation="source-over"; paint(); }
+big.addEventListener("pointerdown", e => { const it=items[sel]; if(!it) return; big.setPointerCapture(e.pointerId);
+  if (it.behind && it.mask && tool()!=="move") { drag={brush:true}; brushAt(e); return; }
+  big.classList.add("drag"); drag={x:e.clientX,y:e.clientY,fx:it.fx,fy:it.fy}; });
+big.addEventListener("pointermove", e => { if(!drag) return; if (drag.brush) { brushAt(e); return; } const it=items[sel]; const r=big.getBoundingClientRect(), k=1080/r.width;
   const s=Math.max(1080/it.img.width,1920/it.img.height)*it.zoom, dw=it.img.width*s, dh=it.img.height*s;
   it.fx = Math.min(1,Math.max(0, drag.fx - (e.clientX-drag.x)*k/dw)); it.fy = Math.min(1,Math.max(0, drag.fy - (e.clientY-drag.y)*k/dh)); paint(); });
 const endDrag = () => { drag=null; big.classList.remove("drag"); };
