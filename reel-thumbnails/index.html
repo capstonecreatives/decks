@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reel Thumbnail Studio · Capstone Property</title>
+<link rel="icon" href="../favicon.ico?v=20260924">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Playfair+Display:wght@600&family=Tajawal:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#EDF0F3;--panel:#FFFFFF;--ink:#212721;--muted:#5D6973;--line:#D7DDE2;--field:#F6F8F9;
+  --navy:#003850;--teal:#45828C;--chip:#E3EDEF;--focus:#45828C;color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#06161E;--panel:#0B2430;--ink:#EEF2F4;--muted:#9DB0BA;--line:#1E3D4B;--field:#0F2D3A;
+  --navy:#0B4A66;--teal:#5B9AA4;--chip:#123643;--focus:#7FB7C0;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#06161E;--panel:#0B2430;--ink:#EEF2F4;--muted:#9DB0BA;--line:#1E3D4B;--field:#0F2D3A;
+  --navy:#0B4A66;--teal:#5B9AA4;--chip:#123643;--focus:#7FB7C0;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.45 "Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}
+button,input,select{font:inherit;color:inherit}
+header{background:#003850;color:#fff;padding:18px clamp(16px,4vw,36px);display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header img{height:34px;width:auto;display:block}
+header h1{margin:0;font:600 22px/1.2 "Playfair Display",Georgia,serif;padding-left:18px;border-left:1px solid rgba(255,255,255,.25)}
+header p{margin:0 0 0 auto;color:#C0C2CB;font-size:14px}
+.hbtn{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;padding:7px 14px;font-weight:600;font-size:13px;cursor:pointer;min-height:36px}
+.hbtn:hover{background:rgba(255,255,255,.1)}
+.hbtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+main{display:grid;grid-template-columns:minmax(320px,400px) minmax(0,1fr);gap:22px;padding:22px clamp(12px,3vw,36px) 48px;max-width:1600px;margin:0 auto;align-items:start}
+@media (max-width:980px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px}
+.side{padding:6px 20px 20px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+@media (max-width:980px){.side{position:static;max-height:none}}
+fieldset{border:0;margin:0;padding:16px 0 4px;border-bottom:1px solid var(--line)}
+fieldset:last-child{border-bottom:0}
+legend{font:600 17px/1.3 "Playfair Display",Georgia,serif;padding:0;margin-bottom:10px}
+label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:0 0 5px}
+.f{margin-bottom:12px;min-width:0}
+input[type=text],select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:42px;outline:none}
+input[dir=rtl]{font-family:"Tajawal","Figtree",sans-serif;font-size:16px}
+input[type=range]{width:100%;accent-color:var(--teal)}
+input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-visible+span{outline:2px solid var(--focus);outline-offset:2px}
+.hint{font-size:12.5px;color:var(--muted);margin:4px 0 0}
+.seg{display:flex;background:var(--field);border:1px solid var(--line);border-radius:12px;padding:3px;gap:3px}
+.seg label{flex:1;margin:0;position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;inset:0;cursor:pointer;z-index:1;margin:0}
+.seg span{display:block;text-align:center;padding:8px 6px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted);line-height:1.2}
+.seg input:checked+span{background:var(--navy);color:#fff}
+.seg small{display:block;font-weight:500;font-size:11.5px;opacity:.8}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1.5px dashed var(--line);border-radius:12px;padding:18px;text-align:center;cursor:pointer;background:var(--field)}
+.drop.over{border-color:var(--teal);background:var(--chip)}
+.drop strong{font-size:15px}
+.drop span{font-size:13px;color:var(--muted)}
+.rowlbl{display:flex;justify-content:space-between;align-items:baseline}
+.rowlbl output{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;min-height:38px;font-weight:600;font-size:14px;cursor:pointer}
+.btn:hover{border-color:var(--teal)}
+.btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 12px}
+.out{padding:18px 20px 22px;min-width:0}
+.outhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.outhead h2{margin:0 auto 0 0;font:600 22px/1.25 "Playfair Display",Georgia,serif}
+.stage{display:grid;grid-template-columns:minmax(220px,360px) minmax(0,1fr);gap:22px;align-items:start}
+@media (max-width:720px){.stage{grid-template-columns:1fr}}
+.big{width:100%;max-width:360px;margin:0 auto;min-width:0}
+.big canvas{width:100%;height:auto;display:block;border-radius:12px;background:#0B3042;box-shadow:0 1px 0 var(--line),0 10px 28px rgba(0,20,30,.16);cursor:grab;touch-action:none}
+.big canvas.drag{cursor:grabbing}
+.big p{text-align:center;margin:8px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:14px}
+.card{border:0;background:none;padding:0;text-align:left;cursor:pointer}
+.card canvas{width:100%;height:auto;display:block;border-radius:10px;border:2px solid transparent;background:#0B3042}
+.card.sel canvas{border-color:var(--teal)}
+.card .cap{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12.5px;color:var(--muted);gap:6px}
+.card .cap span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.link{border:0;background:none;color:var(--teal);font-weight:700;cursor:pointer;padding:4px 2px;font-size:12.5px;flex:none}
+.empty{color:var(--muted);font-size:14px;padding:30px 0;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#003850;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;z-index:20}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("cp-reel-thumbs-ui")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+<header>
+  <a href="../app/" aria-label="Back to the Capstone App" style="display:block"><img src="data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjQ4IDM4NSA5ODQgMjY4Ij4KICAKICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLnN0MCB7CiAgICAgICAgZmlsbDogI2ZmZjsKICAgICAgfQoKICAgICAgLnN0MSB7CiAgICAgICAgZmlsbDogIzAwMzg0ZjsKICAgICAgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgCiAgPGc+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTY4OS40Niw2NTAuNDR2LTMxLjA1aDEzLjY0YzYuNTIsMCwxMC4xNSw0LjQ3LDEwLjE1LDkuNzNzLTMuNjgsOS43My0xMC4xNSw5LjczaC04LjE5djExLjU5aC01LjQ1Wk03MDIuMzUsNjI0LjE5aC03LjQ1djkuODdoNy40NWMzLjA3LDAsNS4zMS0xLjk1LDUuMzEtNC45M3MtMi4yMy00LjkzLTUuMzEtNC45M1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTc0Ni45LDY1MC40NGwtNi44OS0xMS41OWgtNS40djExLjU5aC01LjQ1di0zMS4wNWgxMy42NGM2LjE0LDAsMTAuMTUsNCwxMC4xNSw5Ljczcy0zLjYzLDguNTItNy4zNSw5LjEybDcuNTksMTIuMmgtNi4yOFpNNzQyLjA2LDYyNC4xOWgtNy40NXY5Ljg3aDcuNDVjMy4wNywwLDUuMzEtMS45NSw1LjMxLTQuOTNzLTIuMjMtNC45My01LjMxLTQuOTNaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03ODQuMjgsNjE4Ljg4YzkuMzEsMCwxNS44Nyw2LjgsMTUuODcsMTYuMDZzLTYuNTYsMTYuMDYtMTUuODcsMTYuMDYtMTUuODctNi44LTE1Ljg3LTE2LjA2LDYuNTYtMTYuMDYsMTUuODctMTYuMDZaTTc4NC4yOCw2MjMuNzJjLTYuMjgsMC0xMC4yOSw0Ljc5LTEwLjI5LDExLjIyczQsMTEuMjIsMTAuMjksMTEuMjIsMTAuMjktNC44NCwxMC4yOS0xMS4yMi00LjA1LTExLjIyLTEwLjI5LTExLjIyWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODE2LjgyLDY1MC40NHYtMzEuMDVoMTMuNjRjNi41MiwwLDEwLjE1LDQuNDcsMTAuMTUsOS43M3MtMy42OCw5LjczLTEwLjE1LDkuNzNoLTguMTl2MTEuNTloLTUuNDVaTTgyOS43MSw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODU2LjUyLDY1MC40NHYtMzEuMDVoMjEuMjd2NC43OWgtMTUuODN2OC4wNWgxNS41djQuNzloLTE1LjV2OC42MWgxNS44M3Y0Ljc5aC0yMS4yN1oiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTkxMi41Miw2NTAuNDRsLTYuODktMTEuNTloLTUuNHYxMS41OWgtNS40NXYtMzEuMDVoMTMuNjRjNi4xNCwwLDEwLjE1LDQsMTAuMTUsOS43M3MtMy42Myw4LjUyLTcuMzUsOS4xMmw3LjU5LDEyLjJoLTYuMjhaTTkwNy42OCw2MjQuMTloLTcuNDV2OS44N2g3LjQ1YzMuMDcsMCw1LjMxLTEuOTUsNS4zMS00Ljkzcy0yLjIzLTQuOTMtNS4zMS00LjkzWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNOTQyLjM2LDY1MC40NHYtMjYuMjVoLTkuNHYtNC43OWgyNC4yNXY0Ljc5aC05LjR2MjYuMjVoLTUuNDVaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05ODIuMDIsNjUwLjQ0di0xMi44OWwtMTIuMDYtMTguMTVoNi4yNGw4LjU2LDEzLjMxLDguNDctMTMuMzFoNi4yNGwtMTIuMDEsMTguMTV2MTIuODloLTUuNDVaIi8+CiAgICA8L2c+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTMwNy45Niw0NTUuMDljLTcuMjgsMC0xMy45MSw1LjEzLTE5Ljc5LDE1LjUtNS44OCwxMC4zNi04Ljg3LDI2LjQyLTguODcsNDguMjdzMi44OSwzOCw4Ljc4LDQ4LjkyYzUuODgsMTAuOTMsMTIuNTEsMTYuNDMsMTkuODksMTYuNDMsNi42MywwLDE0LjE5LTQuMywyMi42LTEyLjk4LDguNC04LjY4LDE2LjI1LTE4LjY4LDIzLjUzLTMwLjA2aDEuMzFsLTMuODMsNDMuNmMtMTUuOTcsMy44My0zMS4wOSw1Ljc5LTQ1LjM4LDUuODgtOS4xNSwwLTE3LjY1LTEuMjEtMjUuNTgtMy42NC03Ljk0LTIuNDMtMTUuMjItNi4yNi0yMS45NC0xMS4zOS02LjcyLTUuMTQtMTIuMDQtMTIuMzMtMTUuOTctMjEuNTctMy45Mi05LjI0LTUuODgtMjAuMTctNS44OC0zMi42OCwwLTIzLjYyLDYuNTQtNDEuNjQsMTkuNjEtNTMuOTcsMTMuMDctMTIuMzIsMjkuODgtMTguNDksNTAuNDItMTguNDksMTEuODYsMCwyNi44LDEuODcsNDQuODIsNS43bDMuODMsNDIuNjdoLTEuMzFjLTE4Ljg2LTI4LjEtMzQuMjctNDIuMi00Ni4zMS00Mi4yaC4wOVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MCIgZD0iTTQzOC45OCw1OTAuMTJjLTcuMTcsMC0xMi4yNi0yLTE1LjI2LTUuOTktMy00LTQuMzYtOC43Mi00LjA5LTE0LjE3aC0uMzZjLTIuNjMsNS40NS02LjgxLDEwLjE3LTEyLjUzLDE0LjE3LTUuNzIsNC0xMi4zNSw1Ljk5LTE5Ljg5LDUuOTlzLTEzLjktMi4wOS0xOC41My02LjI3Yy00LjYzLTQuMTgtNi45LTkuNDUtNi45LTE1Ljg5LDAtOS41Myw1LjA5LTE3LjQ0LDE1LjI2LTIzLjYxLDEwLjE3LTYuMTcsMjQuNDMtMTEuNTMsNDIuNzctMTUuOThsLjE4LTE2LjE2YzAtMy4wOS0uNzMtNS44MS0yLjE4LTguMDgtMS40NS0yLjI3LTMuODItMy40NS02Ljk5LTMuNDUtNC44MSwwLTguNzIsMy4xOC0xMS43MSw5LjUzLTMsNi4zNi01LjA5LDEzLjgxLTYuMjcsMjIuMjVsLTEuMDkuMTgtMjIuNy0xMi41M2MzLjA5LTYuNDUsOC41NC0xMi4wOCwxNi4zNS0xNi45OCw3LjgxLTQuOSwxOC4wNy03LjM2LDMwLjctNy4zNiw2LjYzLDAsMTIuMzUuODIsMTcuMTYsMi40NSw0LjgyLDEuNjMsOC40NSwzLjYzLDEwLjk5LDUuOTksMi41NCwyLjM2LDQuNTQsNS4yNyw1Ljk5LDguNzIsMS40NSwzLjQ1LDIuMzYsNi41NCwyLjYzLDkuMjYuMjcsMi43Mi4zNiw1LjgxLjI3LDkuMjZsLS45MSwzOS44N2MwLDQuMDksMS40NSw2LjA5LDQuNDUsNS45OSwzLjA5LDAsNS43Mi0yLjM2LDcuODEtNy4wOGwxLjQ1LjgyYy0xLjcyLDUuMTgtNC44MSw5LjYzLTkuMTcsMTMuMzUtNC4zNiwzLjcyLTEwLjA4LDUuNjMtMTcuMTYsNS42M2wtLjI3LjA5Wk00MDYuNzQsNTcwLjk1YzQuNjMsMCw4LjcyLTIuNDUsMTIuMjYtNy4yN2wuNzMtMzEuMjRjLTE0Ljk4LDQuMjctMjIuNTIsMTIuNTMtMjIuNTIsMjQuNzksMCw0LjQ1LjkxLDcuOSwyLjYzLDEwLjI2LDEuNzIsMi4zNiwzLjk5LDMuNTQsNi44MSwzLjU0bC4wOS0uMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik01MzQuOTEsNDk1LjY3YzkuNzIsMCwxOC4xNiwzLjcyLDI1LjQzLDExLjE3LDcuMjcsNy40NSwxMC45LDE4Ljk4LDEwLjksMzQuNnMtMy45OSwyOC41MS0xMS45OSwzNi42Yy03Ljk5LDguMDgtMTcuMTYsMTIuMDgtMjcuNjEsMTIuMDgtOC44MSwwLTE2LjgtMi41NC0yMy45Ny03LjU0aC0uMzd2MzAuNTZjMCw2LjYzLjgyLDExLjA4LDIuNDUsMTMuMzUsMS42MywyLjI3LDUuMjcsNC42MywxMC44MSw3LjA4djEuMzZoLTU3LjMxdi0xLjM2YzQtMi42Myw2LjU0LTUuMDksNy43Mi03LjI3LDEuMTgtMi4xOCwxLjczLTYuNjMsMS43My0xMy4yNnYtOTUuMzFjMC0zLjQ1LS42NC02LjA5LTEuOTEtNy44MS0xLjI3LTEuNzItMy44MS0zLjcyLTcuNjMtNS45OXYtMS4wOWMxNS4yNi0xLDI5LjctMy41NCw0My4zMi03LjYzbC0uMTgsMTUuOTguMzYuMThjNy41NC0xMC41MywxNi44OS0xNS44LDI4LjA2LTE1LjhsLjE4LjA5Wk01MzUuMzYsNTQ5LjQzYzAtMjcuMTUtNS00MC43OC0xNS4wOC00MC43OC00LjM2LDAtOC42MywyLjkxLTEyLjksOC42M3YzOS41OWMxLjM2LDcuMDgsMy40NSwxMy4xNyw2LjE4LDE4LjM1LDIuNzIsNS4xOCw2LjE3LDcuNzIsMTAuMjYsNy43Miw3LjcyLDAsMTEuNTMtMTEuMTcsMTEuNTMtMzMuNTFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02MTcuOTMsNTkwLjc1Yy04LjksMC0yMC4zNC0xLjkxLTM0LjQyLTUuODFsLTMuNTQtMzEuMDYsMS4zNi0uMThjMTQuNTMsMjEuMzQsMjYuNywzMS45NywzNi40MiwzMS45NywyLjgyLDAsNS4xNy0uODIsNi45OS0yLjQ1LDEuODItMS42NCwyLjcyLTMuOTEsMi43Mi02LjcyLDAtMy41NC0xLjU1LTYuODEtNC43Mi05Ljcycy04LjYzLTYuNTQtMTYuMzUtMTAuODFjLTMtMS43Mi01LjA4LTMtNi4zNi0zLjcyLTEuMjctLjczLTMuMjctMi02LTMuODEtMi43Mi0xLjgyLTQuNzItMy40NS01Ljk5LTQuOTEtMS4yNy0xLjQ1LTIuNzItMy4yNy00LjM2LTUuNDUtMS42My0yLjE4LTIuODItNC41NC0zLjU0LTcuMDgtLjczLTIuNTQtMS4wOS01LjI3LTEuMDktOC4wOCwwLTguNjMsMy4xOC0xNS4zNSw5LjQ1LTIwLjE2LDYuMjctNC44MSwxNC4zNS03LjE3LDI0LjE2LTcuMTcsNy44MSwwLDE4LjI1LDEuNjMsMzEuNDIsNC44MmwyLjgyLDI4Ljg4LTEuMzYuMzdjLTEzLjYyLTE5LjE2LTI0Ljc5LTI4Ljc5LTMzLjQyLTI4Ljg4LTIuNjMsMC00LjcyLjgyLTYuMzYsMi4zNi0xLjY0LDEuNTQtMi40NSwzLjYzLTIuNDUsNi4yNywwLDMuOTksMS44Miw3LjM2LDUuMzYsMTAuMDgsMy41NCwyLjcyLDkuMjYsNS45OSwxNy4wNyw5LjksOC41NCw0LjM2LDE1LjE3LDguOTksMTkuODksMTMuOTgsNC43Miw1LDcuMDgsMTEuMzUsNy4wOCwxOS4wNywwLDguNTQtMy4wOSwxNS4zNS05LjI2LDIwLjUyLTYuMTcsNS4xOC0xNC43MSw3LjcyLTI1LjcsNy43MmwuMTguMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik02ODkuMzgsNTg5LjkzYy03LjU0LDAtMTMuNzEtMi4xOC0xOC42Mi02LjU0LTQuOS00LjM2LTcuMzYtMTAuOS03LjM2LTE5LjUzdi01OS41N2gtOC40NXYtOC43MmMyMC44LTExLjUzLDM0LjI0LTIxLjUyLDQwLjMyLTMxLjIxaDIuMTh2MzAuOTRoMjAuODlsLS45MSw4Ljk5aC0xOS41MmwtLjY0LDUzLjk0Yy0uMDksMTAuNjMsMy44MiwxNS45OCwxMS43MSwxNS45OCw0LjI3LDAsOC4yNy0xLjkxLDExLjk5LTUuNzJsMS4wOSwxLjA5Yy04LjA4LDEzLjYyLTE4Ljk4LDIwLjQzLTMyLjY5LDIwLjQzdi0uMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik03NzAuODEsNTkwLjEyYy0xNC45OCwwLTI2Ljk3LTMuOS0zNi4wNS0xMS44MS05LjA4LTcuOS0xMy42Mi0xOS4zNC0xMy42Mi0zNC40MnM0LjYzLTI3LjE1LDEzLjg5LTM1LjZjOS4yNi04LjQ1LDIxLjctMTIuNzEsMzcuMzMtMTIuNzFzMjYuOTcsMy45MSwzNS45NiwxMS44MWM4Ljk5LDcuOSwxMy41MywxOS40NCwxMy41MywzNC42OXMtNC41NCwyNy4wNi0xMy43MSwzNS40MmMtOS4xNyw4LjM1LTIxLjUyLDEyLjUzLTM3LjE0LDEyLjUzbC0uMTguMDlaTTc3Ni4xNyw1ODQuODVjMy4wOSwwLDUuNjMtMS44Miw3LjU0LTUuMzYsMS45MS0zLjU0LDIuOTEtOC45OSwyLjkxLTE2LjI2LDAtNi40NS0uNDYtMTMuOTktMS40NS0yMi43LTEtOC43Mi0zLjA5LTE3LjUzLTYuMjctMjYuMzQtMy4xOC04LjgxLTcuMTctMTMuMjYtMTEuOS0xMy4yNi0zLjA5LDAtNS42MywxLjgyLTcuNjMsNS40NS0yLDMuNjMtMyw5LjE3LTMsMTYuNjIsMCw2LjQ1LjU0LDEzLjk5LDEuNTQsMjIuNjEsMSw4LjYzLDMuMDksMTcuMzUsNi4yNywyNi4wNiwzLjE4LDguNzIsNy4xNywxMy4wOCwxMS45OSwxMy4wOHYuMDlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik05MjkuMDYsNTY2LjQxYzAsNi42My41NCwxMS4wOCwxLjYzLDEzLjM1LDEuMDksMi4yNywzLjcyLDQuNjMsNy44MSw3LjA4djEuMjdoLTUzLjU4di0xLjI3YzQuMjctMi43Miw2LjktNS4xNyw3LjktNy4zNiwxLTIuMTgsMS42My02LjU0LDEuOTEtMTMuMTcuMDktNS40NS4xOC0xOC4yNS4xOC0zOC41MSwwLTUuMzYtMS4wOS05LjM1LTMuMzYtMTEuOTlzLTUuMTgtMy45LTguNzItMy45Yy00LjgxLDAtOS41NCwzLjA5LTE0LjA4LDkuMTd2NDUuMTNjMCw2LjYzLjY0LDExLjA4LDEuODIsMTMuMzUsMS4xOCwyLjI3LDMuNzIsNC43Miw3LjYzLDcuMzZ2MS4yN2gtNTMuNTh2LTEuMjdjNC4wOS0yLjQ1LDYuNzItNC44MSw3LjgxLTcuMDgsMS4wOS0yLjI3LDEuNjMtNi43MiwxLjYzLTEzLjM1di0zNi45NmMwLTguMTctLjU0LTEzLjYyLTEuNjMtMTYuMzUtMS4wOS0yLjcyLTMuNjMtNS43Mi03LjYzLTguOTl2LTEuMjdjMTQuMDgtLjczLDI4LjUyLTMuMjcsNDMuMzItNy42M3YxOS4zNGMzLjE4LTQuODEsNy41NC05LjE3LDEyLjk5LTEzLjA4LDUuNDUtMy45LDExLjgxLTUuOSwxOS4xNi01LjksMi44MiwwLDUuNjMuMzcsOC40NSwxLjA5LDIuODIuNzMsNS45LDIsOS4xNywzLjgyLDMuMjcsMS44Miw1LjksNC44MSw3LjksOC45OSwyLDQuMTgsMyw5LjE3LDMsMTUuMDd2NDEuNzhoLjI3WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAzMC40NCw1NTQuNDNjLTUuMDgsMjMuNy0xOC45OCwzNS41MS00MS42OCwzNS41MS0xMy43MSwwLTI1LjE2LTQuMjctMzQuMjQtMTIuNzEtOS4wOC04LjQ0LTEzLjYyLTIwLjE2LTEzLjYyLTM1LjE0czQuNTQtMjYuNDMsMTMuNjItMzQuNTFjOS4wOC04LjA4LDIwLjYxLTEyLjE3LDM0LjUxLTEyLjE3czIzLjc5LDMuNjMsMzAuNzksMTAuOWM2Ljk5LDcuMjcsMTAuNTMsMTUuNjIsMTAuNTMsMjQuOTd2Mi4wOWgtNTguMDN2MS42M2MwLDExLjM1LDMuMDksMTkuNjIsOS4yNiwyNC44OCw2LjE3LDUuMjcsMTMuNjIsNy45LDIyLjQzLDcuOSwxMS41MywwLDIwLjA3LTQuNjMsMjUuNTItMTMuOTlsLjkxLjY0Wk05ODUuNzYsNTAwLjY2Yy04LjA4LDAtMTIuNTMsOS4xNy0xMy4zNSwyNy42MWgyNy4xNWMtLjQ1LTE4LjQ0LTUuMDgtMjcuNjEtMTMuODktMjcuNjFoLjA5WiIvPgogICAgPC9nPgogICAgPGc+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xMjMuNDcsNjMxLjg5bC0uMDctLjExLS42NCwzLjE1LTEuODMtLjM4Yy0zLjQtOS4xNi0xMi45Mi0xOS44NS0yOC4zLTMzLjEybDEuNTEtNy4yOSwxMS4zOS01NC43N3MwLS4wMi4wMS0uMDVsMzEuNjUtMTUyLjIxLjAyLS4xMSwxLjgxLjM4YzMuNCw5LjE2LDEyLjkyLDE5Ljg2LDI4LjMyLDMzLjEzbC0xLjUxLDcuMjktLjQ3LDIuMjYuMDYuMDktNDEuOTQsMjAxLjc1WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTAwLjU3LDUxNC40NWwtNi41MiwzMS42Ni0xLjI0LS4yNmMtLjU3LTEuNTQtMS40MS0zLjE2LTIuNS00Ljg0LS4yNy0uNDEtLjU1LS44NS0uODctMS4yOS0uOTEtMS4yOS0xLjk1LTIuNjMtMy4xNS00LjAzLTMuMi0zLjctNy40Mi03Ljc1LTEyLjYxLTEyLjI0bDguMzctNDAuMjFzLjA2LS4xNy4xNi0uNTFsMTQuMTItNjcuOTYuNjQtMy4wMiw0LjA1LTE5Ljg0LDEuMjUuMjZjLjQzLDEuMTYsMSwyLjM2LDEuNzEsMy41OSwzLjEyLDUuMzcsOC45MywxMS41LDE3LjQsMTguOGwtMi4xOCwxMC40OC0zLjczLDE4cy0uMDcuMjUtLjIxLjYzbC0xNC4xOSw2OC4xOHYuMDJzLS41MiwyLjU2LS41MiwyLjU2WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNODIuMTQsNTQyLjkybC02LjAyLDI4Ljk0LTI2LjU2LTQwLjUsMTMuNDYtNjQuNzEsOS44NywxNS4wNSwxLjM4LDEuOTYtOC45Niw0My4xMSwzLjkzLDMuNDNjNS43Myw0LjkyLDEwLjA0LDkuMTcsMTIuOSwxMi43MyIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTYxLjczLDYxOS40NmwtMS4yNC0uMjZjLTIuMzUtNi4zMy04LjkxLTEzLjctMTkuNTItMjIuODVsLjY2LTMuMjUuNy0zLjMyLDcuMTYtMzQuNDVzMC0uMDIsMC0uMDRsMTguOTgtOTEuMywxLjI2LjI2YzIuMzUsNi4zMyw4LjkxLDEzLjcsMTkuNTIsMjIuODVsLTEuMDYsNS4wMi00Ljk5LDI0LjA1cy0uMTIuMzgtLjM0Ljk4di4wNXMtMTAuMDgsNDguNDEtMTAuMDgsNDguNDFjMCwwLDAsLjAyLDAsLjA0LS4xLjU1LS4xOCwxLjAzLS4yNSwxLjRsLTEwLjgsNTIuNDFaIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4=" alt="Capstone Property"></a>
+  
+  <h1>Reel thumbnail studio</h1>
+  <p>Reel covers · 1080 × 1920 · Arabic &amp; English</p>
+  <button type="button" id="uiTheme" class="hbtn"></button>
+</header>
+<main>
+<section class="panel side" aria-label="Settings">
+  <fieldset>
+    <legend>Photos</legend>
+    <div class="drop" id="drop" role="button" tabindex="0"><strong>Add photos</strong><span>Drop images here or tap to choose. Each photo becomes one reel cover.</span></div>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+    <p class="hint">New photos take the wording of the cover you have selected.</p>
+  </fieldset>
+  <fieldset id="edit" disabled>
+    <legend>Selected cover</legend>
+    <div class="f"><label for="preset">Project</label>
+      <select id="preset"></select></div>
+    <div class="f"><label>Line order</label>
+      <div class="seg">
+        <label><input type="radio" name="order" value="ar" checked><span>Arabic first<small>Arabic bold · English light</small></span></label>
+        <label><input type="radio" name="order" value="en"><span>English first<small>English bold · Arabic light</small></span></label>
+      </div></div>
+    <div class="f"><label for="ar">Arabic line</label><input type="text" id="ar" dir="rtl" lang="ar" maxlength="60"></div>
+    <div class="f"><label for="en">English line</label><input type="text" id="en" maxlength="60" autocapitalize="characters">
+      <p class="hint">English is set in capitals, as on the approved covers. Long lines shrink to fit.</p></div>
+    <div class="f"><div class="rowlbl"><label for="zoom">Photo zoom</label><output id="zoomV">100%</output></div>
+      <input type="range" id="zoom" min="100" max="250" step="1" value="100">
+      <p class="hint">Drag the large preview to move the photo.</p></div>
+    <div class="f"><div class="rowlbl"><label for="dy">Text height</label><output id="dyV">As approved</output></div>
+      <input type="range" id="dy" min="-150" max="600" step="2" value="0"></div>
+    <div class="tools">
+      <button type="button" class="btn" id="resetPos">Reset photo &amp; text</button>
+      <button type="button" class="btn" id="applyAll">Use this wording on all</button>
+      <button type="button" class="btn" id="remove">Remove</button>
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Export</legend>
+    <div class="f"><label for="fmt">File type</label>
+      <select id="fmt"><option value="png">PNG, lossless</option><option value="jpg">JPG, high quality (smaller files)</option></select></div>
+  </fieldset>
+</section>
+<section class="panel out" aria-live="polite">
+  <div class="outhead"><h2>Reel covers</h2>
+    <button type="button" class="btn" id="saveOne" disabled>Save selected</button>
+    <button type="button" class="btn primary" id="saveAll" disabled>Save all as ZIP</button></div>
+  <div class="stage">
+    <div class="big"><canvas id="big" width="1080" height="1920" aria-label="Selected cover preview"></canvas><p class="hint" id="bigCap">Sample · add photos to start</p></div>
+    <div><div class="grid" id="grid"></div><p class="empty" id="empty">Your covers will appear here.</p></div>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+// Shared renderer — layout measured from 20260730_Thumbnails_Final_copy.psd (1080x1920 artboards)
+const RT = {
+  W: 1080, H: 1920, SIZE: 60, CX: 540,
+  // baselines per order (px from top)
+  LAYOUT: { ar: [308, 380], en: [324, 384] },
+  MAXW: 930, // widest line allowed before it shrinks (approved covers top out near 780)
+  font(kind, px){ // kind: arBold arLight enLight enSemi
+    px = px || 60; const fam = kind.startsWith("ar") ? "RTTajawal, Tajawal" : "RTProxima";
+    return {arBold:"700", arLight:"300", enLight:"300", enSemi:"600"}[kind] + " " + px + "px " + fam;
+  },
+  async loadFonts(base){
+    const list=[["RTTajawal",base+"Tajawal/Tajawal-Bold.ttf","700"],["RTTajawal",base+"Tajawal/Tajawal-Light.ttf","300"],
+      ["RTProxima",base+"ProximaNova/ProximaNova-Light.otf","300"],["RTProxima",base+"ProximaNova/ProximaNova-Semibold.otf","600"]];
+    await Promise.all(list.map(async([f,u,w])=>{const ff=new FontFace(f,"url("+encodeURI(u)+")",{weight:w});await ff.load();document.fonts.add(ff);}));
+  },
+  draw(ctx, img, v){ // v:{order,ar,en,zoom,fx,fy,dy}
+    const {W,H}=RT; ctx.save(); ctx.clearRect(0,0,W,H); ctx.fillStyle="#0B3042"; ctx.fillRect(0,0,W,H);
+    if(img){ const s=Math.max(W/img.width,H/img.height)*(v.zoom||1), dw=img.width*s, dh=img.height*s;
+      const fx=v.fx??.5, fy=v.fy??.5; let x=W/2-fx*dw, y=H/2-fy*dh;
+      x=Math.min(0,Math.max(W-dw,x)); y=Math.min(0,Math.max(H-dh,y));
+      ctx.imageSmoothingQuality="high"; ctx.drawImage(img,x,y,dw,dh); }
+    const b=RT.LAYOUT[v.order]||RT.LAYOUT.ar, dy=v.dy||0;
+    const lines = v.order==="en" ? [[v.en,"enSemi","ltr"],[v.ar,"arLight","rtl"]] : [[v.ar,"arBold","rtl"],[v.en,"enLight","ltr"]];
+    ctx.fillStyle="#FFFFFF"; ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+    lines.forEach(([txt,kind,dir],i)=>{ if(!txt) return; ctx.direction=dir;
+      let px = RT.SIZE; ctx.font=RT.font(kind,px);
+      const ls = dir==="ltr" ? -0.025 : 0; const setLs = p => { if("letterSpacing" in ctx) ctx.letterSpacing=(ls*p)+"px"; };
+      setLs(px); const w = ctx.measureText(txt).width;
+      if (w > RT.MAXW) { px = Math.max(30, Math.floor(px * RT.MAXW / w)); ctx.font=RT.font(kind,px); setLs(px); }
+      ctx.fillText(txt, RT.CX - ls*px/2, b[i]+dy); if("letterSpacing" in ctx) ctx.letterSpacing="0px"; });
+    ctx.restore();
+  }
+};
+
+const PRESETS = [
+  {k:"huzoom", n:"Bliss Villas Huzoom Lusail", ar:"فلل بليس حزوم", en:"BLISS VILLAS HUZOOM LUSAIL", order:"ar"},
+  {k:"newslata", n:"Bliss Gardens New Slata", ar:"بليس جاردنز السلطة الجديدة", en:"BLISS GARDENS NEW SLATA", order:"ar"},
+  {k:"lusailapts", n:"New apartments in Lusail", ar:"شقق جديدة بمنطقة لوسيل", en:"NEW APARTMENTS IN LUSAIL", order:"en"},
+  {k:"dyar", n:"Dyar Al Haram", ar:"ديار الحرم", en:"DYAR AL HARAM", order:"ar"}
+];
+const $ = id => document.getElementById(id);
+const items = []; let sel = -1, sample = null;
+const big = $("big"), bctx = big.getContext("2d");
+const tpl = () => sel >= 0 ? items[sel] : {order:"ar", ar:PRESETS[0].ar, en:PRESETS[0].en};
+const pre = $("preset");
+pre.innerHTML = PRESETS.map(p => `<option value="${p.k}">${p.n}</option>`).join("") + `<option value="">Custom wording</option>`;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove("on"),2600); }
+function matchPreset(it){ const p = PRESETS.find(p => p.ar===it.ar && p.en===it.en); return p ? p.k : ""; }
+
+function makeSample(){ // neutral sky gradient for the empty state
+  const c=document.createElement("canvas"); c.width=1080; c.height=1920; const x=c.getContext("2d");
+  const g=x.createLinearGradient(0,0,0,1920); g.addColorStop(0,"#3F6E8C"); g.addColorStop(.55,"#9DB9C9"); g.addColorStop(1,"#D8C9B0"); x.fillStyle=g; x.fillRect(0,0,1080,1920); return c; }
+
+function paint(){
+  const it = sel>=0 ? items[sel] : null;
+  RT.draw(bctx, it ? it.img : sample, it || {order:"ar", ar:PRESETS[0].ar, en:PRESETS[0].en});
+  if (it) { RT.draw(it.c.getContext("2d"), it.img, it); it.cap.textContent = it.en || it.ar || "Cover"; }
+}
+function syncForm(){
+  const it = items[sel]; $("edit").disabled = !it; $("saveOne").disabled = !it; $("saveAll").disabled = !items.length;
+  $("empty").style.display = items.length ? "none" : ""; $("bigCap").textContent = it ? `Cover ${sel+1} of ${items.length}` : "Sample · add photos to start";
+  items.forEach((x,i)=>x.card.classList.toggle("sel", i===sel));
+  if (!it) return;
+  document.querySelector(`input[name=order][value=${it.order}]`).checked = true;
+  $("ar").value = it.ar; $("en").value = it.en; pre.value = matchPreset(it);
+  $("zoom").value = Math.round(it.zoom*100); $("zoomV").textContent = Math.round(it.zoom*100)+"%";
+  $("dy").value = it.dy; $("dyV").textContent = it.dy ? (it.dy>0?"+":"")+it.dy+" px" : "As approved";
+}
+function select(i){ sel=i; syncForm(); paint(); }
+
+async function addFiles(files){
+  const base = tpl(); let added = 0;
+  for (const f of files) {
+    if (!/^image\//.test(f.type)) continue;
+    let img;
+    try { img = await createImageBitmap(f); } catch(e) { try { img = new Image(); img.src = URL.createObjectURL(f); await img.decode(); } catch(e2) { toast("Couldn't open " + f.name); continue; } }
+    const c = document.createElement("canvas"); c.width=1080; c.height=1920;
+    const card = document.createElement("button"); card.type="button"; card.className="card";
+    const cap = document.createElement("span"); const dl = document.createElement("button"); dl.type="button"; dl.className="link"; dl.textContent="Save";
+    const capw = document.createElement("div"); capw.className="cap"; capw.append(cap, dl); card.append(c, capw);
+    const it = {img, name:f.name, order:base.order, ar:base.ar, en:base.en, zoom:1, fx:.5, fy:.5, dy:0, c, card, cap};
+    card.onclick = e => { if (e.target===dl) return; select(items.indexOf(it)); };
+    dl.onclick = () => saveItem(it);
+    items.push(it); $("grid").append(card); RT.draw(c.getContext("2d"), img, it); cap.textContent = it.en || it.ar; added++;
+  }
+  if (added) select(items.length - added);
+}
+const fileIn = $("file"), drop = $("drop");
+drop.onclick = () => fileIn.click();
+drop.onkeydown = e => { if (e.key==="Enter"||e.key===" ") { e.preventDefault(); fileIn.click(); } };
+fileIn.onchange = () => { addFiles([...fileIn.files]); fileIn.value=""; };
+["dragenter","dragover"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add("over")}));
+["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove("over")}));
+drop.addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
+
+function edit(fn){ const it=items[sel]; if(!it) return; fn(it); paint(); }
+pre.onchange = () => { const p = PRESETS.find(p=>p.k===pre.value); if (!p) return; edit(it=>{it.ar=p.ar; it.en=p.en; it.order=p.order;}); syncForm(); };
+document.querySelectorAll("input[name=order]").forEach(r => r.onchange = () => edit(it=>it.order=r.value));
+$("ar").oninput = e => { edit(it=>it.ar=e.target.value.trim()); pre.value = items[sel] ? matchPreset(items[sel]) : ""; };
+$("en").oninput = e => { const p=e.target.selectionStart; e.target.value=e.target.value.toUpperCase(); e.target.setSelectionRange(p,p); edit(it=>it.en=e.target.value.trim()); pre.value = items[sel] ? matchPreset(items[sel]) : ""; };
+$("zoom").oninput = e => { edit(it=>it.zoom=e.target.value/100); $("zoomV").textContent=e.target.value+"%"; };
+$("dy").oninput = e => { const v=+e.target.value; edit(it=>it.dy=v); $("dyV").textContent = v ? (v>0?"+":"")+v+" px" : "As approved"; };
+$("resetPos").onclick = () => { edit(it=>{it.zoom=1;it.fx=.5;it.fy=.5;it.dy=0;}); syncForm(); };
+$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; RT.draw(it.c.getContext("2d"),it.img,it); it.cap.textContent=it.en||it.ar; }); toast("Wording applied to all " + items.length + " covers"); };
+$("remove").onclick = () => { const it=items[sel]; if(!it) return; it.card.remove(); items.splice(sel,1); sel = items.length ? Math.min(sel, items.length-1) : -1; syncForm(); paint(); };
+
+// drag to pan
+let drag = null;
+big.addEventListener("pointerdown", e => { const it=items[sel]; if(!it) return; big.setPointerCapture(e.pointerId); big.classList.add("drag"); drag={x:e.clientX,y:e.clientY,fx:it.fx,fy:it.fy}; });
+big.addEventListener("pointermove", e => { if(!drag) return; const it=items[sel]; const r=big.getBoundingClientRect(), k=1080/r.width;
+  const s=Math.max(1080/it.img.width,1920/it.img.height)*it.zoom, dw=it.img.width*s, dh=it.img.height*s;
+  it.fx = Math.min(1,Math.max(0, drag.fx - (e.clientX-drag.x)*k/dw)); it.fy = Math.min(1,Math.max(0, drag.fy - (e.clientY-drag.y)*k/dh)); paint(); });
+const endDrag = () => { drag=null; big.classList.remove("drag"); };
+big.addEventListener("pointerup", endDrag); big.addEventListener("pointercancel", endDrag);
+
+// export
+function fname(it, i){ const b=(it.en||"Reel").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"reel"; return `${b}_reel-cover_${String(i+1).padStart(2,"0")}.${$("fmt").value}`; }
+function blobOf(it){ return new Promise(res => { const c=document.createElement("canvas"); c.width=1080; c.height=1920; RT.draw(c.getContext("2d"), it.img, it);
+  const jpg=$("fmt").value==="jpg"; c.toBlob(res, jpg?"image/jpeg":"image/png", jpg?.95:undefined); }); }
+function deliver(name, blob){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+async function saveItem(it){ deliver(fname(it, items.indexOf(it)), await blobOf(it)); }
+$("saveOne").onclick = () => items[sel] && saveItem(items[sel]);
+$("saveAll").onclick = async e => { const btn=e.currentTarget; btn.disabled=true; try { const zip=new JSZip();
+  for (let i=0;i<items.length;i++) zip.file(fname(items[i],i), await blobOf(items[i]));
+  deliver("Capstone_reel-covers.zip", await zip.generateAsync({type:"blob", compression:"STORE"})); } finally { btn.disabled=false; } };
+
+const uiBtn=$("uiTheme"); function uiLabel(){ uiBtn.textContent = document.documentElement.dataset.theme==="dark" ? "Light mode" : "Dark mode"; }
+uiBtn.onclick=()=>{ const t=document.documentElement.dataset.theme==="dark"?"light":"dark"; document.documentElement.dataset.theme=t; try{localStorage.setItem("cp-reel-thumbs-ui",t)}catch(e){} uiLabel(); }; uiLabel();
+
+(async()=>{ sample = makeSample(); try { await RT.loadFonts("../brand/assets/fonts/"); } catch(e) { toast("Brand fonts didn't load — check your connection."); } syncForm(); paint(); })();
+</script>
+</body>
+</html>
