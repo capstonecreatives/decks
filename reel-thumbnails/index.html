@@ -126,15 +126,13 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
   </fieldset>
   <fieldset id="edit" disabled>
     <legend>Selected cover</legend>
-    <div class="f"><label for="preset">Project</label>
-      <select id="preset"></select></div>
     <div class="f"><label>Line order</label>
       <div class="seg">
         <label><input type="radio" name="order" value="ar" checked><span>Arabic first<small>Arabic bold · English light</small></span></label>
         <label><input type="radio" name="order" value="en"><span>English first<small>English bold · Arabic light</small></span></label>
       </div></div>
-    <div class="f"><label for="ar">Arabic line</label><input type="text" id="ar" dir="rtl" lang="ar" maxlength="60"></div>
-    <div class="f"><label for="en">English line</label><input type="text" id="en" maxlength="60" autocapitalize="characters">
+    <div class="f"><label for="ar">Arabic line</label><input type="text" id="ar" dir="rtl" lang="ar" maxlength="60" placeholder="مثال: فلل بليس حزوم"></div>
+    <div class="f"><label for="en">English line</label><input type="text" id="en" maxlength="60" autocapitalize="characters" placeholder="e.g. BLISS VILLAS HUZOOM LUSAIL">
       <p class="hint">English is set in capitals, as on the approved covers. Long lines shrink to fit.</p></div>
     <div class="f"><div class="rowlbl"><label for="zoom">Photo zoom</label><output id="zoomV">100%</output></div>
       <input type="range" id="zoom" min="100" max="250" step="1" value="100">
@@ -252,20 +250,12 @@ const RT = {
   }
 };
 
-const PRESETS = [
-  {k:"huzoom", n:"Bliss Villas Huzoom Lusail", ar:"فلل بليس حزوم", en:"BLISS VILLAS HUZOOM LUSAIL", order:"ar"},
-  {k:"newslata", n:"Bliss Gardens New Slata", ar:"بليس جاردنز السلطة الجديدة", en:"BLISS GARDENS NEW SLATA", order:"ar"},
-  {k:"lusailapts", n:"New apartments in Lusail", ar:"شقق جديدة بمنطقة لوسيل", en:"NEW APARTMENTS IN LUSAIL", order:"en"},
-  {k:"dyar", n:"Dyar Al Haram", ar:"ديار الحرم", en:"DYAR AL HARAM", order:"ar"}
-];
+const SAMPLE = {order:"ar", ar:"فلل بليس حزوم", en:"BLISS VILLAS HUZOOM LUSAIL"}; // empty-state preview only
 const $ = id => document.getElementById(id);
 const items = []; let sel = -1, sample = null;
 const big = $("big"), bctx = big.getContext("2d");
-const tpl = () => sel >= 0 ? items[sel] : {order:"ar", ar:PRESETS[0].ar, en:PRESETS[0].en};
-const pre = $("preset");
-pre.innerHTML = PRESETS.map(p => `<option value="${p.k}">${p.n}</option>`).join("") + `<option value="">Custom wording</option>`;
+const tpl = () => sel >= 0 ? items[sel] : {order:"ar", ar:"", en:""};
 function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(toast.h); toast.h=setTimeout(()=>t.classList.remove("on"),2600); }
-function matchPreset(it){ const p = PRESETS.find(p => p.ar===it.ar && p.en===it.en); return p ? p.k : ""; }
 
 function makeSample(){ // neutral sky gradient for the empty state
   const c=document.createElement("canvas"); c.width=1080; c.height=1920; const x=c.getContext("2d");
@@ -273,7 +263,7 @@ function makeSample(){ // neutral sky gradient for the empty state
 
 function paint(){
   const it = sel>=0 ? items[sel] : null;
-  RT.draw(bctx, it ? it.img : sample, it || {order:"ar", ar:PRESETS[0].ar, en:PRESETS[0].en});
+  RT.draw(bctx, it ? it.img : sample, it || SAMPLE);
   if (it && it.behind && it.mask && tool() !== "move" && it._box) { // show the subject area while brushing
     const o=document.createElement("canvas"); o.width=1080; o.height=1920; const ox=o.getContext("2d"); const [x,y,dw,dh]=it._box;
     ox.drawImage(it.mask,x,y,dw,dh); ox.globalCompositeOperation="source-in"; ox.fillStyle="rgba(69,130,140,.5)"; ox.fillRect(0,0,1080,1920); bctx.drawImage(o,0,0);
@@ -286,7 +276,7 @@ function syncForm(){
   items.forEach((x,i)=>x.card.classList.toggle("sel", i===sel));
   if (!it) return;
   document.querySelector(`input[name=order][value=${it.order}]`).checked = true;
-  $("ar").value = it.ar; $("en").value = it.en; pre.value = matchPreset(it);
+  $("ar").value = it.ar; $("en").value = it.en;
   $("zoom").value = Math.round(it.zoom*100); $("zoomV").textContent = Math.round(it.zoom*100)+"%";
   $("dy").value = it.dy; $("dyV").textContent = it.dy ? (it.dy>0?"+":"")+it.dy+" px" : "As approved";
   document.querySelector(`input[name=gfrom][value=${it.gfrom}]`).checked = true;
@@ -475,10 +465,9 @@ fileIn.onchange = () => { addFiles([...fileIn.files]); fileIn.value=""; };
 drop.addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
 
 function edit(fn){ const it=items[sel]; if(!it) return; fn(it); paint(); }
-pre.onchange = () => { const p = PRESETS.find(p=>p.k===pre.value); if (!p) return; edit(it=>{it.ar=p.ar; it.en=p.en; it.order=p.order;}); syncForm(); };
 document.querySelectorAll("input[name=order]").forEach(r => r.onchange = () => edit(it=>it.order=r.value));
-$("ar").oninput = e => { edit(it=>it.ar=e.target.value.trim()); pre.value = items[sel] ? matchPreset(items[sel]) : ""; };
-$("en").oninput = e => { const p=e.target.selectionStart; e.target.value=e.target.value.toUpperCase(); e.target.setSelectionRange(p,p); edit(it=>it.en=e.target.value.trim()); pre.value = items[sel] ? matchPreset(items[sel]) : ""; };
+$("ar").oninput = e => { edit(it=>it.ar=e.target.value.trim()); };
+$("en").oninput = e => { const p=e.target.selectionStart; e.target.value=e.target.value.toUpperCase(); e.target.setSelectionRange(p,p); edit(it=>it.en=e.target.value.trim()); };
 $("zoom").oninput = e => { edit(it=>it.zoom=e.target.value/100); $("zoomV").textContent=e.target.value+"%"; };
 $("dy").oninput = e => { const v=+e.target.value; edit(it=>it.dy=v); $("dyV").textContent = v ? (v>0?"+":"")+v+" px" : "As approved"; };
 document.querySelectorAll("input[name=gfrom]").forEach(r => r.onchange = () => edit(it=>it.gfrom=r.value));
