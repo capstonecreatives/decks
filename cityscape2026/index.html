@@ -459,6 +459,9 @@ td.when{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08e
 .bgroup-h b{color:var(--tcol,var(--ink));font-weight:600}
 .bgroup-h::after{content:"";flex:1;height:1px;background:var(--line)}
 .month-blk{margin:4px 0 22px}.month-blk.hide{display:none}
+.cat-blk{margin:0 0 16px}.cat-blk.hide{display:none}
+.cat-h{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:2px 0 8px}
+.cat-h span{opacity:.8}
 .month-h{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);font-weight:600;margin:0 0 10px;display:flex;align-items:center;gap:10px}
 .month-h span{color:var(--muted);font-weight:400}
 .month-h::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -1631,7 +1634,7 @@ function browseSlide(){
       <div class="section-h" style="margin-top:6px">Social creatives · ${kids.length} ${kids.length===1?'creative':'creatives'}</div>
       <div class="bgrid"></div></div>`);
     /* social creatives are grouped by month (added date, else updated), newest month first */
-    const _mk = c => { const v=String(c.added||c.updated||'').trim().match(/^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})$/); return v ? Number(v[3])*100+(_MON[v[2].toLowerCase()]||0) : 0; };
+    const _mk = c => { const v=String(c.updated||c.added||'').trim().match(/^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})$/); return v ? Number(v[3])*100+(_MON[v[2].toLowerCase()]||0) : 0; };
     const _MN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const _byMonth = new Map();
     kids.forEach(c=>{ const k=_mk(c); if(!_byMonth.has(k)) _byMonth.set(k,[]); _byMonth.get(k).push(c); });
@@ -1642,7 +1645,14 @@ function browseSlide(){
       const label = k ? `${_MN[(k%100)-1]} ${Math.floor(k/100)}` : 'Undated';
       const mb = el(`<div class="month-blk"><div class="month-h">${label} · <span>${list.length}</span></div><div class="bgrid"></div></div>`);
       g.appendChild(mb);
-      list.forEach(c=>renderThumb(c, mb.querySelector('.bgrid')));
+      /* inside each month, creatives are grouped by category */
+      const _CATS=[['photo','Stills & single posts'],['wati','WATI'],['carousel','Carousels'],['story','Stories'],['reels','Reels & video'],['walkthrough','Unit walkthroughs'],['construction','Construction']];
+      mb.querySelector('.bgrid').remove();
+      _CATS.concat([[null,'Other']]).forEach(([ct,lab])=>{
+        const items=list.filter(c=> ct ? c.type===ct : !_CATS.some(x=>x[0]===c.type)); if(!items.length) return;
+        const cb=el(`<div class="cat-blk" data-cat="${ct||'other'}"><div class="cat-h">${lab} · <span>${items.length}</span></div><div class="bgrid"></div></div>`);
+        mb.appendChild(cb); items.forEach(c=>renderThumb(c, cb.querySelector('.bgrid')));
+      });
     });
     function renderThumb(c, grid){ const t=c.type;
       const pic = (c.type==='carousel'||c.type==='wati') ? ((c.cards||[]).find(x=>has(x.src))||{}).src
@@ -1685,6 +1695,7 @@ function browseSlide(){
       soc.classList.toggle('hide', f!=='all' && !regularTypes.includes(f));
       soc.querySelectorAll('.thumb').forEach(t=>t.classList.toggle('hide', f!=='all' && t.dataset.t!==f));
       soc.querySelectorAll('.month-blk').forEach(m=>{ const vis=[...m.querySelectorAll('.thumb')].filter(t=>!t.classList.contains('hide')).length; m.classList.toggle('hide', !vis); const n=m.querySelector('.month-h span'); if(n) n.textContent=vis; });
+      soc.querySelectorAll('.cat-blk').forEach(b=>{ const vis=[...b.querySelectorAll('.thumb')].filter(t=>!t.classList.contains('hide')).length; b.classList.toggle('hide', !vis); const n=b.querySelector('.cat-h span'); if(n) n.textContent=vis; });
     }
   }));
 
