@@ -99,7 +99,10 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
 .scrub{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);align-items:start}
 .scrubview canvas{width:100%;height:auto;display:block;border-radius:9px;background:#0B3042}
 @media (max-width:520px){.scrub{grid-template-columns:110px minmax(0,1fr)}}
-.cnt.full{color:#B4532A;font-weight:700}
+.cnt.near{color:#B4532A;font-weight:700}
+.cnt.over{color:#C62828;font-weight:800}
+input.over{border-color:#C62828 !important;box-shadow:0 0 0 1px #C62828}
+.overtag{display:inline-block;background:#C62828;color:#fff;font-size:10.5px;font-weight:800;border-radius:5px;padding:1px 5px;margin-left:4px;letter-spacing:.02em;flex:none}
 #lenHint.warn{color:#B4532A}
 .check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 4px;cursor:pointer}
 .check input{width:18px;height:18px;accent-color:var(--teal);margin:0}
@@ -134,9 +137,9 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
         <label><input type="radio" name="order" value="en"><span>English first<small>English bold · Arabic light</small></span></label>
       </div></div>
     <div class="f"><div class="rowlbl"><label for="ar">Arabic line</label><output id="arN" class="cnt">0 / 26</output></div>
-      <input type="text" id="ar" dir="rtl" lang="ar" maxlength="26" placeholder="مثال: فلل بليس حزوم"></div>
+      <input type="text" id="ar" dir="rtl" lang="ar" maxlength="60" placeholder="مثال: فلل بليس حزوم"></div>
     <div class="f"><div class="rowlbl"><label for="en">English line</label><output id="enN" class="cnt">0 / 26</output></div>
-      <input type="text" id="en" maxlength="26" autocapitalize="characters" placeholder="e.g. BLISS VILLAS HUZOOM LUSAIL">
+      <input type="text" id="en" maxlength="60" autocapitalize="characters" placeholder="e.g. BLISS VILLAS HUZOOM LUSAIL">
       <p class="hint" id="lenHint">Up to 26 characters per line, spaces included, so every cover keeps the same size and balance. Text position, font and size are fixed to the approved covers.</p></div>
     <div class="f"><div class="rowlbl"><label for="zoom">Photo zoom</label><output id="zoomV">100%</output></div>
       <input type="range" id="zoom" min="100" max="250" step="1" value="100">
@@ -207,7 +210,8 @@ const RT = {
   // baselines per order (px from top)
   LAYOUT: { ar: [308, 380], en: [324, 384] },
   MAXW: 940, // lines wider than this would crowd the edges (approved covers top out near 780)
-  MAXCH: 26, // characters per line, spaces included (longest approved line)
+  MAXCH: 26, // target characters per line, spaces included (longest approved line)
+  OVERCH: 28, // at this many characters a line is marked red as over the limit
   font(kind, px){ // kind: arBold arLight enLight enSemi
     px = px || 60; const fam = kind.startsWith("ar") ? "RTTajawal, Tajawal" : "RTProxima";
     return {arBold:"700", arLight:"300", enLight:"300", enSemi:"600"}[kind] + " " + px + "px " + fam;
@@ -276,7 +280,7 @@ function paint(){
     const o=document.createElement("canvas"); o.width=1080; o.height=1920; const ox=o.getContext("2d"); const [x,y,dw,dh]=it._box;
     ox.drawImage(it.mask,x,y,dw,dh); ox.globalCompositeOperation="source-in"; ox.fillStyle="rgba(69,130,140,.5)"; ox.fillRect(0,0,1080,1920); bctx.drawImage(o,0,0);
   }
-  if (it) { RT.draw(it.c.getContext("2d"), it.img, it); it.cap.textContent = it.en || it.ar || "Cover"; }
+  if (it) { RT.draw(it.c.getContext("2d"), it.img, it); capText(it); }
 }
 function syncForm(){
   const it = items[sel]; $("edit").disabled = !it; $("saveOne").disabled = !it; $("saveAll").disabled = !items.length;
@@ -302,7 +306,7 @@ function addItem(img, name, base){
   const it = {img, name, order:base.order, ar:base.ar, en:base.en, zoom:1, fx:.5, fy:.5, gs:base.gs||0, gl:base.gl??.45, gfrom:base.gfrom||"top", behind:false, mask:null, c, card, cap};
   card.onclick = e => { if (e.target===dl) return; select(items.indexOf(it)); };
   dl.onclick = () => saveItem(it);
-  items.push(it); $("grid").append(card); RT.draw(c.getContext("2d"), img, it); cap.textContent = it.en || it.ar;
+  items.push(it); $("grid").append(card); RT.draw(c.getContext("2d"), img, it); capText(it);
   return it;
 }
 async function addFiles(files){
@@ -477,13 +481,18 @@ document.querySelectorAll("input[name=order]").forEach(r => r.onchange = () => e
 $("ar").oninput = e => { edit(it=>it.ar=e.target.value.trim()); lenNote(items[sel]); };
 $("en").oninput = e => { const p=e.target.selectionStart; e.target.value=e.target.value.toUpperCase(); e.target.setSelectionRange(p,p); edit(it=>it.en=e.target.value.trim()); lenNote(items[sel]); };
 $("zoom").oninput = e => { edit(it=>it.zoom=e.target.value/100); $("zoomV").textContent=e.target.value+"%"; };
+function overLines(it){ return ["ar","en"].filter(k => [...(it[k]||"")].length >= RT.OVERCH); }
 function lenNote(it){
-  ["ar","en"].forEach(k => { const n=[...(it ? it[k] : "")].length, o=$(k+"N"); o.textContent = n + " / " + RT.MAXCH; o.classList.toggle("full", n>=RT.MAXCH); });
-  const h=$("lenHint"), w = it ? RT.lineWidths(it) : {ar:0,en:0}, wide = Math.max(w.ar,w.en) > RT.MAXW;
-  h.classList.toggle("warn", wide);
-  h.textContent = wide ? "This line is wider than the approved covers allow. Shorten it a little so it stays clear of the edges."
-    : "Up to 26 characters per line, spaces included, so every cover keeps the same size and balance. Text position, font and size are fixed to the approved covers.";
+  ["ar","en"].forEach(k => { const n=[...(it ? it[k] : "")].length, o=$(k+"N"), over=n>=RT.OVERCH;
+    o.textContent = over ? `${n} / ${RT.MAXCH} · over limit` : `${n} / ${RT.MAXCH}`;
+    o.classList.toggle("near", !over && n>RT.MAXCH); o.classList.toggle("over", over); $(k).classList.toggle("over", over); });
+  const h=$("lenHint"), ov = it ? overLines(it) : [];
+  h.classList.toggle("warn", ov.length>0);
+  h.textContent = ov.length ? `The ${ov.map(k=>k==="ar"?"Arabic":"English").join(" and ")} line is ${RT.OVERCH} characters or more and is marked as over the limit. It will still export, but it won't match the balance of the other covers.`
+    : `Aim for ${RT.MAXCH} characters or fewer per line, spaces included. Lines can go longer, but at ${RT.OVERCH} they're marked red. Text position, font and size are fixed to the approved covers.`;
+  if (it) capText(it);
 }
+function capText(it){ it.cap.textContent = it.en || it.ar || "Cover"; if (overLines(it).length) { const s=document.createElement("span"); s.className="overtag"; s.textContent="OVER"; s.title="A line is over the character limit"; s.style.marginLeft="0"; s.style.marginRight="5px"; it.cap.prepend(s); } }
 document.querySelectorAll("input[name=gfrom]").forEach(r => r.onchange = () => edit(it=>it.gfrom=r.value));
 $("gs").oninput = e => { edit(it=>it.gs=e.target.value/100); $("gsV").textContent = +e.target.value ? e.target.value+"%" : "Off"; };
 $("gl").oninput = e => { edit(it=>it.gl=e.target.value/100); $("glV").textContent = e.target.value+"%"; };
@@ -493,7 +502,7 @@ document.querySelectorAll("input[name=tool]").forEach(r => r.onchange = () => { 
 $("brush").oninput = e => $("brushV").textContent = e.target.value + " px";
 $("maskReset").onclick = () => { const it=items[sel]; if(!it||!it.mask0) return; const x=it.mask.getContext("2d"); x.clearRect(0,0,it.mask.width,it.mask.height); x.drawImage(it.mask0,0,0); paint(); };
 $("resetPos").onclick = () => { edit(it=>{it.zoom=1;it.fx=.5;it.fy=.5;it.gs=0;it.gl=.45;it.gfrom="top";it.behind=false;}); syncForm(); };
-$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; it.gs=s.gs; it.gl=s.gl; it.gfrom=s.gfrom; RT.draw(it.c.getContext("2d"),it.img,it); it.cap.textContent=it.en||it.ar; });
+$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; it.gs=s.gs; it.gl=s.gl; it.gfrom=s.gfrom; RT.draw(it.c.getContext("2d"),it.img,it); capText(it); });
   toast("Wording and gradient applied to all " + items.length + " covers"); };
 $("remove").onclick = () => { const it=items[sel]; if(!it) return; it.card.remove(); items.splice(sel,1); sel = items.length ? Math.min(sel, items.length-1) : -1; syncForm(); paint(); };
 
