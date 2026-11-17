@@ -99,6 +99,8 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
 .scrub{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line);align-items:start}
 .scrubview canvas{width:100%;height:auto;display:block;border-radius:9px;background:#0B3042}
 @media (max-width:520px){.scrub{grid-template-columns:110px minmax(0,1fr)}}
+.cnt.full{color:#B4532A;font-weight:700}
+#lenHint.warn{color:#B4532A}
 .check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 4px;cursor:pointer}
 .check input{width:18px;height:18px;accent-color:var(--teal);margin:0}
 .subj .hint.busy{color:var(--teal)}
@@ -131,14 +133,14 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
         <label><input type="radio" name="order" value="ar" checked><span>Arabic first<small>Arabic bold · English light</small></span></label>
         <label><input type="radio" name="order" value="en"><span>English first<small>English bold · Arabic light</small></span></label>
       </div></div>
-    <div class="f"><label for="ar">Arabic line</label><input type="text" id="ar" dir="rtl" lang="ar" maxlength="60" placeholder="مثال: فلل بليس حزوم"></div>
-    <div class="f"><label for="en">English line</label><input type="text" id="en" maxlength="60" autocapitalize="characters" placeholder="e.g. BLISS VILLAS HUZOOM LUSAIL">
-      <p class="hint">English is set in capitals, as on the approved covers. Long lines shrink to fit.</p></div>
+    <div class="f"><div class="rowlbl"><label for="ar">Arabic line</label><output id="arN" class="cnt">0 / 26</output></div>
+      <input type="text" id="ar" dir="rtl" lang="ar" maxlength="26" placeholder="مثال: فلل بليس حزوم"></div>
+    <div class="f"><div class="rowlbl"><label for="en">English line</label><output id="enN" class="cnt">0 / 26</output></div>
+      <input type="text" id="en" maxlength="26" autocapitalize="characters" placeholder="e.g. BLISS VILLAS HUZOOM LUSAIL">
+      <p class="hint" id="lenHint">Up to 26 characters per line, spaces included, so every cover keeps the same size and balance. Text position, font and size are fixed to the approved covers.</p></div>
     <div class="f"><div class="rowlbl"><label for="zoom">Photo zoom</label><output id="zoomV">100%</output></div>
       <input type="range" id="zoom" min="100" max="250" step="1" value="100">
       <p class="hint">Drag the large preview to move the photo.</p></div>
-    <div class="f"><div class="rowlbl"><label for="dy">Text height</label><output id="dyV">As approved</output></div>
-      <input type="range" id="dy" min="-150" max="600" step="2" value="0"></div>
     <div class="f"><label>Black gradient</label>
       <div class="seg">
         <label><input type="radio" name="gfrom" value="top" checked><span>Top</span></label>
@@ -160,9 +162,9 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
         <input type="range" id="brush" min="16" max="240" step="2" value="70">
         <div class="tools" style="margin:6px 0 4px"><button type="button" class="btn" id="maskReset">Undo brush edits</button></div>
       </div>
-      <p class="hint" id="subjMsg">Finds the main subject (people, a building) and lays it over the headline. Move the text down with Text height so it overlaps the subject.</p></div>
+      <p class="hint" id="subjMsg">Finds the main subject (people, a building) and lays it over the headline. The headline stays in its fixed place, so this shows where the subject reaches the top of the frame — move or zoom the photo so the subject sits behind the text.</p></div>
     <div class="tools">
-      <button type="button" class="btn" id="resetPos">Reset photo &amp; text</button>
+      <button type="button" class="btn" id="resetPos">Reset photo &amp; gradient</button>
       <button type="button" class="btn" id="applyAll">Use this look on all</button>
       <button type="button" class="btn" id="remove">Remove</button>
     </div>
@@ -204,7 +206,8 @@ const RT = {
   W: 1080, H: 1920, SIZE: 60, CX: 540,
   // baselines per order (px from top)
   LAYOUT: { ar: [308, 380], en: [324, 384] },
-  MAXW: 930, // widest line allowed before it shrinks (approved covers top out near 780)
+  MAXW: 940, // lines wider than this would crowd the edges (approved covers top out near 780)
+  MAXCH: 26, // characters per line, spaces included (longest approved line)
   font(kind, px){ // kind: arBold arLight enLight enSemi
     px = px || 60; const fam = kind.startsWith("ar") ? "RTTajawal, Tajawal" : "RTProxima";
     return {arBold:"700", arLight:"300", enLight:"300", enSemi:"600"}[kind] + " " + px + "px " + fam;
@@ -228,6 +231,12 @@ const RT = {
       ox.globalCompositeOperation="source-atop"; RT.drawGradient(ox, v); ox.globalCompositeOperation="source-over"; ctx.drawImage(o,0,0);
     }
   },
+  lineWidths(v){ // rendered width of each line at the fixed size
+    const c=RT._m||(RT._m=document.createElement("canvas").getContext("2d")), out={};
+    [["ar", v.order==="en"?"arLight":"arBold", "rtl"],["en", v.order==="en"?"enSemi":"enLight", "ltr"]].forEach(([k,kind,dir])=>{
+      c.font=RT.font(kind); c.direction=dir; if("letterSpacing" in c) c.letterSpacing=(dir==="ltr"?-1.5:0)+"px"; out[k]=v[k]?c.measureText(v[k]).width:0; });
+    return out;
+  },
   drawGradient(ctx, v){ // black, eased fall-off; strength 0–1, length as a share of the height
     const s=v.gs||0; if (s<=0) return; const {W,H}=RT, len=Math.max(.05, v.gl ?? .45)*H;
     const one = (y0, y1) => { const g=ctx.createLinearGradient(0,y0,0,y1);
@@ -237,14 +246,13 @@ const RT = {
   },
   drawText(ctx, v, scale){ // headline only, at the approved position; scale<1 for small previews
     ctx.save(); if (scale !== 1) ctx.scale(scale, scale);
-    const b=RT.LAYOUT[v.order]||RT.LAYOUT.ar, dy=v.dy||0;
+    const b=RT.LAYOUT[v.order]||RT.LAYOUT.ar, dy=0; // fixed: same place on every cover
     const lines = v.order==="en" ? [[v.en,"enSemi","ltr"],[v.ar,"arLight","rtl"]] : [[v.ar,"arBold","rtl"],[v.en,"enLight","ltr"]];
     ctx.fillStyle="#FFFFFF"; ctx.textAlign="center"; ctx.textBaseline="alphabetic";
     lines.forEach(([txt,kind,dir],i)=>{ if(!txt) return; ctx.direction=dir;
       let px = RT.SIZE; ctx.font=RT.font(kind,px);
       const ls = dir==="ltr" ? -0.025 : 0; const setLs = p => { if("letterSpacing" in ctx) ctx.letterSpacing=(ls*p)+"px"; };
       setLs(px); const w = ctx.measureText(txt).width;
-      if (w > RT.MAXW) { px = Math.max(30, Math.floor(px * RT.MAXW / w)); ctx.font=RT.font(kind,px); setLs(px); }
       ctx.fillText(txt, RT.CX - ls*px/2, b[i]+dy); if("letterSpacing" in ctx) ctx.letterSpacing="0px"; });
     ctx.restore();
   }
@@ -278,7 +286,7 @@ function syncForm(){
   document.querySelector(`input[name=order][value=${it.order}]`).checked = true;
   $("ar").value = it.ar; $("en").value = it.en;
   $("zoom").value = Math.round(it.zoom*100); $("zoomV").textContent = Math.round(it.zoom*100)+"%";
-  $("dy").value = it.dy; $("dyV").textContent = it.dy ? (it.dy>0?"+":"")+it.dy+" px" : "As approved";
+  lenNote(it);
   document.querySelector(`input[name=gfrom][value=${it.gfrom}]`).checked = true;
   $("gs").value = Math.round(it.gs*100); $("gsV").textContent = it.gs ? Math.round(it.gs*100)+"%" : "Off";
   $("gl").value = Math.round(it.gl*100); $("glV").textContent = Math.round(it.gl*100)+"%";
@@ -291,7 +299,7 @@ function addItem(img, name, base){
   const card = document.createElement("button"); card.type="button"; card.className="card";
   const cap = document.createElement("span"); const dl = document.createElement("button"); dl.type="button"; dl.className="link"; dl.textContent="Save";
   const capw = document.createElement("div"); capw.className="cap"; capw.append(cap, dl); card.append(c, capw);
-  const it = {img, name, order:base.order, ar:base.ar, en:base.en, zoom:1, fx:.5, fy:.5, dy:base.dy||0, gs:base.gs||0, gl:base.gl??.45, gfrom:base.gfrom||"top", behind:false, mask:null, c, card, cap};
+  const it = {img, name, order:base.order, ar:base.ar, en:base.en, zoom:1, fx:.5, fy:.5, gs:base.gs||0, gl:base.gl??.45, gfrom:base.gfrom||"top", behind:false, mask:null, c, card, cap};
   card.onclick = e => { if (e.target===dl) return; select(items.indexOf(it)); };
   dl.onclick = () => saveItem(it);
   items.push(it); $("grid").append(card); RT.draw(c.getContext("2d"), img, it); cap.textContent = it.en || it.ar;
@@ -314,7 +322,7 @@ async function addFiles(files){
 /* ---------- subject cut-out (on-device, silueta / U²-Net) ---------- */
 const SEG = {session:null, loading:null};
 function subjNote(it){ const m=$("subjMsg"); m.classList.remove("busy");
-  if (!it || !it.behind) { m.textContent = "Finds the main subject (people, a building) and lays it over the headline. Move the text down with Text height so it overlaps the subject."; return; }
+  if (!it || !it.behind) { m.textContent = "Finds the main subject (people, a building) and lays it over the headline. The headline stays in its fixed place, so this shows where the subject reaches the top of the frame — move or zoom the photo so the subject sits behind the text."; return; }
   if (it.maskMsg) m.textContent = it.maskMsg; }
 async function segSession(){
   if (SEG.session) return SEG.session;
@@ -343,7 +351,7 @@ async function findSubject(it){
     const hx=hm.getContext("2d"); hx.imageSmoothingQuality="high"; hx.drawImage(mk,0,0,hm.width,hm.height);
     const keep=document.createElement("canvas"); keep.width=hm.width; keep.height=hm.height; keep.getContext("2d").drawImage(hm,0,0);
     if (cover < .01 || hi-lo < .2) { it.mask=null; it.behind=false; it.maskMsg="No clear subject found in this photo, so the text stays on top."; $("behind").checked=false; }
-    else { it.mask = hm; it.mask0 = keep; it.maskMsg = `Subject found (${Math.round(cover*100)}% of the photo). If it doesn't overlap the headline yet, move the text down with Text height. Use the brush to remove anything that shouldn't cover the text.`; }
+    else { it.mask = hm; it.mask0 = keep; it.maskMsg = `Subject found (${Math.round(cover*100)}% of the photo). If it doesn't reach the headline yet, move or zoom the photo. Use the brush to remove anything that shouldn't cover the text.`; }
   } catch(e) { console.error(e); it.behind=false; it.mask=null; $("behind").checked=false; it.maskMsg="The subject finder couldn't load. Check your connection and try again."; }
   m.classList.remove("busy");
 }
@@ -466,10 +474,16 @@ drop.addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
 
 function edit(fn){ const it=items[sel]; if(!it) return; fn(it); paint(); }
 document.querySelectorAll("input[name=order]").forEach(r => r.onchange = () => edit(it=>it.order=r.value));
-$("ar").oninput = e => { edit(it=>it.ar=e.target.value.trim()); };
-$("en").oninput = e => { const p=e.target.selectionStart; e.target.value=e.target.value.toUpperCase(); e.target.setSelectionRange(p,p); edit(it=>it.en=e.target.value.trim()); };
+$("ar").oninput = e => { edit(it=>it.ar=e.target.value.trim()); lenNote(items[sel]); };
+$("en").oninput = e => { const p=e.target.selectionStart; e.target.value=e.target.value.toUpperCase(); e.target.setSelectionRange(p,p); edit(it=>it.en=e.target.value.trim()); lenNote(items[sel]); };
 $("zoom").oninput = e => { edit(it=>it.zoom=e.target.value/100); $("zoomV").textContent=e.target.value+"%"; };
-$("dy").oninput = e => { const v=+e.target.value; edit(it=>it.dy=v); $("dyV").textContent = v ? (v>0?"+":"")+v+" px" : "As approved"; };
+function lenNote(it){
+  ["ar","en"].forEach(k => { const n=[...(it ? it[k] : "")].length, o=$(k+"N"); o.textContent = n + " / " + RT.MAXCH; o.classList.toggle("full", n>=RT.MAXCH); });
+  const h=$("lenHint"), w = it ? RT.lineWidths(it) : {ar:0,en:0}, wide = Math.max(w.ar,w.en) > RT.MAXW;
+  h.classList.toggle("warn", wide);
+  h.textContent = wide ? "This line is wider than the approved covers allow. Shorten it a little so it stays clear of the edges."
+    : "Up to 26 characters per line, spaces included, so every cover keeps the same size and balance. Text position, font and size are fixed to the approved covers.";
+}
 document.querySelectorAll("input[name=gfrom]").forEach(r => r.onchange = () => edit(it=>it.gfrom=r.value));
 $("gs").oninput = e => { edit(it=>it.gs=e.target.value/100); $("gsV").textContent = +e.target.value ? e.target.value+"%" : "Off"; };
 $("gl").oninput = e => { edit(it=>it.gl=e.target.value/100); $("glV").textContent = e.target.value+"%"; };
@@ -478,9 +492,9 @@ const tool = () => (document.querySelector("input[name=tool]:checked")||{}).valu
 document.querySelectorAll("input[name=tool]").forEach(r => r.onchange = () => { big.style.cursor = tool()==="move" ? "" : "crosshair"; paint(); });
 $("brush").oninput = e => $("brushV").textContent = e.target.value + " px";
 $("maskReset").onclick = () => { const it=items[sel]; if(!it||!it.mask0) return; const x=it.mask.getContext("2d"); x.clearRect(0,0,it.mask.width,it.mask.height); x.drawImage(it.mask0,0,0); paint(); };
-$("resetPos").onclick = () => { edit(it=>{it.zoom=1;it.fx=.5;it.fy=.5;it.dy=0;it.gs=0;it.gl=.45;it.gfrom="top";it.behind=false;}); syncForm(); };
-$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; it.dy=s.dy; it.gs=s.gs; it.gl=s.gl; it.gfrom=s.gfrom; RT.draw(it.c.getContext("2d"),it.img,it); it.cap.textContent=it.en||it.ar; });
-  toast("Wording, text height and gradient applied to all " + items.length + " covers"); };
+$("resetPos").onclick = () => { edit(it=>{it.zoom=1;it.fx=.5;it.fy=.5;it.gs=0;it.gl=.45;it.gfrom="top";it.behind=false;}); syncForm(); };
+$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; it.gs=s.gs; it.gl=s.gl; it.gfrom=s.gfrom; RT.draw(it.c.getContext("2d"),it.img,it); it.cap.textContent=it.en||it.ar; });
+  toast("Wording and gradient applied to all " + items.length + " covers"); };
 $("remove").onclick = () => { const it=items[sel]; if(!it) return; it.card.remove(); items.splice(sel,1); sel = items.length ? Math.min(sel, items.length-1) : -1; syncForm(); paint(); };
 
 // drag to pan
