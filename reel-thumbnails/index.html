@@ -104,6 +104,10 @@ input:focus-visible,select:focus-visible,button:focus-visible,.seg input:focus-v
 input.over{border-color:#C62828 !important;box-shadow:0 0 0 1px #C62828}
 .overtag{display:inline-block;background:#C62828;color:#fff;font-size:10.5px;font-weight:800;border-radius:5px;padding:1px 5px;margin-left:4px;letter-spacing:.02em;flex:none}
 #lenHint.warn{color:#B4532A}
+.seg4 span{padding:8px 3px;font-size:13px}
+.seg input:disabled+span{opacity:.4}
+.adj{margin-bottom:8px}
+#rmMsg.busy,#adjMsg.busy{color:var(--teal)}
 .check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:var(--ink);margin:2px 0 4px;cursor:pointer}
 .check input{width:18px;height:18px;accent-color:var(--teal);margin:0}
 .subj .hint.busy{color:var(--teal)}
@@ -155,22 +159,55 @@ input.over{border-color:#C62828 !important;box-shadow:0 0 0 1px #C62828}
     <div class="f"><div class="rowlbl"><label for="gl">Gradient length</label><output id="glV">45%</output></div>
       <input type="range" id="gl" min="10" max="100" step="1" value="45"></div>
     <div class="f subj"><label class="check"><input type="checkbox" id="behind"> Put the text behind the subject</label>
-      <div id="brushBox" hidden>
-        <div class="seg" style="margin:8px 0 8px">
-          <label><input type="radio" name="tool" value="move" checked><span>Move photo</span></label>
-          <label><input type="radio" name="tool" value="erase"><span>Remove from subject</span></label>
-          <label><input type="radio" name="tool" value="add"><span>Add to subject</span></label>
-        </div>
-        <div class="rowlbl"><label for="brush">Brush size</label><output id="brushV">70 px</output></div>
-        <input type="range" id="brush" min="16" max="240" step="2" value="70">
-        <div class="tools" style="margin:6px 0 4px"><button type="button" class="btn" id="maskReset">Undo brush edits</button></div>
-      </div>
       <p class="hint" id="subjMsg">Finds the main subject (people, a building) and lays it over the headline. The headline stays in its fixed place, so this shows where the subject reaches the top of the frame — move or zoom the photo so the subject sits behind the text.</p></div>
     <div class="tools">
       <button type="button" class="btn" id="resetPos">Reset photo &amp; gradient</button>
       <button type="button" class="btn" id="applyAll">Use this look on all</button>
       <button type="button" class="btn" id="remove">Remove</button>
     </div>
+  </fieldset>
+  <fieldset id="editPhoto" disabled>
+    <legend>Edit photo</legend>
+    <div class="f"><label>Brush on the large preview</label>
+      <div class="seg seg4">
+        <label><input type="radio" name="tool" value="move" checked><span>Move</span></label>
+        <label><input type="radio" name="tool" value="mark"><span>Remove object</span></label>
+        <label><input type="radio" name="tool" value="erase"><span>Subject −</span></label>
+        <label><input type="radio" name="tool" value="add"><span>Subject +</span></label>
+      </div>
+      <p class="hint" id="toolHint">Move drags the photo. Remove object: paint over anything you want gone (people, cones, signs, shadows), then tap Remove marked.</p></div>
+    <div class="f"><div class="rowlbl"><label for="brush">Brush size</label><output id="brushV">70 px</output></div>
+      <input type="range" id="brush" min="16" max="240" step="2" value="70"></div>
+    <div class="tools">
+      <button type="button" class="btn primary" id="doRemove" disabled>Remove marked</button>
+      <button type="button" class="btn" id="clearMarks" disabled>Clear marks</button>
+      <button type="button" class="btn" id="undoEdit" disabled>Undo removal</button>
+      <button type="button" class="btn" id="restorePhoto" disabled>Original photo</button>
+      <button type="button" class="btn" id="maskReset" hidden>Reset subject outline</button>
+    </div>
+    <p class="hint" id="rmMsg"></p>
+    <div class="f" style="margin-top:6px"><label>Adjust</label>
+      <div class="seg">
+        <label><input type="radio" name="adjT" value="all" checked><span>Whole photo</span></label>
+        <label><input type="radio" name="adjT" value="subj"><span>Subject</span></label>
+        <label><input type="radio" name="adjT" value="bg"><span>Background</span></label>
+      </div>
+      <p class="hint" id="adjMsg">Subject and Background each keep their own settings, on top of Whole photo.</p></div>
+    <div class="f adj"><div class="rowlbl"><label for="a_exp">Exposure</label><output id="a_expV">0</output></div>
+      <input type="range" id="a_exp" data-k="exp" min="-100" max="100" step="1" value="0"></div>
+    <div class="f adj"><div class="rowlbl"><label for="a_bri">Brightness</label><output id="a_briV">0</output></div>
+      <input type="range" id="a_bri" data-k="bri" min="-100" max="100" step="1" value="0"></div>
+    <div class="f adj"><div class="rowlbl"><label for="a_con">Contrast</label><output id="a_conV">0</output></div>
+      <input type="range" id="a_con" data-k="con" min="-100" max="100" step="1" value="0"></div>
+    <div class="f adj"><div class="rowlbl"><label for="a_hi">Highlights</label><output id="a_hiV">0</output></div>
+      <input type="range" id="a_hi" data-k="hi" min="-100" max="100" step="1" value="0"></div>
+    <div class="f adj"><div class="rowlbl"><label for="a_sh">Shadows</label><output id="a_shV">0</output></div>
+      <input type="range" id="a_sh" data-k="sh" min="-100" max="100" step="1" value="0"></div>
+    <div class="f adj"><div class="rowlbl"><label for="a_sat">Saturation</label><output id="a_satV">0</output></div>
+      <input type="range" id="a_sat" data-k="sat" min="-100" max="100" step="1" value="0"></div>
+    <div class="f adj"><div class="rowlbl"><label for="a_warm">Warmth</label><output id="a_warmV">0</output></div>
+      <input type="range" id="a_warm" data-k="warm" min="-100" max="100" step="1" value="0"></div>
+    <div class="tools"><button type="button" class="btn" id="adjReset">Reset these adjustments</button></div>
   </fieldset>
   <fieldset>
     <legend>Export</legend>
@@ -226,14 +263,46 @@ const RT = {
     if(img){ const s=Math.max(W/img.width,H/img.height)*(v.zoom||1), dw=img.width*s, dh=img.height*s;
       const fx=v.fx??.5, fy=v.fy??.5; let x=W/2-fx*dw, y=H/2-fy*dh;
       x=Math.min(0,Math.max(W-dw,x)); y=Math.min(0,Math.max(H-dh,y));
-      ctx.imageSmoothingQuality="high"; ctx.drawImage(img,x,y,dw,dh); v._box=[x,y,dw,dh]; }
+      ctx.imageSmoothingQuality="high"; ctx.drawImage(img,x,y,dw,dh); v._box=[x,y,dw,dh]; RT.applyAdj(ctx, v); }
+    let photo=null; if (img && v.behind && v.mask) { photo = RT._ph || (RT._ph=document.createElement("canvas")); photo.width=W; photo.height=H; photo.getContext("2d").drawImage(ctx.canvas,0,0); }
     RT.drawGradient(ctx, v); ctx.restore();
     RT.drawText(ctx, v, 1);
     if (img && v.behind && v.mask && v._box) { // subject cut-out over the headline, with the same gradient on it
       const o = RT._off || (RT._off = document.createElement("canvas")); o.width=W; o.height=H; const ox=o.getContext("2d"); const [x,y,dw,dh]=v._box;
-      ox.imageSmoothingQuality="high"; ox.drawImage(img,x,y,dw,dh); ox.globalCompositeOperation="destination-in"; ox.drawImage(v.mask,x,y,dw,dh);
+      ox.drawImage(photo,0,0); ox.globalCompositeOperation="destination-in"; ox.drawImage(v.mask,x,y,dw,dh);
       ox.globalCompositeOperation="source-atop"; RT.drawGradient(ox, v); ox.globalCompositeOperation="source-over"; ctx.drawImage(o,0,0);
     }
+  },
+  // ---- photo adjustments: tone curve per channel + saturation/warmth; Subject/Background weighted by the subject mask
+  hasAdj(o){ return !!o && Object.values(o).some(x=>x); },
+  toneLUT(o){
+    const lut=new Float32Array(256), e=(o.exp||0)/100*2, b=(o.bri||0)/100, c=(o.con||0)/100, h=(o.hi||0)/100, s=(o.sh||0)/100;
+    const ss=(a,z,x)=>{ const t=Math.min(1,Math.max(0,(x-a)/(z-a))); return t*t*(3-2*t); };
+    for (let v=0; v<256; v++) { let x=v/255;
+      if (e) { let l = x<=.04045 ? x/12.92 : Math.pow((x+.055)/1.055,2.4); l*=Math.pow(2,e); l=Math.min(1,l); x = l<=.0031308 ? l*12.92 : 1.055*Math.pow(l,1/2.4)-.055; }
+      if (b) x = Math.pow(Math.max(0,x), Math.pow(2,-.7*b));
+      if (c) x = .5 + (x-.5)*(1+c*.8);
+      if (h) x += h*.28*ss(.45,1,x);
+      if (s) x += s*.28*(1-ss(0,.55,x));
+      lut[v] = Math.min(255, Math.max(0, x*255)); }
+    return lut;
+  },
+  applyAdj(ctx, v){
+    const A=v.adj; if (!A) return; const st=[];
+    if (RT.hasAdj(A.all)) st.push([A.all,0]); if (v.mask && RT.hasAdj(A.subj)) st.push([A.subj,1]); if (v.mask && RT.hasAdj(A.bg)) st.push([A.bg,-1]);
+    if (!st.length) return; const {W,H}=RT, id=ctx.getImageData(0,0,W,H), d=id.data; let ma=null;
+    if (st.some(s=>s[1])) { const o=RT._mo||(RT._mo=document.createElement("canvas")); o.width=W; o.height=H; const ox=o.getContext("2d",{willReadFrequently:true}); const [x,y,dw,dh]=v._box; ox.drawImage(v.mask,x,y,dw,dh); ma=ox.getImageData(0,0,W,H).data; }
+    for (const [o,mode] of st) {
+      const lut=RT.toneLUT(o), sat=1+(o.sat||0)/100, wm=(o.warm||0)/100, wr=1+.12*wm, wg=1+.03*wm, wb=1-.12*wm;
+      for (let i=0;i<d.length;i+=4) {
+        const w = mode===0 ? 1 : mode===1 ? ma[i+3]/255 : 1-ma[i+3]/255; if (w<=0) continue;
+        const r0=d[i], g0=d[i+1], b0=d[i+2]; let r=lut[r0], g=lut[g0], b=lut[b0];
+        if (sat!==1) { const l=.2126*r+.7152*g+.0722*b; r=l+(r-l)*sat; g=l+(g-l)*sat; b=l+(b-l)*sat; }
+        if (wm) { r*=wr; g*=wg; b*=wb; }
+        d[i]=r0+(r-r0)*w; d[i+1]=g0+(g-g0)*w; d[i+2]=b0+(b-b0)*w;
+      }
+    }
+    ctx.putImageData(id,0,0);
   },
   lineWidths(v){ // rendered width of each line at the fixed size
     const c=RT._m||(RT._m=document.createElement("canvas").getContext("2d")), out={};
@@ -275,15 +344,15 @@ function makeSample(){ // neutral sky gradient for the empty state
 
 function paint(){
   const it = sel>=0 ? items[sel] : null;
-  RT.draw(bctx, it ? it.img : sample, it || SAMPLE);
-  if (it && it.behind && it.mask && tool() !== "move" && it._box) { // show the subject area while brushing
-    const o=document.createElement("canvas"); o.width=1080; o.height=1920; const ox=o.getContext("2d"); const [x,y,dw,dh]=it._box;
-    ox.drawImage(it.mask,x,y,dw,dh); ox.globalCompositeOperation="source-in"; ox.fillStyle="rgba(69,130,140,.5)"; ox.fillRect(0,0,1080,1920); bctx.drawImage(o,0,0);
-  }
-  if (it) { RT.draw(it.c.getContext("2d"), it.img, it); capText(it); }
+  if (!it) { RT.draw(bctx, sample, SAMPLE); return; }
+  RT.draw(it.c.getContext("2d"), it.img, it); capText(it); bctx.clearRect(0,0,1080,1920); bctx.drawImage(it.c,0,0);
+  const tl = tool(), tint = (src, color) => { const o=document.createElement("canvas"); o.width=1080; o.height=1920; const ox=o.getContext("2d"); const [x,y,dw,dh]=it._box;
+    ox.drawImage(src,x,y,dw,dh); ox.globalCompositeOperation="source-in"; ox.fillStyle=color; ox.fillRect(0,0,1080,1920); bctx.drawImage(o,0,0); };
+  if (it._box && it.mask && (tl==="erase"||tl==="add")) tint(it.mask, "rgba(69,130,140,.5)");   // subject area while brushing it
+  if (it._box && it.marks && it.hasMarks) tint(it.marks, "rgba(220,38,38,.55)");                // objects marked for removal
 }
 function syncForm(){
-  const it = items[sel]; $("edit").disabled = !it; $("saveOne").disabled = !it; $("saveAll").disabled = !items.length;
+  const it = items[sel]; $("edit").disabled = !it; $("editPhoto").disabled = !it; $("saveOne").disabled = !it; $("saveAll").disabled = !items.length;
   $("empty").style.display = items.length ? "none" : ""; $("bigCap").textContent = it ? `Cover ${sel+1} of ${items.length}` : "Sample · add photos to start";
   items.forEach((x,i)=>x.card.classList.toggle("sel", i===sel));
   if (!it) return;
@@ -294,7 +363,7 @@ function syncForm(){
   document.querySelector(`input[name=gfrom][value=${it.gfrom}]`).checked = true;
   $("gs").value = Math.round(it.gs*100); $("gsV").textContent = it.gs ? Math.round(it.gs*100)+"%" : "Off";
   $("gl").value = Math.round(it.gl*100); $("glV").textContent = Math.round(it.gl*100)+"%";
-  $("behind").checked = !!it.behind; subjNote(it); $("brushBox").hidden = !(it.behind && it.mask);
+  $("behind").checked = !!it.behind; subjNote(it); editSync(it);
 }
 function select(i){ sel=i; const mv=document.querySelector("input[name=tool][value=move]"); if (mv) { mv.checked=true; big.style.cursor=""; } syncForm(); paint(); }
 
@@ -303,7 +372,7 @@ function addItem(img, name, base){
   const card = document.createElement("button"); card.type="button"; card.className="card";
   const cap = document.createElement("span"); const dl = document.createElement("button"); dl.type="button"; dl.className="link"; dl.textContent="Save";
   const capw = document.createElement("div"); capw.className="cap"; capw.append(cap, dl); card.append(c, capw);
-  const it = {img, name, order:base.order, ar:base.ar, en:base.en, zoom:1, fx:.5, fy:.5, gs:base.gs||0, gl:base.gl??.45, gfrom:base.gfrom||"top", behind:false, mask:null, c, card, cap};
+  const it = {img, name, order:base.order, ar:base.ar, en:base.en, zoom:1, fx:.5, fy:.5, gs:base.gs||0, gl:base.gl??.45, gfrom:base.gfrom||"top", behind:false, mask:null, adj:{all:{},subj:{},bg:{}}, adjT:"all", orig:img, history:[], marks:null, hasMarks:false, c, card, cap};
   card.onclick = e => { if (e.target===dl) return; select(items.indexOf(it)); };
   dl.onclick = () => saveItem(it);
   items.push(it); $("grid").append(card); RT.draw(c.getContext("2d"), img, it); capText(it);
@@ -323,6 +392,64 @@ async function addFiles(files){
   if (vids.length > 1) toast("One video at a time — scanning " + vids[0].name);
 }
 
+/* ---------- shared on-device model runtime ---------- */
+async function ortReady(){
+  if (!window.ort) await new Promise((res, rej) => { const s=document.createElement("script"); s.src="vendor/ort/ort.wasm.min.js"; s.onload=res; s.onerror=()=>rej(new Error("runtime")); document.head.append(s); });
+  ort.env.wasm.wasmPaths = new URL("vendor/ort/", location.href).href; ort.env.wasm.numThreads = 1; return ort;
+}
+/* ---------- object removal (on-device, MI-GAN inpainting) ---------- */
+const RM = {session:null, loading:null};
+async function rmSession(){
+  if (RM.session) return RM.session;
+  if (!RM.loading) RM.loading = (async () => { await ortReady(); return RM.session = await ort.InferenceSession.create(new URL("models/migan_pipeline_v2.onnx", location.href).href, {executionProviders:["wasm"]}); })();
+  try { return await RM.loading; } catch(e) { RM.loading = null; throw e; }
+}
+async function removeMarked(it){
+  const msg=$("rmMsg"), btn=$("doRemove"); btn.disabled=true; msg.classList.add("busy");
+  msg.textContent = RM.session ? "Removing…" : "Loading the object remover (first time only, about 28 MB)…";
+  try {
+    const sess = await rmSession(); msg.textContent = "Removing…"; await new Promise(r=>setTimeout(r,30));
+    const img=it.img, iw=img.width, ih=img.height, mk=it.marks, k=iw/mk.width;
+    const md=mk.getContext("2d").getImageData(0,0,mk.width,mk.height).data; let x0=1e9,y0=1e9,x1=-1,y1=-1;
+    for (let y=0;y<mk.height;y++) for (let x=0;x<mk.width;x++) if (md[(y*mk.width+x)*4+3]>10) { if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+    if (x1<0) { msg.textContent="Nothing is marked yet."; return; }
+    // work on a crop around the marks so the rest of the photo keeps its full resolution
+    let bx0=x0*k, by0=y0*k, bx1=(x1+1)*k, by1=(y1+1)*k; const pad=Math.max(96, .75*Math.max(bx1-bx0, by1-by0));
+    bx0=Math.max(0,Math.floor(bx0-pad)); by0=Math.max(0,Math.floor(by0-pad)); bx1=Math.min(iw,Math.ceil(bx1+pad)); by1=Math.min(ih,Math.ceil(by1+pad));
+    const cw=bx1-bx0, ch=by1-by0, s=Math.min(1, 2048/Math.max(cw,ch)), w=Math.max(8,Math.round(cw*s)), h=Math.max(8,Math.round(ch*s));
+    const A=document.createElement("canvas"); A.width=w; A.height=h; const ax=A.getContext("2d",{willReadFrequently:true}); ax.imageSmoothingQuality="high"; ax.drawImage(img,bx0,by0,cw,ch,0,0,w,h);
+    const M=document.createElement("canvas"); M.width=w; M.height=h; const mx=M.getContext("2d",{willReadFrequently:true}); mx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,w,h);
+    const px=ax.getImageData(0,0,w,h).data, ma=mx.getImageData(0,0,w,h).data, n=w*h, im=new Uint8Array(3*n), mm=new Uint8Array(n);
+    for (let i=0;i<n;i++){ im[i]=px[i*4]; im[n+i]=px[i*4+1]; im[2*n+i]=px[i*4+2]; mm[i]= ma[i*4+3]>10 ? 0 : 255; } // 0 = fill this area
+    const out=await sess.run({image:new ort.Tensor("uint8",im,[1,3,h,w]), mask:new ort.Tensor("uint8",mm,[1,1,h,w])});
+    const r=out[sess.outputNames[0]].data, R=document.createElement("canvas"); R.width=w; R.height=h; const rx=R.getContext("2d"), rd=rx.createImageData(w,h);
+    for (let i=0;i<n;i++){ rd.data[i*4]=r[i]; rd.data[i*4+1]=r[n+i]; rd.data[i*4+2]=r[2*n+i]; rd.data[i*4+3]=255; } rx.putImageData(rd,0,0);
+    // paste back only the marked area (soft edge), at full resolution
+    const Q=document.createElement("canvas"); Q.width=cw; Q.height=ch; const qx=Q.getContext("2d"); qx.imageSmoothingQuality="high";
+    qx.filter="blur("+Math.max(1,Math.round(2*k))+"px)"; qx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,cw,ch); qx.filter="none"; qx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,cw,ch); // soft edge, solid core
+    const F=document.createElement("canvas"); F.width=iw; F.height=ih; const fx=F.getContext("2d"); fx.drawImage(img,0,0);
+    const T2=document.createElement("canvas"); T2.width=cw; T2.height=ch; const t2=T2.getContext("2d"); t2.imageSmoothingQuality="high"; t2.drawImage(R,0,0,cw,ch); t2.globalCompositeOperation="destination-in"; t2.drawImage(Q,0,0);
+    fx.drawImage(T2,bx0,by0);
+    it.history.push(it.img); try { it.img = await createImageBitmap(F); } catch(e) { it.img = F; }
+    mk.getContext("2d").clearRect(0,0,mk.width,mk.height); it.hasMarks=false;
+    msg.textContent = "Removed. Mark more, or use Undo removal if it doesn't look right.";
+  } catch(e) { console.error(e); msg.textContent = "The object remover couldn't load. Check your connection and try again."; }
+  finally { msg.classList.remove("busy"); editSync(it); paint(); }
+}
+$("doRemove").onclick = () => { const it=items[sel]; if (it && it.hasMarks) removeMarked(it); };
+$("clearMarks").onclick = () => { const it=items[sel]; if(!it||!it.marks) return; it.marks.getContext("2d").clearRect(0,0,it.marks.width,it.marks.height); it.hasMarks=false; editSync(it); paint(); };
+$("undoEdit").onclick = () => { const it=items[sel]; if(!it||!it.history.length) return; it.img=it.history.pop(); $("rmMsg").textContent=""; editSync(it); paint(); };
+$("restorePhoto").onclick = () => { const it=items[sel]; if(!it||!it.history.length) return; it.img=it.orig; it.history=[]; $("rmMsg").textContent="Back to the original photo."; editSync(it); paint(); };
+// adjustments
+document.querySelectorAll("input[name=adjT]").forEach(r => r.onchange = async () => { const it=items[sel]; if(!it) return; it.adjT=r.value;
+  const m=$("adjMsg");
+  if (r.value!=="all" && !it.mask) { m.classList.add("busy"); m.textContent = SEG.session ? "Finding the subject…" : "Loading the subject finder (first time only, about 45 MB)…"; await findSubject(it); subjNote(it); m.classList.remove("busy");
+    if (!it.mask) { it.adjT="all"; m.textContent = "No clear subject found in this photo, so only Whole photo can be adjusted."; editSync(it); return; } }
+  m.textContent = r.value==="all" ? "Subject and Background each keep their own settings, on top of Whole photo." : (r.value==="subj" ? "Adjusting the subject only." : "Adjusting everything except the subject.") + (it.mask ? " Fix the outline with Subject − / Subject +." : "");
+  editSync(it); paint(); });
+document.querySelectorAll(".adj input").forEach(s => s.oninput = () => { const it=items[sel]; if(!it) return; const v=+s.value; it.adj[it.adjT][s.dataset.k]=v; $(s.id+"V").textContent = v>0?"+"+v:String(v).replace("-","−"); paint(); });
+$("adjReset").onclick = () => { const it=items[sel]; if(!it) return; it.adj[it.adjT]={}; editSync(it); paint(); };
+
 /* ---------- subject cut-out (on-device, silueta / U²-Net) ---------- */
 const SEG = {session:null, loading:null};
 function subjNote(it){ const m=$("subjMsg"); m.classList.remove("busy");
@@ -331,8 +458,7 @@ function subjNote(it){ const m=$("subjMsg"); m.classList.remove("busy");
 async function segSession(){
   if (SEG.session) return SEG.session;
   if (!SEG.loading) SEG.loading = (async () => {
-    if (!window.ort) await new Promise((res, rej) => { const s=document.createElement("script"); s.src="vendor/ort/ort.wasm.min.js"; s.onload=res; s.onerror=()=>rej(new Error("runtime")); document.head.append(s); });
-    ort.env.wasm.wasmPaths = new URL("vendor/ort/", location.href).href; ort.env.wasm.numThreads = 1;
+    await ortReady();
     return SEG.session = await ort.InferenceSession.create(new URL("models/silueta.onnx", location.href).href, {executionProviders:["wasm"]});
   })();
   try { return await SEG.loading; } catch(e) { SEG.loading = null; throw e; }
@@ -355,7 +481,7 @@ async function findSubject(it){
     const hx=hm.getContext("2d"); hx.imageSmoothingQuality="high"; hx.drawImage(mk,0,0,hm.width,hm.height);
     const keep=document.createElement("canvas"); keep.width=hm.width; keep.height=hm.height; keep.getContext("2d").drawImage(hm,0,0);
     if (cover < .01 || hi-lo < .2) { it.mask=null; it.behind=false; it.maskMsg="No clear subject found in this photo, so the text stays on top."; $("behind").checked=false; }
-    else { it.mask = hm; it.mask0 = keep; it.maskMsg = `Subject found (${Math.round(cover*100)}% of the photo). If it doesn't reach the headline yet, move or zoom the photo. Use the brush to remove anything that shouldn't cover the text.`; }
+    else { it.mask = hm; it.mask0 = keep; it.maskMsg = `Subject found (${Math.round(cover*100)}% of the photo). If it doesn't reach the headline yet, move or zoom the photo. Fix the outline with Subject − / Subject + in Edit photo.`; }
   } catch(e) { console.error(e); it.behind=false; it.mask=null; $("behind").checked=false; it.maskMsg="The subject finder couldn't load. Check your connection and try again."; }
   m.classList.remove("busy");
 }
@@ -496,26 +622,50 @@ function capText(it){ it.cap.textContent = it.en || it.ar || "Cover"; if (overLi
 document.querySelectorAll("input[name=gfrom]").forEach(r => r.onchange = () => edit(it=>it.gfrom=r.value));
 $("gs").oninput = e => { edit(it=>it.gs=e.target.value/100); $("gsV").textContent = +e.target.value ? e.target.value+"%" : "Off"; };
 $("gl").oninput = e => { edit(it=>it.gl=e.target.value/100); $("glV").textContent = e.target.value+"%"; };
-$("behind").onchange = async e => { const it=items[sel]; if(!it) return; it.behind = e.target.checked; if (it.behind && !it.mask) await findSubject(it); paint(); subjNote(it); $("brushBox").hidden = !(it.behind && it.mask); };
+$("behind").onchange = async e => { const it=items[sel]; if(!it) return; it.behind = e.target.checked; if (it.behind && !it.mask) await findSubject(it); paint(); subjNote(it); editSync(it); };
 const tool = () => (document.querySelector("input[name=tool]:checked")||{}).value || "move";
-document.querySelectorAll("input[name=tool]").forEach(r => r.onchange = () => { big.style.cursor = tool()==="move" ? "" : "crosshair"; paint(); });
+const TOOL_HINT = {
+  move: "Move drags the photo. Remove object: paint over anything you want gone (people, cones, signs, shadows), then tap Remove marked.",
+  mark: "Paint over the object and its shadow, a little past the edges, then tap Remove marked. Big areas work best in a few smaller passes.",
+  erase: "Paint to take areas out of the subject (shown in teal), e.g. buildings you don't want covering the headline.",
+  add: "Paint to add areas to the subject (shown in teal)."
+};
+document.querySelectorAll("input[name=tool]").forEach(r => r.onchange = async () => {
+  const it=items[sel]; big.style.cursor = tool()==="move" ? "" : "crosshair"; $("toolHint").textContent = TOOL_HINT[tool()];
+  if (it && (tool()==="erase"||tool()==="add") && !it.mask) { await findSubject(it); if (!it.mask) document.querySelector("input[name=tool][value=move]").checked = true; editSync(it); subjNote(it); }
+  paint(); });
 $("brush").oninput = e => $("brushV").textContent = e.target.value + " px";
 $("maskReset").onclick = () => { const it=items[sel]; if(!it||!it.mask0) return; const x=it.mask.getContext("2d"); x.clearRect(0,0,it.mask.width,it.mask.height); x.drawImage(it.mask0,0,0); paint(); };
+function editSync(it){
+  if (!it) return;
+  $("maskReset").hidden = !it.mask; $("doRemove").disabled = !it.hasMarks; $("clearMarks").disabled = !it.hasMarks;
+  $("undoEdit").disabled = !it.history.length; $("restorePhoto").disabled = !it.history.length;
+  document.querySelector(`input[name=adjT][value=${it.adjT}]`).checked = true;
+  document.querySelectorAll(".adj input").forEach(s => { const v = it.adj[it.adjT][s.dataset.k] || 0; s.value = v; $(s.id+"V").textContent = v>0 ? "+"+v : String(v).replace("-","−"); });
+}
 $("resetPos").onclick = () => { edit(it=>{it.zoom=1;it.fx=.5;it.fy=.5;it.gs=0;it.gl=.45;it.gfrom="top";it.behind=false;}); syncForm(); };
-$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; it.gs=s.gs; it.gl=s.gl; it.gfrom=s.gfrom; RT.draw(it.c.getContext("2d"),it.img,it); capText(it); });
-  toast("Wording and gradient applied to all " + items.length + " covers"); };
+$("applyAll").onclick = () => { const s=items[sel]; if(!s) return; items.forEach(it=>{ it.ar=s.ar; it.en=s.en; it.order=s.order; it.adj.all={...s.adj.all}; it.gs=s.gs; it.gl=s.gl; it.gfrom=s.gfrom; RT.draw(it.c.getContext("2d"),it.img,it); capText(it); });
+  toast("Wording, gradient and whole-photo adjustments applied to all " + items.length + " covers"); };
 $("remove").onclick = () => { const it=items[sel]; if(!it) return; it.card.remove(); items.splice(sel,1); sel = items.length ? Math.min(sel, items.length-1) : -1; syncForm(); paint(); };
 
 // drag to pan
 let drag = null;
+function markAt(e){ const it=items[sel]; if(!it||!it._box) return;
+  if (!it.marks) { const k=Math.min(1,1440/Math.max(it.img.width,it.img.height)); it.marks=document.createElement("canvas"); it.marks.width=Math.round(it.img.width*k); it.marks.height=Math.round(it.img.height*k); }
+  const r=big.getBoundingClientRect(), X=(e.clientX-r.left)*1080/r.width, Y=(e.clientY-r.top)*1920/r.height, [x,y,dw,dh]=it._box, m=it.marks;
+  const mx=(X-x)/dw*m.width, my=(Y-y)/dh*m.height, rad=(+$("brush").value/2)/dw*m.width, c=m.getContext("2d");
+  c.fillStyle="#000"; c.beginPath(); c.arc(mx,my,rad,0,Math.PI*2); c.fill();
+  if (drag && drag.last) { c.lineWidth=rad*2; c.lineCap="round"; c.strokeStyle="#000"; c.beginPath(); c.moveTo(drag.last[0],drag.last[1]); c.lineTo(mx,my); c.stroke(); }
+  if (drag) drag.last=[mx,my]; it.hasMarks=true; editSync(it); paint(); }
 function brushAt(e){ const it=items[sel]; if(!it||!it.mask||!it._box) return; const r=big.getBoundingClientRect(), X=(e.clientX-r.left)*1080/r.width, Y=(e.clientY-r.top)*1920/r.height;
   const [x,y,dw,dh]=it._box, m=it.mask, mx=(X-x)/dw*m.width, my=(Y-y)/dh*m.height, rad=(+$("brush").value/2)/dw*m.width, c=m.getContext("2d");
   const g=c.createRadialGradient(mx,my,0,mx,my,rad); g.addColorStop(0,"rgba(0,0,0,1)"); g.addColorStop(.7,"rgba(0,0,0,1)"); g.addColorStop(1,"rgba(0,0,0,0)");
   c.globalCompositeOperation = tool()==="erase" ? "destination-out" : "source-over"; c.fillStyle=g; c.beginPath(); c.arc(mx,my,rad,0,Math.PI*2); c.fill(); c.globalCompositeOperation="source-over"; paint(); }
 big.addEventListener("pointerdown", e => { const it=items[sel]; if(!it) return; big.setPointerCapture(e.pointerId);
-  if (it.behind && it.mask && tool()!=="move") { drag={brush:true}; brushAt(e); return; }
+  if (tool()==="mark") { drag={mark:true}; markAt(e); return; }
+  if (it.mask && (tool()==="erase"||tool()==="add")) { drag={brush:true}; brushAt(e); return; }
   big.classList.add("drag"); drag={x:e.clientX,y:e.clientY,fx:it.fx,fy:it.fy}; });
-big.addEventListener("pointermove", e => { if(!drag) return; if (drag.brush) { brushAt(e); return; } const it=items[sel]; const r=big.getBoundingClientRect(), k=1080/r.width;
+big.addEventListener("pointermove", e => { if(!drag) return; if (drag.brush) { brushAt(e); return; } if (drag.mark) { markAt(e); return; } const it=items[sel]; const r=big.getBoundingClientRect(), k=1080/r.width;
   const s=Math.max(1080/it.img.width,1920/it.img.height)*it.zoom, dw=it.img.width*s, dh=it.img.height*s;
   it.fx = Math.min(1,Math.max(0, drag.fx - (e.clientX-drag.x)*k/dw)); it.fy = Math.min(1,Math.max(0, drag.fy - (e.clientY-drag.y)*k/dh)); paint(); });
 const endDrag = () => { drag=null; big.classList.remove("drag"); };
