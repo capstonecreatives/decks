@@ -579,8 +579,12 @@ html:not(.rv-open) .rv-thumb img{filter:blur(14px) saturate(.6)}
 .ed-tabs button.on{color:var(--ink);border-bottom-color:var(--brass)}.ed-tabs button:hover{color:var(--ink)}.ed-tabs sup{margin-left:4px;font-size:10px;color:var(--brass)}
 .ed-month{display:flex;flex-direction:column;gap:4px}.ed-month span{font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--brass)}
 .ed-month select{height:44px;min-width:190px;padding:0 34px 0 0;border:0;border-bottom:1px solid #DCD2C2;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23B8925A' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 6px center;-webkit-appearance:none;appearance:none;font:600 13px Montserrat,sans-serif;letter-spacing:.06em;color:var(--ink);cursor:pointer}
+.ed-type{margin:0 0 40px}.ed-type[hidden]{display:none}
+.ed-th{display:flex;align-items:center;gap:10px;margin:0 0 18px}
+.ed-th h4{margin:0;font-size:11.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--teal)}
+.ed-tcnt{min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;border:1px solid #D9CDB8;display:inline-grid;place-items:center;font-size:11px;font-weight:600;color:var(--brass)}
 .ed-month-grp{margin:0 0 54px}.ed-month-grp[hidden]{display:none}
-.ed-mh{display:flex;align-items:baseline;gap:16px;margin:0 0 26px}
+.ed-mh{display:flex;align-items:baseline;gap:16px;margin:0 0 22px}
 .ed-mh h3{margin:0;font-family:"Playfair Display",Georgia,serif;font-weight:500;font-size:32px;color:var(--ink);white-space:nowrap}
 .ed-cnt{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);white-space:nowrap}.ed-rule{flex:1;height:1px;background:#DCD2C2}
 .ed-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:40px 24px}
@@ -2473,8 +2477,10 @@ function buildEditorial(home){
         <div class="ed-tabs" role="tablist" aria-label="Type">${TABS.map(([k,l],i)=>`<button type="button" role="tab" data-k="${k}"${i?'':' class="on" aria-selected="true"'}>${E(l)}<sup></sup></button>`).join('')}</div>
         <label class="ed-month"><span>Month</span><select aria-label="Month"><option value="">All months</option>${months.map(m=>`<option value="${m}">${E(ml(m))}</option>`).join('')}</select></label>
       </div></div>
-    ${months.map(m=>{ const items=lib.filter(c=>mk(c)===m).sort((a,b)=>(a.review?1:0)-(b.review?1:0)||(feat&&a.id===feat.id?-1:feat&&b.id===feat.id?1:0));
-      return `<div class="ed-month-grp" data-m="${m}"><div class="ed-mh"><h3>${E(ml(m))}</h3><span class="ed-cnt"></span><span class="ed-rule"></span></div><div class="ed-grid">${items.map(card).join('')}</div></div>`; }).join('')}
+    ${months.map(m=>{ const items=lib.filter(c=>mk(c)===m);
+      const KS=[['posts','Posts'],['reels','Reels'],['wati','WATI campaigns'],['tours','Unit tours'],['photos','Photography']];
+      return `<div class="ed-month-grp" data-m="${m}"><div class="ed-mh"><h3>${E(ml(m))}</h3><span class="ed-cnt"></span><span class="ed-rule"></span></div>${KS.map(([k,l])=>{ const its=items.filter(c=>kindOf(c)===k).sort((a,b)=>(a.review?1:0)-(b.review?1:0)||(feat&&a.id===feat.id?-1:feat&&b.id===feat.id?1:0)); if(!its.length) return '';
+        return `<div class="ed-type" data-k="${k}"><div class="ed-th"><h4>${E(l)}</h4><span class="ed-tcnt"></span></div><div class="ed-grid">${its.map(card).join('')}</div></div>`; }).join('')}</div>`; }).join('')}
     <p class="ed-none" hidden>Nothing here for this selection.</p>
     ${CAMPAIGN.updated?`<p class="ed-stamp">Last updated ${E(CAMPAIGN.updated)}</p>`:''}
    </section>
@@ -2491,9 +2497,11 @@ function buildEditorial(home){
   function apply(){ let total=0; const counts={};
     ed.querySelectorAll('.ed-month-grp').forEach(g=>{ let k=0, i=0;
       g.hidden=!!st.m&&g.dataset.m!==st.m;
-      g.querySelectorAll('.ed-card').forEach(c=>{ const okL=st.l==='all'||c.dataset.l==='*'||c.dataset.l===st.l;
-        if(okL&&!g.hidden){ counts[c.dataset.k]=(counts[c.dataset.k]||0)+1; counts.all=(counts.all||0)+1; }
-        const ok=!g.hidden&&okL&&(st.k==='all'||c.dataset.k===st.k); c.hidden=!ok; if(ok){ k++; i++; c.querySelector('.ed-num').textContent=String(i).padStart(2,'0'); } });
+      g.querySelectorAll('.ed-type').forEach(tg=>{ let j=0;
+        tg.querySelectorAll('.ed-card').forEach(c=>{ const okL=st.l==='all'||c.dataset.l==='*'||c.dataset.l===st.l;
+          if(okL&&!g.hidden){ counts[c.dataset.k]=(counts[c.dataset.k]||0)+1; counts.all=(counts.all||0)+1; }
+          const ok=!g.hidden&&okL&&(st.k==='all'||c.dataset.k===st.k); c.hidden=!ok; if(ok){ k++; j++; c.querySelector('.ed-num').textContent=String(j).padStart(2,'0'); } });
+        tg.hidden=!j; tg.querySelector('.ed-tcnt').textContent=j; });
       g.querySelector('.ed-cnt').textContent=k+(k===1?' piece':' pieces'); if(!k) g.hidden=true; total+=k; });
     ed.querySelectorAll('.ed-tabs button').forEach(b=>b.querySelector('sup').textContent=counts[b.dataset.k]||0);
     ed.querySelector('.ed-none').hidden=!!total; }
