@@ -2272,7 +2272,7 @@ window.__fromHash=true; try{ go(0); } finally { window.__fromHash=false; }
   document.body.appendChild(tray);
   const ICON_ADD='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
   const ICON_OK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
-  function decorate(){ home.querySelectorAll('.thumb[data-go],.feat-card[data-go]').forEach(t=>{ if(t.querySelector('.sf-mark')) return; const c=byId(t.dataset.go); if(!c||c.review||!filesOf(c).length) return;
+  function decorate(){ if(home.querySelector('.ig')) return; home.querySelectorAll('.thumb[data-go],.feat-card[data-go]').forEach(t=>{ if(t.querySelector('.sf-mark')) return; const c=byId(t.dataset.go); if(!c||c.review||!filesOf(c).length) return;
       const b=document.createElement('button'); b.type='button'; b.className='sf-mark'; b.setAttribute('aria-label','Mark '+(c.name||c.id)+' to share'); b.innerHTML=ICON_ADD;
       b.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); const id=t.dataset.go; picks=picks.includes(id)?picks.filter(x=>x!==id):[...picks,id]; keep(); ready=null; paint(); });
       t.classList.add('sf-host'); t.appendChild(b); }); paint(); }
