@@ -528,6 +528,17 @@ td.when{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08e
   .stage{position:static;inset:auto}
   .slide{position:static;opacity:1;visibility:visible;transform:none;page-break-after:always;min-height:auto;padding:28px}
 }
+/* ---------- mark & share files ---------- */
+.sf-host{position:relative}
+.sf-mark{position:absolute;top:8px;right:8px;z-index:3;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1.5px solid rgba(255,255,255,.95);background:rgba(0,20,30,.45);color:#fff;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.sf-mark:hover{background:rgba(0,20,30,.7)}.sf-on .sf-mark{background:#0E5A6E;border-color:#0E5A6E}
+.sf-on{outline:3px solid #0E5A6E;outline-offset:-3px}
+.sf-mark:focus-visible,.sf-acts button:focus-visible{outline:2px solid #45828C;outline-offset:2px}
+.sf-tray{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;z-index:70;width:min(640px,calc(100% - 24px));box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 10px 10px 16px;background:#0B2530;color:#fff;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.3);font:600 14px -apple-system,"Segoe UI",Arial,sans-serif}
+.sf-tray[hidden]{display:none!important}.sf-acts{display:flex;gap:6px}
+.sf-acts button{height:42px;padding:0 14px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font:inherit;font-size:13px;cursor:pointer}
+.sf-acts .sf-share{background:#25D366;border-color:#25D366;color:#06301A;font-weight:700}.sf-acts .sf-clear{border-color:transparent;color:#C9D6DA}
+@media(max-width:600px){.sf-tray{flex-direction:column;align-items:stretch;bottom:60px}.sf-acts button{flex:1}}
 </style>
 <script>/*JSZIP*//*!
 
@@ -2237,6 +2248,72 @@ function toast(msg){
 
 /* initial render must not touch the URL, or a shared #deep-link is lost before openHash runs */
 window.__fromHash=true; try{ go(0); } finally { window.__fromHash=false; }
+
+/* ---------- share the actual files (no links): mark creatives, then Share or Save ---------- */
+(function(){
+  const base=f=>String(f||'').split('?')[0].split('/').pop();
+  const MIME={jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',mp4:'video/mp4',mov:'video/quicktime',pdf:'application/pdf',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'};
+  const byId=id=>CREATIVES.find(c=>c.id===id);
+  function filesOf(c){ if(!c||c.review) return [];
+    const one=(h,f)=>h?[{href:h,name:base(f||h)}]:[];
+    if(['photo','reels','walkthrough','video'].includes(c.type)) return one(c.src,c.file);
+    if(['carousel','wati','story'].includes(c.type)) return (c.cards||[]).filter(x=>x.src).map(x=>({href:x.src,name:base(x.file||x.src)}));
+    if(['gallery','progress','construction'].includes(c.type)) return (c.photos||[]).filter(x=>x.src).map(x=>({href:x.src,name:base(x.file||x.src)}));
+    if(c.type==='brochure') return one(c.pdfHref||c.pdf,c.file);
+    return one(c.src,c.file); }
+  const say=t=>{ try{ toast(t); }catch(e){} };
+  async function fetchFiles(list,onStep){ const out=[]; let bytes=0, i=0;
+    for(const f of list){ i++; onStep&&onStep(i,list.length);
+      try{ const r=await fetch(f.href); if(!r.ok) continue; const bl=await r.blob(); bytes+=bl.size; const ext=(f.name.split('.').pop()||'').toLowerCase();
+        out.push(new File([bl],f.name,{type:(bl.type&&bl.type!=='application/octet-stream')?bl.type:(MIME[ext]||'application/octet-stream')})); }catch(e){} }
+    return {files:out,bytes}; }
+  function saveBlobs(files){ files.forEach((f,i)=>setTimeout(()=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(f); a.download=f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),8000); },i*350)); }
+  async function saveList(list,btn){ if(!list.length){ say('Nothing to save'); return; }
+    if(list.length===1){ const a=document.createElement('a'); a.href=list[0].href; a.download=list[0].name; document.body.appendChild(a); a.click(); a.remove(); return; }
+    const lbl=btn&&btn.textContent; const res=await fetchFiles(list,(i,n)=>{ if(btn) btn.textContent=i+'/'+n; });
+    if(typeof JSZip!=='undefined'){ const z=new JSZip(); res.files.forEach(f=>z.file(f.name,f)); const blob=await z.generateAsync({type:'blob'});
+      saveBlobs([new File([blob],(CAMPAIGN.project||'creatives').replace(/[^A-Za-z0-9]+/g,'-')+'-selection.zip',{type:'application/zip'})]); }
+    else saveBlobs(res.files);
+    if(btn) btn.textContent=lbl; }
+  /* two taps on phones: 1st prepares the files, 2nd opens the share sheet (keeps the tap's permission on iPhone) */
+  let ready=null;
+  async function shareList(list,key,btn,idleLabel){
+    if(!list.length){ say('Nothing to share in this item'); return; }
+    const canShare=!!(navigator.share&&navigator.canShare);
+    if(ready&&ready.key===key){ const r=ready; ready=null; if(btn) btn.textContent=idleLabel;
+      try{ await navigator.share({files:r.files}); }catch(e){ if(e&&e.name!=='AbortError'){ saveBlobs(r.files); say('Your browser could not share — files downloaded instead'); } } return; }
+    if(btn) btn.disabled=true; const res=await fetchFiles(list,(i,n)=>{ if(btn) btn.textContent='Preparing '+i+'/'+n+'…'; }); if(btn) btn.disabled=false;
+    if(!res.files.length){ if(btn) btn.textContent=idleLabel; say('Could not load the files'); return; }
+    const mb=(res.bytes/1048576).toFixed(res.bytes>10485760?0:1);
+    if(canShare&&navigator.canShare({files:res.files})){ ready={key,files:res.files}; if(btn) btn.textContent='Tap to share '+res.files.length+(res.files.length===1?' file':' files'); say(mb+' MB ready — tap again, then pick WhatsApp'); return; }
+    saveBlobs(res.files); if(btn) btn.textContent=idleLabel; say('Downloaded '+res.files.length+(res.files.length===1?' file':' files')+' ('+mb+' MB) — attach them in WhatsApp'); }
+  /* the viewer's Share button now shares the creative's files, never a link */
+  try{ shareCreative=function(c){ const b=document.activeElement&&document.activeElement.classList&&document.activeElement.classList.contains('fb-share')?document.activeElement:null;
+      if(c&&c.review){ say('For review — not available for sharing'); return; }
+      shareList(filesOf(c),'one:'+(c&&c.id),b,'Share ↗'); }; }catch(e){}
+  /* mark creatives on the overview (decks with their own picker skip this) */
+  const home=slides&&slides[0]; if(!home||home.querySelector('.ig')||typeof buildEditorial==='function') return;
+  const key='sf-picks-'+(CAMPAIGN.handle||location.pathname); let picks=[]; try{ picks=JSON.parse(sessionStorage.getItem(key)||'[]'); }catch(e){}
+  const keep=()=>{ try{ sessionStorage.setItem(key,JSON.stringify(picks)); }catch(e){} };
+  const tray=document.createElement('div'); tray.className='sf-tray'; tray.hidden=true;
+  tray.innerHTML='<b class="sf-n"></b><div class="sf-acts"><button type="button" class="sf-share">Share files</button><button type="button" class="sf-save">Save</button><button type="button" class="sf-clear">Clear</button></div>';
+  document.body.appendChild(tray);
+  const ICON_ADD='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+  const ICON_OK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>';
+  function decorate(){ home.querySelectorAll('.thumb[data-go],.feat-card[data-go]').forEach(t=>{ if(t.querySelector('.sf-mark')) return; const c=byId(t.dataset.go); if(!c||c.review||!filesOf(c).length) return;
+      const b=document.createElement('button'); b.type='button'; b.className='sf-mark'; b.setAttribute('aria-label','Mark '+(c.name||c.id)+' to share'); b.innerHTML=ICON_ADD;
+      b.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); const id=t.dataset.go; picks=picks.includes(id)?picks.filter(x=>x!==id):[...picks,id]; keep(); ready=null; paint(); });
+      t.classList.add('sf-host'); t.appendChild(b); }); paint(); }
+  function paint(){ home.querySelectorAll('.sf-host').forEach(t=>{ const on=picks.includes(t.dataset.go); if(t.classList.contains('sf-on')!==on) t.classList.toggle('sf-on',on); const b=t.querySelector('.sf-mark'); if(b&&b.dataset.on!==String(on)){ b.dataset.on=String(on); b.innerHTML=on?ICON_OK:ICON_ADD; b.setAttribute('aria-pressed',on); } });
+    const n=picks.filter(byId).length; if(tray.hidden!==!n) tray.hidden=!n; const lbl=n+(n===1?' item marked':' items marked'); if(tray.querySelector('.sf-n').textContent!==lbl) tray.querySelector('.sf-n').textContent=lbl; const sb=tray.querySelector('.sf-share'); if(!ready) sb.textContent='Share files'; }
+  const listAll=()=>picks.map(byId).filter(Boolean).flatMap(filesOf);
+  tray.querySelector('.sf-share').addEventListener('click',e=>shareList(listAll(),'sel:'+picks.join(','),e.currentTarget,'Share files'));
+  tray.querySelector('.sf-save').addEventListener('click',e=>saveList(listAll(),e.currentTarget));
+  tray.querySelector('.sf-clear').addEventListener('click',()=>{ picks=[]; keep(); ready=null; paint(); });
+  decorate(); let _sfT=0; new MutationObserver(ms=>{ if(ms.every(m=>m.target.closest&&m.target.closest('.sf-mark'))) return; clearTimeout(_sfT); _sfT=setTimeout(decorate,60); }).observe(home,{childList:true,subtree:true});
+  const vis=()=>{ tray.style.display=(typeof cur==='number'&&cur!==0)?'none':''; }; setInterval(vis,400);
+})();
+
 </script>
 <script>document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('#dlProject');if(t){e.preventDefault();openDownloadPicker();}});</script>
 <script>(function(){function openHash(){var h=(location.hash||'').slice(1);var i=h?slides.findIndex(function(s){return s.dataset.cid===h}):0;if(i<0)return;window.__fromHash=true;try{go(i);}finally{window.__fromHash=false;}}window.addEventListener('hashchange',openHash);window.addEventListener('popstate',openHash);if(location.hash){openHash();}})();</script>
