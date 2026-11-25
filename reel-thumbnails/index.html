@@ -168,14 +168,20 @@ input.over{border-color:#C62828 !important;box-shadow:0 0 0 1px #C62828}
   </fieldset>
   <fieldset id="editPhoto" disabled>
     <legend>Edit photo</legend>
-    <div class="f"><label>Brush on the large preview</label>
-      <div class="seg seg4">
-        <label><input type="radio" name="tool" value="move" checked><span>Move</span></label>
-        <label><input type="radio" name="tool" value="mark"><span>Remove object</span></label>
+    <div class="f"><label>Remove text &amp; objects</label>
+      <div class="tools" style="margin:0 0 8px"><button type="button" class="btn primary" id="findText">Find text</button>
+        <button type="button" class="btn" id="findRemoveText">Find &amp; remove all text</button></div>
+      <div class="seg">
+        <label><input type="radio" name="tool" value="move" checked><span>Move photo</span></label>
+        <label><input type="radio" name="tool" value="mark"><span>Mark to remove</span></label>
+        <label><input type="radio" name="tool" value="unmark"><span>Unmark</span></label>
+      </div>
+      <label style="margin-top:10px">Subject outline</label>
+      <div class="seg">
         <label><input type="radio" name="tool" value="erase"><span>Subject −</span></label>
         <label><input type="radio" name="tool" value="add"><span>Subject +</span></label>
       </div>
-      <p class="hint" id="toolHint">Move drags the photo. Remove object: paint over anything you want gone (people, cones, signs, shadows), then tap Remove marked.</p></div>
+      <p class="hint" id="toolHint">Find text marks captions, subtitles, watermarks and logos in red. Check the marks, unmark anything to keep, then tap Remove marked. Or paint marks yourself with Mark to remove.</p></div>
     <div class="f"><div class="rowlbl"><label for="brush">Brush size</label><output id="brushV">70 px</output></div>
       <input type="range" id="brush" min="16" max="240" step="2" value="70"></div>
     <div class="tools">
@@ -230,6 +236,7 @@ input.over{border-color:#C62828 !important;box-shadow:0 0 0 1px #C62828}
         <input type="range" id="scrubT" min="0" max="1" step="0.04" value="0">
         <div class="tools"><button type="button" class="btn" id="stepB">◀ Frame</button><button type="button" class="btn" id="stepF">Frame ▶</button>
         <button type="button" class="btn primary" id="useScrub">Use this frame</button></div>
+        <label class="check" style="margin-top:4px"><input type="checkbox" id="vidText" checked> Find on-screen text in frames I use</label>
         <p class="hint">Frames are taken at the video's full resolution. Nothing is uploaded — the video stays on your device.</p></div>
     </div>
   </div>
@@ -409,33 +416,81 @@ async function removeMarked(it){
   msg.textContent = RM.session ? "Removing…" : "Loading the object remover (first time only, about 28 MB)…";
   try {
     const sess = await rmSession(); msg.textContent = "Removing…"; await new Promise(r=>setTimeout(r,30));
-    const img=it.img, iw=img.width, ih=img.height, mk=it.marks, k=iw/mk.width;
-    const md=mk.getContext("2d").getImageData(0,0,mk.width,mk.height).data; let x0=1e9,y0=1e9,x1=-1,y1=-1;
-    for (let y=0;y<mk.height;y++) for (let x=0;x<mk.width;x++) if (md[(y*mk.width+x)*4+3]>10) { if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
-    if (x1<0) { msg.textContent="Nothing is marked yet."; return; }
-    // work on a crop around the marks so the rest of the photo keeps its full resolution
-    let bx0=x0*k, by0=y0*k, bx1=(x1+1)*k, by1=(y1+1)*k; const pad=Math.max(96, .75*Math.max(bx1-bx0, by1-by0));
-    bx0=Math.max(0,Math.floor(bx0-pad)); by0=Math.max(0,Math.floor(by0-pad)); bx1=Math.min(iw,Math.ceil(bx1+pad)); by1=Math.min(ih,Math.ceil(by1+pad));
-    const cw=bx1-bx0, ch=by1-by0, s=Math.min(1, 2048/Math.max(cw,ch)), w=Math.max(8,Math.round(cw*s)), h=Math.max(8,Math.round(ch*s));
-    const A=document.createElement("canvas"); A.width=w; A.height=h; const ax=A.getContext("2d",{willReadFrequently:true}); ax.imageSmoothingQuality="high"; ax.drawImage(img,bx0,by0,cw,ch,0,0,w,h);
-    const M=document.createElement("canvas"); M.width=w; M.height=h; const mx=M.getContext("2d",{willReadFrequently:true}); mx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,w,h);
-    const px=ax.getImageData(0,0,w,h).data, ma=mx.getImageData(0,0,w,h).data, n=w*h, im=new Uint8Array(3*n), mm=new Uint8Array(n);
-    for (let i=0;i<n;i++){ im[i]=px[i*4]; im[n+i]=px[i*4+1]; im[2*n+i]=px[i*4+2]; mm[i]= ma[i*4+3]>10 ? 0 : 255; } // 0 = fill this area
-    const out=await sess.run({image:new ort.Tensor("uint8",im,[1,3,h,w]), mask:new ort.Tensor("uint8",mm,[1,1,h,w])});
-    const r=out[sess.outputNames[0]].data, R=document.createElement("canvas"); R.width=w; R.height=h; const rx=R.getContext("2d"), rd=rx.createImageData(w,h);
-    for (let i=0;i<n;i++){ rd.data[i*4]=r[i]; rd.data[i*4+1]=r[n+i]; rd.data[i*4+2]=r[2*n+i]; rd.data[i*4+3]=255; } rx.putImageData(rd,0,0);
-    // paste back only the marked area (soft edge), at full resolution
-    const Q=document.createElement("canvas"); Q.width=cw; Q.height=ch; const qx=Q.getContext("2d"); qx.imageSmoothingQuality="high";
-    qx.filter="blur("+Math.max(1,Math.round(2*k))+"px)"; qx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,cw,ch); qx.filter="none"; qx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,cw,ch); // soft edge, solid core
-    const F=document.createElement("canvas"); F.width=iw; F.height=ih; const fx=F.getContext("2d"); fx.drawImage(img,0,0);
-    const T2=document.createElement("canvas"); T2.width=cw; T2.height=ch; const t2=T2.getContext("2d"); t2.imageSmoothingQuality="high"; t2.drawImage(R,0,0,cw,ch); t2.globalCompositeOperation="destination-in"; t2.drawImage(Q,0,0);
-    fx.drawImage(T2,bx0,by0);
-    it.history.push(it.img); try { it.img = await createImageBitmap(F); } catch(e) { it.img = F; }
+    const iw=it.img.width, ih=it.img.height, mk=it.marks, k=iw/mk.width, MW=mk.width, MH=mk.height;
+    const md=mk.getContext("2d").getImageData(0,0,MW,MH).data, on=new Uint8Array(MW*MH); for (let i=0;i<on.length;i++) on[i]=md[i*4+3]>10?1:0;
+    // separate marked areas → one crop each, so the rest of the photo keeps full resolution
+    const seen=new Uint8Array(MW*MH), st=new Int32Array(MW*MH); let boxes=[];
+    for (let i=0;i<on.length;i++){ if(!on[i]||seen[i]) continue; let sp=0,x0=MW,y0=MH,x1=0,y1=0; st[sp++]=i; seen[i]=1;
+      while(sp){ const j=st[--sp], jx=j%MW, jy=(j/MW)|0; if(jx<x0)x0=jx; if(jx>x1)x1=jx; if(jy<y0)y0=jy; if(jy>y1)y1=jy;
+        if(jx>0&&on[j-1]&&!seen[j-1]){seen[j-1]=1;st[sp++]=j-1;} if(jx<MW-1&&on[j+1]&&!seen[j+1]){seen[j+1]=1;st[sp++]=j+1;}
+        if(jy>0&&on[j-MW]&&!seen[j-MW]){seen[j-MW]=1;st[sp++]=j-MW;} if(jy<MH-1&&on[j+MW]&&!seen[j+MW]){seen[j+MW]=1;st[sp++]=j+MW;} }
+      boxes.push([x0,y0,x1+1,y1+1]); }
+    if (!boxes.length) { msg.textContent="Nothing is marked yet."; return; }
+    // merge areas that sit close together
+    const near=(a,b,g)=>a[0]-g<b[2]&&b[0]-g<a[2]&&a[1]-g<b[3]&&b[1]-g<a[3];
+    for (let merged=true; merged;) { merged=false; for (let a=0;a<boxes.length&&!merged;a++) for (let b=a+1;b<boxes.length;b++) {
+      const A=boxes[a],B=boxes[b], g=.5*Math.max(A[3]-A[1],B[3]-B[1],8); if (near(A,B,g)) { boxes[a]=[Math.min(A[0],B[0]),Math.min(A[1],B[1]),Math.max(A[2],B[2]),Math.max(A[3],B[3])]; boxes.splice(b,1); merged=true; break; } } }
+    let cur=it.img;
+    for (let bi=0; bi<boxes.length; bi++) {
+      if (boxes.length>1) msg.textContent = `Removing ${bi+1} of ${boxes.length}…`;
+      const [x0,y0,x1,y1]=boxes[bi]; let bx0=x0*k, by0=y0*k, bx1=x1*k, by1=y1*k; const pad=Math.max(96, .75*Math.max(bx1-bx0, by1-by0));
+      bx0=Math.max(0,Math.floor(bx0-pad)); by0=Math.max(0,Math.floor(by0-pad)); bx1=Math.min(iw,Math.ceil(bx1+pad)); by1=Math.min(ih,Math.ceil(by1+pad));
+      const cw=bx1-bx0, ch=by1-by0, s=Math.min(1, 2048/Math.max(cw,ch)), w=Math.max(8,Math.round(cw*s)), h=Math.max(8,Math.round(ch*s));
+      const A=document.createElement("canvas"); A.width=w; A.height=h; const ax=A.getContext("2d",{willReadFrequently:true}); ax.imageSmoothingQuality="high"; ax.drawImage(cur,bx0,by0,cw,ch,0,0,w,h);
+      const M=document.createElement("canvas"); M.width=w; M.height=h; const mx=M.getContext("2d",{willReadFrequently:true}); mx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,w,h);
+      const px=ax.getImageData(0,0,w,h).data, ma=mx.getImageData(0,0,w,h).data, n=w*h, im=new Uint8Array(3*n), mm=new Uint8Array(n);
+      for (let i=0;i<n;i++){ im[i]=px[i*4]; im[n+i]=px[i*4+1]; im[2*n+i]=px[i*4+2]; mm[i]= ma[i*4+3]>10 ? 0 : 255; } // 0 = fill this area
+      const out=await sess.run({image:new ort.Tensor("uint8",im,[1,3,h,w]), mask:new ort.Tensor("uint8",mm,[1,1,h,w])});
+      const r=out[sess.outputNames[0]].data, R=document.createElement("canvas"); R.width=w; R.height=h; const rx=R.getContext("2d"), rd=rx.createImageData(w,h);
+      for (let i=0;i<n;i++){ rd.data[i*4]=r[i]; rd.data[i*4+1]=r[n+i]; rd.data[i*4+2]=r[2*n+i]; rd.data[i*4+3]=255; } rx.putImageData(rd,0,0);
+      // paste back only the marked area (soft edge, solid core)
+      const Q=document.createElement("canvas"); Q.width=cw; Q.height=ch; const qx=Q.getContext("2d"); qx.imageSmoothingQuality="high";
+      qx.filter="blur("+Math.max(1,Math.round(2*k))+"px)"; qx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,cw,ch); qx.filter="none"; qx.drawImage(mk,bx0/k,by0/k,cw/k,ch/k,0,0,cw,ch);
+      const F=document.createElement("canvas"); F.width=iw; F.height=ih; const fx=F.getContext("2d"); fx.drawImage(cur,0,0);
+      const T2=document.createElement("canvas"); T2.width=cw; T2.height=ch; const t2=T2.getContext("2d"); t2.imageSmoothingQuality="high"; t2.drawImage(R,0,0,cw,ch); t2.globalCompositeOperation="destination-in"; t2.drawImage(Q,0,0);
+      fx.drawImage(T2,bx0,by0); cur=F;
+    }
+    it.history.push(it.img); try { it.img = await createImageBitmap(cur); } catch(e) { it.img = cur; }
     mk.getContext("2d").clearRect(0,0,mk.width,mk.height); it.hasMarks=false;
-    msg.textContent = "Removed. Mark more, or use Undo removal if it doesn't look right.";
+    msg.textContent = "Removed. Mark more, run Find text again for anything left, or use Undo removal if it doesn't look right.";
   } catch(e) { console.error(e); msg.textContent = "The object remover couldn't load. Check your connection and try again."; }
   finally { msg.classList.remove("busy"); editSync(it); paint(); }
 }
+/* ---------- text detection (on-device, PaddleOCR PP-OCRv4 detector) ---------- */
+const TD = {session:null, loading:null};
+async function tdSession(){
+  if (TD.session) return TD.session;
+  if (!TD.loading) TD.loading = (async () => { await ortReady(); return TD.session = await ort.InferenceSession.create(new URL("models/textdet_ppocrv4.onnx", location.href).href, {executionProviders:["wasm"]}); })();
+  try { return await TD.loading; } catch(e) { TD.loading = null; throw e; }
+}
+function marksExist(it){ if (!it.marks) return false; const d=it.marks.getContext("2d").getImageData(0,0,it.marks.width,it.marks.height).data; for (let i=3;i<d.length;i+=16) if (d[i]>10) return true; return false; }
+function ensureMarks(it){ if (!it.marks) { const k=Math.min(1,1440/Math.max(it.img.width,it.img.height)); it.marks=document.createElement("canvas"); it.marks.width=Math.round(it.img.width*k); it.marks.height=Math.round(it.img.height*k); } return it.marks; }
+async function findText(it){
+  const msg=$("rmMsg"); msg.classList.add("busy"); msg.textContent = TD.session ? "Looking for text…" : "Loading the text finder (first time only, about 5 MB)…";
+  try {
+    const sess=await tdSession(); msg.textContent="Looking for text…"; await new Promise(r=>setTimeout(r,30));
+    const img=it.img, iw=img.width, ih=img.height, sc=Math.min(1, 1280/Math.max(iw,ih)), w=Math.max(32,Math.round(iw*sc/32)*32), h=Math.max(32,Math.round(ih*sc/32)*32);
+    const c=document.createElement("canvas"); c.width=w; c.height=h; const x=c.getContext("2d",{willReadFrequently:true}); x.imageSmoothingQuality="high"; x.drawImage(img,0,0,w,h);
+    const px=x.getImageData(0,0,w,h).data, n=w*h, inp=new Float32Array(3*n), mean=[.485,.456,.406], sd=[.229,.224,.225];
+    for (let i=0;i<n;i++){ inp[i]=(px[i*4+2]/255-mean[0])/sd[0]; inp[n+i]=(px[i*4+1]/255-mean[1])/sd[1]; inp[2*n+i]=(px[i*4]/255-mean[2])/sd[2]; } // BGR, as the model was trained
+    const out=await sess.run({[sess.inputNames[0]]: new ort.Tensor("float32",inp,[1,3,h,w])}), pm=out[sess.outputNames[0]].data;
+    // group text pixels into regions, keep confident ones, mark each as a padded box
+    const lab=new Int32Array(n), boxes=[]; let id=0; const st=new Int32Array(n);
+    for (let i=0;i<n;i++){ if (pm[i]<=.3 || lab[i]) continue; id++; let sp=0, x0=w, y0=h, x1=0, y1=0, sum=0, cnt=0; st[sp++]=i; lab[i]=id;
+      while (sp){ const j=st[--sp], jx=j%w, jy=(j/w)|0; sum+=pm[j]; cnt++; if(jx<x0)x0=jx; if(jx>x1)x1=jx; if(jy<y0)y0=jy; if(jy>y1)y1=jy;
+        const nb=[jx>0?j-1:-1, jx<w-1?j+1:-1, jy>0?j-w:-1, jy<h-1?j+w:-1]; for (const q of nb) if (q>=0 && !lab[q] && pm[q]>.3){ lab[q]=id; st[sp++]=q; } }
+      if (cnt<10 || sum/cnt<.55) continue; boxes.push([x0,y0,x1+1,y1+1]); }
+    const m=ensureMarks(it), mx=m.getContext("2d"), kx=m.width/w, ky=m.height/h; mx.fillStyle="#000";
+    for (const [x0,y0,x1,y1] of boxes){ const pad=Math.max(3, .6*(y1-y0)); mx.fillRect((x0-pad)*kx,(y0-pad)*ky,(x1-x0+2*pad)*kx,(y1-y0+2*pad)*ky); }
+    if (boxes.length) it.hasMarks=true;
+    msg.textContent = boxes.length ? `Found ${boxes.length} text area${boxes.length>1?"s":""}, marked in red. Unmark anything you want to keep, then tap Remove marked.` : "No text found in this photo.";
+    return boxes.length;
+  } catch(e) { console.error(e); msg.textContent="The text finder couldn't load. Check your connection and try again."; return 0; }
+  finally { msg.classList.remove("busy"); editSync(it); paint(); }
+}
+$("findText").onclick = async () => { const it=items[sel]; if (!it) return; const n=await findText(it);
+  if (n) { document.querySelector("input[name=tool][value=unmark]").checked=true; big.style.cursor="crosshair"; $("toolHint").textContent=TOOL_HINT.unmark; paint(); } };
+$("findRemoveText").onclick = async () => { const it=items[sel]; if (!it) return; if (await findText(it)) await removeMarked(it); };
 $("doRemove").onclick = () => { const it=items[sel]; if (it && it.hasMarks) removeMarked(it); };
 $("clearMarks").onclick = () => { const it=items[sel]; if(!it||!it.marks) return; it.marks.getContext("2d").clearRect(0,0,it.marks.width,it.marks.height); it.hasMarks=false; editSync(it); paint(); };
 $("undoEdit").onclick = () => { const it=items[sel]; if(!it||!it.history.length) return; it.img=it.history.pop(); $("rmMsg").textContent=""; editSync(it); paint(); };
@@ -547,6 +602,8 @@ async function grabFull(t){ // full-resolution frame, untouched pixels
 async function useFrame(t){
   const img = await grabFull(t); const it = addItem(img, V.name + " @ " + fmtT(t), tpl()); select(items.indexOf(it));
   toast("Frame at " + fmtT(t) + " added as a cover");
+  if ($("vidText").checked && await findText(it)) { document.querySelector("input[name=tool][value=unmark]").checked=true; big.style.cursor="crosshair"; $("toolHint").textContent=TOOL_HINT.unmark; paint();
+    $("editPhoto").scrollIntoView({behavior:"smooth", block:"start"}); toast("Text found on this frame — check the red marks, then tap Remove marked"); }
 }
 function closeVideo(){ V.run++; if (V.video) { V.video.removeAttribute("src"); V.video.load(); } if (V.url) URL.revokeObjectURL(V.url); V.video=null; V.url=""; $("vid").hidden = true; }
 $("vidClose").onclick = closeVideo;
@@ -625,8 +682,9 @@ $("gl").oninput = e => { edit(it=>it.gl=e.target.value/100); $("glV").textConten
 $("behind").onchange = async e => { const it=items[sel]; if(!it) return; it.behind = e.target.checked; if (it.behind && !it.mask) await findSubject(it); paint(); subjNote(it); editSync(it); };
 const tool = () => (document.querySelector("input[name=tool]:checked")||{}).value || "move";
 const TOOL_HINT = {
-  move: "Move drags the photo. Remove object: paint over anything you want gone (people, cones, signs, shadows), then tap Remove marked.",
-  mark: "Paint over the object and its shadow, a little past the edges, then tap Remove marked. Big areas work best in a few smaller passes.",
+  move: "Find text marks captions, subtitles, watermarks and logos in red. Check the marks, unmark anything to keep, then tap Remove marked. Or paint marks yourself with Mark to remove.",
+  mark: "Paint over the text or object (and its shadow), a little past the edges, then tap Remove marked. Big areas work best in a few smaller passes.",
+  unmark: "Paint over red marks you want to keep — for example a logo on clothing or a building sign.",
   erase: "Paint to take areas out of the subject (shown in teal), e.g. buildings you don't want covering the headline.",
   add: "Paint to add areas to the subject (shown in teal)."
 };
@@ -654,15 +712,16 @@ function markAt(e){ const it=items[sel]; if(!it||!it._box) return;
   if (!it.marks) { const k=Math.min(1,1440/Math.max(it.img.width,it.img.height)); it.marks=document.createElement("canvas"); it.marks.width=Math.round(it.img.width*k); it.marks.height=Math.round(it.img.height*k); }
   const r=big.getBoundingClientRect(), X=(e.clientX-r.left)*1080/r.width, Y=(e.clientY-r.top)*1920/r.height, [x,y,dw,dh]=it._box, m=it.marks;
   const mx=(X-x)/dw*m.width, my=(Y-y)/dh*m.height, rad=(+$("brush").value/2)/dw*m.width, c=m.getContext("2d");
+  c.globalCompositeOperation = tool()==="unmark" ? "destination-out" : "source-over";
   c.fillStyle="#000"; c.beginPath(); c.arc(mx,my,rad,0,Math.PI*2); c.fill();
   if (drag && drag.last) { c.lineWidth=rad*2; c.lineCap="round"; c.strokeStyle="#000"; c.beginPath(); c.moveTo(drag.last[0],drag.last[1]); c.lineTo(mx,my); c.stroke(); }
-  if (drag) drag.last=[mx,my]; it.hasMarks=true; editSync(it); paint(); }
+  c.globalCompositeOperation="source-over"; if (drag) drag.last=[mx,my]; it.hasMarks = tool()==="unmark" ? marksExist(it) : true; editSync(it); paint(); }
 function brushAt(e){ const it=items[sel]; if(!it||!it.mask||!it._box) return; const r=big.getBoundingClientRect(), X=(e.clientX-r.left)*1080/r.width, Y=(e.clientY-r.top)*1920/r.height;
   const [x,y,dw,dh]=it._box, m=it.mask, mx=(X-x)/dw*m.width, my=(Y-y)/dh*m.height, rad=(+$("brush").value/2)/dw*m.width, c=m.getContext("2d");
   const g=c.createRadialGradient(mx,my,0,mx,my,rad); g.addColorStop(0,"rgba(0,0,0,1)"); g.addColorStop(.7,"rgba(0,0,0,1)"); g.addColorStop(1,"rgba(0,0,0,0)");
   c.globalCompositeOperation = tool()==="erase" ? "destination-out" : "source-over"; c.fillStyle=g; c.beginPath(); c.arc(mx,my,rad,0,Math.PI*2); c.fill(); c.globalCompositeOperation="source-over"; paint(); }
 big.addEventListener("pointerdown", e => { const it=items[sel]; if(!it) return; big.setPointerCapture(e.pointerId);
-  if (tool()==="mark") { drag={mark:true}; markAt(e); return; }
+  if (tool()==="mark" || (tool()==="unmark" && it.marks)) { drag={mark:true}; markAt(e); return; }
   if (it.mask && (tool()==="erase"||tool()==="add")) { drag={brush:true}; brushAt(e); return; }
   big.classList.add("drag"); drag={x:e.clientX,y:e.clientY,fx:it.fx,fy:it.fy}; });
 big.addEventListener("pointermove", e => { if(!drag) return; if (drag.brush) { brushAt(e); return; } if (drag.mark) { markAt(e); return; } const it=items[sel]; const r=big.getBoundingClientRect(), k=1080/r.width;
