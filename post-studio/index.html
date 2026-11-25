@@ -92,6 +92,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 .note{font-size:12.5px;color:var(--muted);margin:14px 0 0}
 @media (prefers-reduced-motion:reduce){.toast{transition:none}}
 .langblock{margin-top:8px}
+.seg.tplgrid{display:grid;grid-template-columns:repeat(4,1fr)}
+@media (max-width:420px){.seg.tplgrid{grid-template-columns:repeat(3,1fr)}}
 .hbtn{border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;padding:7px 14px;font-weight:600;font-size:13px;cursor:pointer;min-height:36px}
 .hbtn:hover{background:rgba(255,255,255,.1)}
 .hbtn:focus-visible{outline:2px solid #fff;outline-offset:2px}
@@ -114,16 +116,21 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
   <fieldset>
     <legend>Design</legend>
     <div class="f"><label>Template</label>
-      <div class="seg">
-        <label><input type="radio" name="tpl" value="signature" checked><span>Signature<small>New, brand-led</small></span></label>
-        <label><input type="radio" name="tpl" value="frosted"><span>Frosted<small>Current style</small></span></label>
+      <div class="seg tplgrid">
+        <label><input type="radio" name="tpl" value="signature" checked><span>Signature</span></label>
+        <label><input type="radio" name="tpl" value="frosted"><span>Frosted</span></label>
+        <label><input type="radio" name="tpl" value="outline"><span>Outline</span></label>
+        <label><input type="radio" name="tpl" value="card"><span>Card</span></label>
+        <label><input type="radio" name="tpl" value="pill"><span>Pill</span></label>
+        <label><input type="radio" name="tpl" value="split"><span>Split</span></label>
+        <label><input type="radio" name="tpl" value="classic"><span>Classic</span></label>
       </div></div>
-    <div class="f"><label>Colour</label>
+    <div class="f" id="colourField"><label>Colour</label>
       <div class="seg">
         <label><input type="radio" name="theme" value="navy" checked><span>Navy</span></label>
         <label><input type="radio" name="theme" value="white"><span>White</span></label>
       </div>
-      <p class="hint">Sets the panel colour on Signature posts. Frosted keeps its glass card.</p></div>
+      <p class="hint">Sets the panel colour on Signature posts.</p></div>
     <div class="f"><label>Language</label>
       <div class="seg">
         <label><input type="radio" name="lang" value="en"><span>English</span></label>
@@ -311,7 +318,7 @@ function derive(v, lang) {
       priceFull: amount ? [v.from ? "ابتداءً من" : "", big, per].filter(Boolean).join(" ") : "",
       tag: {rent: "للإيجار", sale: "للبيع", offplan: "على الخارطة"}[v.listing] || "للإيجار",
       loc: v.locationAr || v.location, extra: v.extraAr, idLabel: "الرقم المرجعي:", sep: "، ", inWord: " في ",
-      book: "احجز معاينتك", bookAlt: "Book your viewing", disc: v.disclaimerAr, sub: ""};
+      book: "احجز معاينتك", bookAlt: "Book your viewing", disc: v.disclaimerAr, sub: "", short: head, typeSub: ""};
   }
   const bedsTxt = v.beds === "studio" ? "Studio" : v.beds ? v.beds + " Bedroom" : "";
   const head = v.headline || [bedsTxt, v.type].filter(Boolean).join(" ") || "New listing";
@@ -326,7 +333,8 @@ function derive(v, lang) {
     tag: {rent: "For rent", sale: "For sale", offplan: "Off-plan"}[v.listing] || "For rent",
     loc: v.location, extra: v.extra, idLabel: "ID:", sep: ", ", inWord: " in ",
     book: "Book your viewing", bookAlt: "احجز معاينتك", disc: v.disclaimer,
-    sub: v.lang === "en" ? v.arabic : ""};
+    sub: v.lang === "en" ? v.arabic : "",
+    short: v.headline || bedsTxt || v.type || "New listing", typeSub: v.headline || !bedsTxt ? "" : v.type};
 }
 
 /* ---------- images ---------- */
@@ -451,7 +459,7 @@ function arabicLine(ctx, text, base, px, col, pad) {
 }
 function logo(ctx, mode, pad, y, wEn) {
   const h = wEn / EN_AR, img = RTL ? logoA : logoW, w = RTL ? h * AR_AR : wEn;
-  const x = mode === "center" ? (CW - w) / 2 : (RTL ? CW - pad - w : pad);
+  const x = mode === "center" ? (CW - w) / 2 : mode === "end" ? (RTL ? pad : CW - pad - w) : (RTL ? CW - pad - w : pad);
   ctx.drawImage(img, x, y, w, h); return h;
 }
 function arrowBtn(ctx, cx, cy, r, fill) {
@@ -648,6 +656,277 @@ function frostCTA(ctx, W, H, ph, v, d) {
   if (d.disc) { font(ctx, 500, 22 * k, "sans"); ctx.fillStyle = "rgba(33,39,33,.7)"; ctxt(ctx, d.disc, cx, card.y + card.h - 30 * k); }
 }
 
+/* ---------- New templates (Outline, Card, Pill, Split, Classic) ---------- */
+const rx = (x, w) => RTL ? CW - x - w : x;           // LTR rect left -> drawn left
+const up = (d, s) => d.ar ? s : s.toUpperCase();
+function topShade(ctx, W, h, a) {
+  const g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, `rgba(0,20,32,${a})`); g.addColorStop(1, "rgba(0,20,32,0)");
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, h);
+}
+function bottomGrad(ctx, W, H, y0, y1, rgb, a1, a2) {
+  y0 = Math.max(0, y0); const g = ctx.createLinearGradient(0, y0, 0, H);
+  g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(Math.min(.95, Math.max(.05, (y1 - y0) / (H - y0))), `rgba(${rgb},${a1})`); g.addColorStop(1, `rgba(${rgb},${a2})`);
+  ctx.fillStyle = g; ctx.fillRect(0, y0, W, H - y0);
+}
+function shrink(ctx, parts, maxW) {
+  let s = 1, out = parts;
+  while (s > .5) { out = parts.map(p => p.px ? {...p, px: p.px * s, gap: p.gap ? p.gap * s : p.gap} : p); if (seqW(ctx, out) <= maxW) break; s -= .04; }
+  return out;
+}
+function runL(ctx, parts, x, base, maxW) { const p = maxW ? shrink(ctx, parts, maxW) : parts; return seq(ctx, X(x), base, p); }
+function runR(ctx, parts, R, base, maxW) { const p = maxW ? shrink(ctx, parts, maxW) : parts; const w = seqW(ctx, p); seq(ctx, X(R - w), base, p); return w; }
+function runC(ctx, parts, cx, base, maxW) { const p = maxW ? shrink(ctx, parts, maxW) : parts; const w = seqW(ctx, p); seq(ctx, X(cx - w / 2), base, p); return w; }
+function priceParts(d, v, big, small, col, col2, w) {
+  const p = [];
+  if (v.from) p.push({t: d.fromWord, w: 500, px: small, col: col2});
+  p.push({t: d.big, w: w || 700, px: big, col, gap: v.from ? 12 : 0});
+  if (d.per) p.push({t: d.per, w: 400, px: small, col: col2, gap: d.ar ? 10 : 2});
+  return p;
+}
+function itemsOf(d, withExtra) { const it = d.specs.slice(); if (withExtra && d.extra) it.push(["check", d.extra]); return it; }
+function waParts(v, px, col, w) { return [{ic: "bubble", t: v.phone, px, w: w || 700, col, f: "lat"}]; }
+function altLine(ctx, d, cx, base, col, arPx, latPx, alignLeftX) {
+  ctx.fillStyle = col;
+  if (d.ar) font(ctx, 500, latPx, "lat"); else font(ctx, 700, arPx, "ar");
+  if (alignLeftX == null) ctxt(ctx, d.bookAlt, cx, base);
+  else { ctx.direction = d.ar ? "ltr" : "rtl"; ctx.textAlign = RTL ? "right" : "left"; ctx.fillText(d.bookAlt, X(alignLeftX), base); }
+}
+function gridItems(ctx, items, cols, rows, base0, lh, px, col, icol, maxColW) {
+  items.forEach((it, i) => {
+    const c = Math.floor(i / rows), r = i % rows; if (c >= cols.length) return;
+    const parts = it[0] ? [{ic: it[0], t: it[1], px, w: 500, col, icol}] : [{t: it[1], px, w: 500, col, f: it[2] || "sans"}];
+    runL(ctx, parts, cols[c], base0 + r * lh, maxColW);
+  });
+}
+const geo = (H, st) => ({by: y => H - (st ? 170 : 0) - (1350 - y), ty: y => y + (st ? 110 : 0)});
+const DIM = "rgba(255,255,255,.88)";
+
+/* 1 · Outline */
+function t1Frame(ctx, W, H, st, g) { const fTop = g.ty(st ? 120 : 88), fBot = g.by(1305); rr(ctx, 81, fTop, W - 162, fBot - fTop, 60); ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 2.5; ctx.stroke(); return fTop; }
+function t1Cover(ctx, W, H, ph, v, d, st) {
+  const g = geo(H, st), {by} = g;
+  drawCover(ctx, ph, 0, 0, W, H); topShade(ctx, W, 320, .35);
+  bottomGrad(ctx, W, H, by(560), by(900), "0,40,62", .82, .95);
+  const fTop = t1Frame(ctx, W, H, st, g);
+  font(ctx, 600, 40, "sans"); const cw = Math.max(268, ctx.measureText(d.tag).width + 96), ch = 80;
+  rr(ctx, (W - cw) / 2, fTop - ch / 2, cw, ch, 24); ctx.fillStyle = "#0A3550"; ctx.fill();
+  ctx.fillStyle = "#fff"; ctxt(ctx, d.tag, W / 2, fTop + 14);
+  logo(ctx, "end", 137, fTop + 57, 231);
+  const sp = d.specs;
+  if (sp.length) {
+    const parts = []; sp.forEach(([ic, t], i) => { if (i) parts.push({bar: true, px: 36, col: "rgba(255,255,255,.45)", gap: 44}); parts.push({ic, t, px: 36, w: 500, col: "#fff", gap: i ? 44 : 0}); });
+    const fp = shrink(ctx, parts, W - 300), pw = seqW(ctx, fp) + 120;
+    rr(ctx, (W - pw) / 2, by(744), pw, 116, 28); ctx.fillStyle = "rgba(6,42,66,.84)"; ctx.fill();
+    seq(ctx, X((W - pw) / 2 + 60), by(744) + 70, fp);
+  }
+  let priceW = 0;
+  if (d.big) {
+    font(ctx, 700, 66, "sans"); priceW = Math.min(420, ctx.measureText(d.big).width);
+    if (v.from) { ctx.fillStyle = DIM; font(ctx, 500, 30, "sans"); runR(ctx, [{t: d.fromWord, px: 30, w: 500, col: DIM}], 951, by(944)); }
+    runR(ctx, [{t: d.big, px: 66, w: 700, col: "#fff"}], 951, by(1008), 420);
+    if (d.per) runR(ctx, [{t: d.ar ? d.per : d.per.replace("/", ""), px: 40, w: 400, col: "#fff"}], 951, by(1056));
+  }
+  const hl = fitLines(ctx, up(d, d.head), 800, "sans", 76, 951 - 121 - priceW - 40, 2), lh = hl.px * .92;
+  font(ctx, 800, hl.px, "sans"); ctx.fillStyle = "#fff";
+  hl.lines.forEach((l, i) => txt(ctx, l, X(121), by(1066) - (hl.lines.length - 1 - i) * lh));
+  if (d.loc) runL(ctx, [{ic: "pin", t: d.loc, px: 32, w: 500, col: "#fff"}], 121, by(1130), 830);
+  const foot = []; if (d.extra) foot.push({ic: "check", t: d.extra, px: 28, w: 500, col: "#fff"});
+  if (v.ref) foot.push({t: v.ref, px: 28, w: 500, col: "#fff", f: "lat", gap: d.extra ? 40 : 0});
+  const wa = v.phone ? waParts(v, 50, "#fff") : [];
+  const waW = wa.length ? runR(ctx, wa, 951, by(1209), 400) : 0;
+  if (foot.length) runL(ctx, foot, 121, by(1205), 830 - waW - 30);
+}
+function t1CTA(ctx, W, H, ph, v, d) {
+  const g = geo(H, false), {by} = g;
+  drawCover(ctx, ph, 0, 0, W, H); topShade(ctx, W, 320, .35);
+  bottomGrad(ctx, W, H, by(640), by(980), "0,40,62", .7, .9);
+  logo(ctx, "center", 0, 72, 286);
+  rr(ctx, 55, by(863), W - 110, by(1294) - by(863), 60); ctx.fillStyle = "rgba(0,30,48,.22)"; ctx.fill(); ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 2.5; ctx.stroke();
+  fit(ctx, up(d, d.book), 800, "sans", 62, 40, 880); ctx.fillStyle = "#fff"; ctxt(ctx, up(d, d.book), W / 2, by(960));
+  altLine(ctx, d, W / 2, by(1029), "#fff", 52, 38);
+  const pw = d.big ? runR(ctx, priceParts(d, v, 42, 30, "#fff", "#fff"), 985, by(1138), 400) : 0;
+  font(ctx, 500, 30, "sans"); ctx.fillStyle = "#fff";
+  const l1 = up(d, d.head), lw = 985 - 95 - pw - 40;
+  fit(ctx, l1, 500, "sans", 30, 20, lw); txt(ctx, l1, X(95), by(1117));
+  if (d.loc) { fit(ctx, d.inWord.trim() + " " + d.loc, 400, "sans", 24, 18, lw); ctx.fillStyle = DIM; txt(ctx, d.inWord.trim() + " " + d.loc, X(95), by(1152)); }
+  const wa = v.phone ? runR(ctx, waParts(v, 50, "#fff"), 985, by(1242), 450) : 0;
+  if (v.ref) runL(ctx, [{t: v.ref, px: 26, w: 500, col: "#fff", f: "lat"}], 95, by(1213));
+}
+
+/* 2 · Card */
+function t2Cover(ctx, W, H, ph, v, d, st) {
+  const g = geo(H, st), {by} = g, m = 16;
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, H);
+  const pb = by(786);
+  ctx.save(); rr(ctx, m, m, W - m * 2, pb - m, 46); ctx.clip(); drawCover(ctx, ph, m, m, W - m * 2, pb - m); topShade(ctx, W, g.ty(260), .4); ctx.restore();
+  const ty0 = g.ty(36);
+  font(ctx, 600, 40, "sans"); const cw = Math.max(250, ctx.measureText(d.tag).width + 110);
+  rr(ctx, rx(21, cw), ty0, cw, 72, 36); ctx.fillStyle = "#fff"; ctx.fill(); ctx.fillStyle = C.ink; ctxt(ctx, d.tag, rx(21, cw) + cw / 2, ty0 + 50);
+  logo(ctx, "end", 54, g.ty(60), 237);
+  const GR = "#6B7177", LINE = "#DDE1E5";
+  runL(ctx, [{t: up(d, d.ar ? d.head : (v.headline || d.short)), px: 76, w: 800, col: C.ink}, ...(d.typeSub && !v.headline ? [{t: d.typeSub, px: 40, w: 400, col: GR, gap: 16}] : [])], 64, by(925), W - 134);
+  if (d.loc) runL(ctx, [{ic: "pin", t: d.loc, px: 30, w: 500, col: C.ink}], 64, by(975), W - 134);
+  if (d.big) runR(ctx, priceParts(d, v, 44, 32, C.ink, GR), W - 70, by(1017), W - 140);
+  ctx.fillStyle = LINE; ctx.fillRect(64, by(1045), W - 134, 2); ctx.fillRect(64, by(1136), W - 134, 2);
+  const parts = []; itemsOf(d, true).forEach(([ic, t], i) => { if (i) parts.push({bar: true, px: 34, col: "#C9CED3", gap: 38}); parts.push({ic, t, px: 34, w: 500, col: C.ink, gap: i ? 38 : 0}); });
+  if (parts.length) runL(ctx, parts, 84, by(1112), W - 168);
+  if (v.ref) runR(ctx, [{t: v.ref, px: 28, w: 500, col: GR, f: "lat"}], W - 70, by(1183));
+  if (v.phone) { const y = by(1240); rr(ctx, 90, y, W - 180, 90, 45); ctx.fillStyle = C.navy; ctx.fill(); runC(ctx, waParts(v, 48, "#fff"), W / 2, y + 62, W - 260); }
+}
+function t2CTA(ctx, W, H, ph, v, d) {
+  const g = geo(H, false), {by} = g;
+  drawCover(ctx, ph, 0, 0, W, H); topShade(ctx, W, 260, .4);
+  logo(ctx, "end", 54, 60, 237);
+  rr(ctx, 16, by(893), W - 32, by(1334) - by(893), 44); ctx.fillStyle = "#fff"; ctx.fill();
+  const GR = "#6B7177";
+  fit(ctx, up(d, d.book), 800, "sans", 60, 40, 880); ctx.fillStyle = C.ink; ctxt(ctx, up(d, d.book), W / 2, by(1003));
+  altLine(ctx, d, W / 2, by(1071), C.ink, 50, 38);
+  ctx.fillStyle = "#DDE1E5"; ctx.fillRect(90, by(1120), W - 180, 2); ctx.fillRect(90, by(1213), W - 180, 2);
+  const pw = d.big ? runR(ctx, priceParts(d, v, 42, 30, C.ink, GR), 990, by(1178), 400) : 0, lw = 990 - 90 - pw - 40;
+  const l1 = up(d, d.head); fit(ctx, l1, 500, "sans", 30, 20, lw); ctx.fillStyle = C.ink; txt(ctx, l1, X(90), by(1162));
+  if (d.loc) { const l2 = d.inWord.trim() + " " + d.loc; fit(ctx, l2, 400, "sans", 24, 18, lw); ctx.fillStyle = GR; txt(ctx, l2, X(90), by(1196)); }
+  const waW = v.phone ? runR(ctx, waParts(v, 50, C.ink), 990, by(1280), 460) : 0;
+  if (v.ref) runL(ctx, [{t: v.ref, px: 26, w: 500, col: GR, f: "lat"}], 90, by(1257));
+}
+
+/* 3 · Pill */
+function t3Base(ctx, W, H, ph, v, d, g) {
+  drawCover(ctx, ph, 0, 0, W, H); topShade(ctx, W, g.ty(300), .3);
+  bottomGrad(ctx, W, H, g.by(600), g.by(1000), "30,31,35", .8, .93);
+  logo(ctx, "start", 60, g.ty(56), 320);
+  if (v.phone) { const y = g.by(1222); rr(ctx, 108, y, W - 216, 88, 44); ctx.fillStyle = "#fff"; ctx.fill(); runC(ctx, waParts(v, 44, C.ink), W / 2, y + 60, W - 300); }
+}
+function t3PricePill(ctx, W, d, v, y, px) {
+  if (!d.big) return 0;
+  const p = shrink(ctx, priceParts(d, v, px, px * .86, "#fff", "#fff", 600), 520), w = seqW(ctx, p) + 64;
+  rr(ctx, rx(W - 62 - w, w), y, w, 74, 37); ctx.fillStyle = "rgba(14,14,16,.84)"; ctx.fill();
+  seq(ctx, X(W - 62 - w + 32), y + 50, p); return w;
+}
+function t3Cover(ctx, W, H, ph, v, d, st) {
+  const g = geo(H, st), {by} = g;
+  t3Base(ctx, W, H, ph, v, d, g);
+  const pw = t3PricePill(ctx, W, d, v, by(958), 36);
+  const h = up(d, d.short); fit(ctx, h, 800, "sans", 74, 40, W - 80 - 62 - pw - 30); ctx.fillStyle = "#fff"; txt(ctx, h, X(80), by(1012));
+  if (d.loc) runL(ctx, [{ic: "pin", t: d.loc, px: 30, w: 500, col: DIM}], 82, by(1059), W - 160);
+  const items = itemsOf(d, true); if (v.ref) items.push([null, v.ref, "lat"]);
+  gridItems(ctx, items, [84, 384, 684], 2, by(1117), 47, 30, "#fff", "#fff", 280);
+}
+function t3CTA(ctx, W, H, ph, v, d) {
+  const g = geo(H, false), {by} = g;
+  t3Base(ctx, W, H, ph, v, d, g);
+  fit(ctx, up(d, d.book), 800, "sans", 62, 40, W - 160); ctx.fillStyle = "#fff"; txt(ctx, up(d, d.book), X(80), by(1000));
+  altLine(ctx, d, 0, by(1062), "#fff", 50, 36, 80);
+  const pw = t3PricePill(ctx, W, d, v, by(1085), 36), lw = W - 80 - 62 - pw - 30;
+  font(ctx, 500, 34, "sans"); ctx.fillStyle = "#fff";
+  fit(ctx, d.head, 500, "sans", 34, 22, lw); txt(ctx, d.head, X(80), by(1142));
+  if (d.loc) { const l2 = d.inWord.trim() + " " + d.loc; fit(ctx, l2, 500, "sans", 34, 22, lw); txt(ctx, l2, X(80), by(1190)); }
+}
+
+/* 4 · Split */
+function t4Base(ctx, W, H, ph, g) {
+  drawCover(ctx, ph, 0, 0, W, H); topShade(ctx, W, g.ty(300), .3);
+  bottomGrad(ctx, W, H, g.by(620), g.by(1000), "0,36,58", .8, .95);
+  logo(ctx, "start", 100, g.ty(72), 297);
+}
+function t4Cover(ctx, W, H, ph, v, d, st) {
+  const g = geo(H, st), {by} = g, L = 100, R = 980, MID = 549;
+  t4Base(ctx, W, H, ph, g);
+  font(ctx, 700, 28, "sans"); const tagW = Math.max(250, ctx.measureText(up(d, d.tag)).width + 70);
+  const h = up(d, d.short); fit(ctx, h, 800, "sans", 72, 36, R - L - tagW - 30); ctx.fillStyle = "#fff"; txt(ctx, h, X(L), by(1096));
+  if (d.specs.length) { const parts = []; d.specs.forEach(([ic, t], i) => parts.push({ic, t, px: 26, w: 500, col: "#fff", gap: i ? 30 : 0})); runL(ctx, parts, L, by(1156), MID - L - 30); }
+  if (d.big) runL(ctx, priceParts(d, v, 44, 32, "#fff", "#fff"), L, by(1220), MID - L - 24);
+  ctx.fillStyle = "rgba(255,255,255,.55)"; ctx.fillRect(rx(MID, 2), by(1140), 2, 96);
+  font(ctx, 700, 28, "sans"); const tag = up(d, d.tag), tw = Math.max(250, ctx.measureText(tag).width + 70);
+  rr(ctx, rx(R - tw, tw), by(1041), tw, 58, 29); ctx.fillStyle = "rgba(12,22,32,.8)"; ctx.fill(); ctx.fillStyle = "#fff"; ctxt(ctx, tag, rx(R - tw, tw) + tw / 2, by(1041) + 40);
+  if (d.loc) runR(ctx, [{ic: "pin", t: d.loc, px: 30, w: 500, col: "#fff"}], R, by(1164), R - MID - 30);
+  if (v.phone) runR(ctx, waParts(v, 50, "#fff", 800), R, by(1222), R - MID - 30);
+  const left = v.ref ? [{t: d.idLabel, px: 24, w: 400, col: "#fff"}, {t: v.ref, px: 24, w: 400, col: "#fff", f: "lat", gap: 8}] : [];
+  const right = d.extra ? [{ic: "check", t: d.extra, px: 26, w: 500, col: "#fff"}] : [];
+  const a = left.length ? runL(ctx, left, L, by(1265), 330) : 0, b = right.length ? runR(ctx, right, R, by(1268), 380) : 0;
+  const x0 = L + a + (a ? 22 : 0), x1 = R - b - (b ? 22 : 0);
+  if (x1 - x0 > 40) { ctx.fillStyle = "rgba(255,255,255,.6)"; ctx.fillRect(rx(x0, x1 - x0), by(1257), x1 - x0, 1.5); }
+}
+function t4CTA(ctx, W, H, ph, v, d) {
+  const g = geo(H, false), {by} = g, L = 100, R = 980;
+  t4Base(ctx, W, H, ph, g);
+  fit(ctx, up(d, d.book), 800, "sans", 62, 40, R - L); ctx.fillStyle = "#fff"; txt(ctx, up(d, d.book), X(L), by(948));
+  altLine(ctx, d, 0, by(1012), "#fff", 50, 36, L);
+  if (d.big) runL(ctx, priceParts(d, v, 70, 50, "#fff", "#fff"), L, by(1107), R - L);
+  const line = up(d, d.loc ? d.head + d.inWord + d.loc : d.head); fit(ctx, line, 500, "sans", 32, 20, R - L); ctx.fillStyle = "#fff"; txt(ctx, line, X(L), by(1168));
+  if (v.ref) runL(ctx, [{t: d.idLabel, px: 24, w: 400, col: "#fff"}, {t: v.ref, px: 24, w: 400, col: "#fff", f: "lat", gap: 8}], L, by(1217));
+  if (v.phone) runR(ctx, waParts(v, 50, "#fff"), R, by(1300), 500);
+}
+
+/* 5 · Classic */
+function t5Base(ctx, W, H, ph, g) {
+  drawCover(ctx, ph, 0, 0, W, H); topShade(ctx, W, g.ty(300), .3);
+  bottomGrad(ctx, W, H, g.by(620), g.by(900), "22,16,12", .74, .92);
+  logo(ctx, "start", 60, g.ty(56), 320);
+  const top = g.by(853), mid = g.by(1031), bot = g.by(1251);
+  rr(ctx, 72, top, W - 144, bot - top, 22); ctx.fillStyle = "rgba(30,22,18,.42)"; ctx.fill();
+  rr(ctx, 72, mid, W - 144, bot - mid, [0, 0, 22, 22]); ctx.fillStyle = "#fff"; ctx.fill();
+  rr(ctx, 72, top, W - 144, bot - top, 22); ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 2; ctx.stroke();
+}
+function t5Cover(ctx, W, H, ph, v, d, st) {
+  const g = geo(H, st), {by} = g, L = 112, R = 968;
+  t5Base(ctx, W, H, ph, g);
+  let pw = 0;
+  if (d.big) {
+    const p = shrink(ctx, priceParts(d, v, 40, 30, "#fff", "#fff", 600), 430); pw = seqW(ctx, p);
+    runL(ctx, [{t: d.ar ? "السعر" : "PRICE", px: 28, w: 500, col: DIM}], R - pw, by(929)); seq(ctx, X(R - pw), by(972), p);
+  }
+  const h = up(d, d.short); fit(ctx, h, 700, "serif", 72, 40, R - L - pw - 40); ctx.fillStyle = "#fff"; txt(ctx, h, X(L), by(952));
+  runL(ctx, [{t: up(d, d.tag), px: 28, w: 500, col: DIM}], L + 2, by(992));
+  if (d.loc) runL(ctx, [{ic: "pin", t: d.loc, px: 28, w: 500, col: C.ink}], L, by(1072), R - L);
+  gridItems(ctx, itemsOf(d, true), [L, 400, 690], 2, by(1121), 42, 27, C.ink, C.ink, 270);
+  const waW = v.phone ? runR(ctx, waParts(v, 40, C.ink, 600), R, by(1216), 420) : 0;
+  if (v.ref) runL(ctx, [{t: v.ref, px: 30, w: 700, col: C.ink, f: "lat"}], L, by(1218), R - L - waW - 30);
+}
+function t5CTA(ctx, W, H, ph, v, d) {
+  const g = geo(H, false), {by} = g;
+  t5Base(ctx, W, H, ph, g);
+  const t = up(d, d.book); fit(ctx, t, 700, "serif", 72, 40, 860); ctx.fillStyle = "#fff"; ctxt(ctx, t, W / 2, by(944));
+  altLine(ctx, d, W / 2, by(1000), DIM, 50, 36);
+  const line = d.loc ? d.head + d.inWord + d.loc : d.head; fit(ctx, line, 500, "sans", 32, 20, 860); ctx.fillStyle = C.ink; ctxt(ctx, line, W / 2, by(1093));
+  if (d.big) runC(ctx, priceParts(d, v, 34, 28, C.ink, C.ink), W / 2, by(1140), 860);
+  if (v.phone) runC(ctx, waParts(v, 42, C.ink, 600), W / 2, by(1216), 860);
+}
+
+/* inner carousel photo slide shared by the new templates */
+const PHOTO_CFG = {
+  outline: {logo: ["end", 137, 145, 231], rgb: "0,40,62", frame: true},
+  card: {logo: ["end", 54, 60, 237], light: true},
+  pill: {logo: ["start", 60, 56, 320], rgb: "30,31,35"},
+  split: {logo: ["start", 100, 72, 297], rgb: "0,36,58"},
+  classic: {logo: ["start", 60, 56, 320], rgb: "22,16,12"}
+};
+function newPhoto(ctx, W, H, ph, v, d, i, n, last, cfg) {
+  const L = cfg.frame ? 121 : 80, R = W - L;
+  let base, col;
+  if (cfg.light) {
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, W, H);
+    ctx.save(); rr(ctx, 16, 16, W - 32, H - 150, 46); ctx.clip(); drawCover(ctx, ph, 16, 16, W - 32, H - 150); topShade(ctx, W, 260, .4); ctx.restore();
+    base = H - 58; col = C.ink;
+  } else {
+    drawCover(ctx, ph, 0, 0, W, H); topShade(ctx, W, 300, .3);
+    bottomGrad(ctx, W, H, H - 420, H - 160, cfg.rgb, .7, .9);
+    if (cfg.frame) { rr(ctx, 81, 88, W - 162, H - 133, 60); ctx.strokeStyle = "rgba(255,255,255,.85)"; ctx.lineWidth = 2.5; ctx.stroke(); }
+    base = H - (cfg.frame ? 100 : 76); col = "#fff";
+  }
+  const [mode, pad, y, w] = cfg.logo; logo(ctx, mode, pad, y, w);
+  const cnt = `${i + 1}/${n}`; font(ctx, 600, 28, "lat"); const cw = ctx.measureText(cnt).width;
+  const right = last ? R : R - 76;
+  ctx.fillStyle = cfg.light ? "#6B7177" : DIM; txt(ctx, cnt, X(right - cw), base);
+  const label = d.loc ? d.head + d.sep + d.loc : d.head;
+  fit(ctx, label, 600, "sans", 34, 22, right - L - cw - 36); ctx.fillStyle = col; txt(ctx, label, X(L), base);
+  if (!last) arrowBtn(ctx, RTL ? L + 24 : R - 24, base - 11, 30, C.teal);
+}
+const NEW_TPL = {
+  outline: {cover: t1Cover, cta: t1CTA}, card: {cover: t2Cover, cta: t2CTA}, pill: {cover: t3Cover, cta: t3CTA},
+  split: {cover: t4Cover, cta: t4CTA}, classic: {cover: t5Cover, cta: t5CTA}
+};
+
+
 /* ---------- build outputs ---------- */
 function plan(v) {
   const photos = S.photos.length ? S.photos : [{id: "ph", img: placeholder, fx: .5, fy: .5}];
@@ -663,9 +942,14 @@ function paint(canvas, W, H, s, v, d) {
   canvas.width = W; canvas.height = H; CW = W; RTL = d.ar; P = v.theme === "white" ? PAL.white : PAL.navy;
   const ctx = canvas.getContext("2d"); ctx.imageSmoothingQuality = "high"; ctx.textBaseline = "alphabetic";
   ctx.clearRect(0, 0, W, H);
-  const sig = v.tpl !== "frosted", story = H > W * 1.6;
+  const sig = v.tpl !== "frosted", story = H > W * 1.6, nt = NEW_TPL[v.tpl];
   const last = s.i === s.n - 1 && s.kind === "photo";
-  if (s.kind === "cover" || story) (sig ? sigCover : frostCover)(ctx, W, H, s.ph, v, d, story);
+  if (nt) {
+    if (s.kind === "cover" || story) nt.cover(ctx, W, H, s.ph, v, d, story);
+    else if (s.kind === "photo") newPhoto(ctx, W, H, s.ph, v, d, s.i, s.n, last, PHOTO_CFG[v.tpl]);
+    else nt.cta(ctx, W, H, s.ph, v, d);
+  }
+  else if (s.kind === "cover" || story) (sig ? sigCover : frostCover)(ctx, W, H, s.ph, v, d, story);
   else if (s.kind === "photo") (sig ? sigPhoto : frostPhotoSlide)(ctx, W, H, s.ph, v, d, s.i, s.n, last);
   else (sig ? sigCTA : frostCTA)(ctx, W, H, s.ph, v, d);
   RTL = false;
@@ -700,13 +984,14 @@ function slideEl(parent, idx) {
   return el;
 }
 function names(v, lang) {
-  const base = ((v.ref || "Capstone") + "_" + (v.tpl === "frosted" ? "frosted" : "signature" + (v.theme === "white" ? "-white" : "")) + "_" + lang.toUpperCase()).replace(/[^\w-]+/g, "-");
+  const base = ((v.ref || "Capstone") + "_" + (v.tpl && v.tpl !== "signature" ? v.tpl : "signature" + (v.theme === "white" ? "-white" : "")) + "_" + lang.toUpperCase()).replace(/[^\w-]+/g, "-");
   const size = v.size === "square" ? "square" : "post";
   return {base, slide: i => `${base}_${size}_${String(i + 1).padStart(2, "0")}`, story: `${base}_story`};
 }
 const langsOf = v => v.lang === "both" ? ["en", "ar"] : [v.lang === "ar" ? "ar" : "en"];
 function render() {
   const v = read(); persist(v);
+  document.getElementById("colourField").hidden = v.tpl !== "signature";
   const H = v.size === "square" ? 1080 : 1350, langs = langsOf(v);
   const {slides, cover, dropped} = plan(v);
   for (const lang of ["en", "ar"]) {
