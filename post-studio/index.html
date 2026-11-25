@@ -114,6 +114,25 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 <main>
 <form class="panel" id="f" autocomplete="off" onsubmit="return false">
   <fieldset>
+    <legend>Photos</legend>
+    <div class="drop" id="drop" role="button" tabindex="0">
+      <strong>Add photos</strong><span>Tap to choose or drop them here. The first photo is the cover.</span>
+    </div>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+    <div class="thumbs" id="thumbs"></div>
+    <div class="focus" id="focus">
+      <p class="hint" style="margin:0 0 6px">Tap the photo to set what stays in frame when it's cropped.</p>
+      <div class="focuswrap" id="focuswrap"><img id="focusimg" alt=""><div class="dot" id="dot"></div></div>
+      <div class="tools">
+        <button type="button" class="btn" id="mvL">Move earlier</button>
+        <button type="button" class="btn" id="mvR">Move later</button>
+        <button type="button" class="btn" id="mkCover">Make cover</button>
+        <button type="button" class="btn" id="rm">Remove</button>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
     <legend>Design</legend>
     <div class="f"><label>Template</label>
       <div class="seg tplgrid">
@@ -143,25 +162,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
         <label><input type="radio" name="size" value="square"><span>Square<small>1080 × 1080</small></span></label>
       </div>
       <p class="hint">Square also works as WhatsApp (WATI) cards. Stories are always 1080 × 1920.</p></div>
-  </fieldset>
-
-  <fieldset>
-    <legend>Photos</legend>
-    <div class="drop" id="drop" role="button" tabindex="0">
-      <strong>Add photos</strong><span>Tap to choose or drop them here. The first photo is the cover.</span>
-    </div>
-    <input type="file" id="file" accept="image/*" multiple hidden>
-    <div class="thumbs" id="thumbs"></div>
-    <div class="focus" id="focus">
-      <p class="hint" style="margin:0 0 6px">Tap the photo to set what stays in frame when it's cropped.</p>
-      <div class="focuswrap" id="focuswrap"><img id="focusimg" alt=""><div class="dot" id="dot"></div></div>
-      <div class="tools">
-        <button type="button" class="btn" id="mvL">Move earlier</button>
-        <button type="button" class="btn" id="mvR">Move later</button>
-        <button type="button" class="btn" id="mkCover">Make cover</button>
-        <button type="button" class="btn" id="rm">Remove</button>
-      </div>
-    </div>
   </fieldset>
 
   <fieldset>
