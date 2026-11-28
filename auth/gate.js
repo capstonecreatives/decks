@@ -3,12 +3,12 @@
 (function(){
   var LOGIN_URL = 'https://script.google.com/macros/s/AKfycbzdma2E_n8Dmq5NPYVKJUC2VrPt4RFEx0T4roa5nJa53CLK_HJUAPBvvysP_eclNZDhtw/exec';
   /* TEST_ONLY: the sign-in shows only on devices opened once with ?logintest (switch to false to go live for everyone) */
-  var TEST_ONLY = true;
+  var TEST_ONLY = false;
   try{ if(/[?&]logintest\b/.test(location.search)) localStorage.setItem('cl-test','1'); if(/[?&]logintest=off\b/.test(location.search)) localStorage.removeItem('cl-test'); }catch(e){}
   if (TEST_ONLY){ var _t=null; try{ _t=localStorage.getItem('cl-test'); }catch(e){} if(_t!=='1' && !window.__CL_URL) return; }
   var URL_ = (window.__CL_URL || LOGIN_URL || '').trim();
   if (!URL_) return;
-  var KEY='cl-session', RECHECK_MS=12*3600*1000; /* sessions end after 15 days, then the code is asked again */
+  var KEY='cl-session-v2', RECHECK_MS=12*3600*1000; /* sessions end after 15 days, then the code is asked again */
   var html=document.documentElement; html.classList.add('cl-locked');
   var css=document.createElement('style'); css.id='clGateCss';
   css.textContent='html.cl-locked body>*:not(#clGate){visibility:hidden!important}html.cl-locked{overflow:hidden}'+
