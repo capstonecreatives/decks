@@ -1,7 +1,11 @@
 /* Capstone Creatives — sign in with a WhatsApp code before the page shows.
    Activated by setting LOGIN_URL (the Google Apps Script web-app URL). Empty = gate off. */
 (function(){
-  var LOGIN_URL = '';
+  var LOGIN_URL = 'https://script.google.com/macros/s/AKfycbzdma2E_n8Dmq5NPYVKJUC2VrPt4RFEx0T4roa5nJa53CLK_HJUAPBvvysP_eclNZDhtw/exec';
+  /* TEST_ONLY: the sign-in shows only on devices opened once with ?logintest (switch to false to go live for everyone) */
+  var TEST_ONLY = true;
+  try{ if(/[?&]logintest\b/.test(location.search)) localStorage.setItem('cl-test','1'); if(/[?&]logintest=off\b/.test(location.search)) localStorage.removeItem('cl-test'); }catch(e){}
+  if (TEST_ONLY){ var _t=null; try{ _t=localStorage.getItem('cl-test'); }catch(e){} if(_t!=='1' && !window.__CL_URL) return; }
   var URL_ = (window.__CL_URL || LOGIN_URL || '').trim();
   if (!URL_) return;
   var KEY='cl-session', RECHECK_MS=12*3600*1000;
