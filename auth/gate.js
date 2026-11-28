@@ -8,7 +8,7 @@
   if (TEST_ONLY){ var _t=null; try{ _t=localStorage.getItem('cl-test'); }catch(e){} if(_t!=='1' && !window.__CL_URL) return; }
   var URL_ = (window.__CL_URL || LOGIN_URL || '').trim();
   if (!URL_) return;
-  var KEY='cl-session', RECHECK_MS=12*3600*1000;
+  var KEY='cl-session', RECHECK_MS=12*3600*1000; /* sessions end after 15 days, then the code is asked again */
   var html=document.documentElement; html.classList.add('cl-locked');
   var css=document.createElement('style'); css.id='clGateCss';
   css.textContent='html.cl-locked body>*:not(#clGate){visibility:hidden!important}html.cl-locked{overflow:hidden}'+
@@ -88,7 +88,7 @@
       verBtn.disabled=true; say('Checking…');
       api({action:'verify',phone:phone,code:c}).then(function(r){
         verBtn.disabled=false;
-        if(r&&r.ok){ save({token:r.token,exp:r.exp,name:r.name,checked:Date.now()}); say(''); g.remove(); unlock(); }
+        if(r&&r.ok){ var cap=Math.floor(Date.now()/1000)+15*86400; save({token:r.token,exp:Math.min(r.exp||cap,cap),name:r.name,checked:Date.now()}); say(''); g.remove(); unlock(); }
         else { var e=r&&r.error; say(e==='wrong_code'?'That code is not right'+(r.left?' — '+r.left+' tries left.':'.'):e==='expired'?'The code expired. Tap Resend code.':e==='too_many_attempts'?'Too many tries. Tap Resend code.':'This number does not have access.'); code.select(); }
       }).catch(function(){ verBtn.disabled=false; say('No connection. Please try again.'); }); }
     f.addEventListener('submit',function(e){ e.preventDefault(); if(!s1.hidden) send(); else verify(); });
